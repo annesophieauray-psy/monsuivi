@@ -1,0 +1,1709 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Entre-Séances"><meta name="robots" content="noindex, nofollow">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+<script src="config.js"></script>
+<title>Entre-Séances</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#1E6A64">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Lexend:wght@400;500;600;700&display=swap">
+
+<style>
+/* Concept : carnet calme et lisible — une colonne, de grands boutons, peu d'éléments à la fois.
+   Couleurs : lagune (vert d'eau profond), ambre pour l'énergie, rouge réservé à l'aide. */
+:root {
+  --bg: #EDF3F1; --surface: #FFFFFF; --surface-2: #E1EBE7; --ink: #15302C; --muted: #52706A;
+  --line: #C6D7D2; --accent: #1E6A64; --accent-ink: #FFFFFF; --accent-soft: #D2E8E3;
+  --sun: #C98A1C; --sun-soft: #F6E7C8; --help: #B3321F; --help-soft: #F8E1DC;
+  --ok: #2E7D4F; --s0: #1C4FC4; --s1: #15302C; --muet: #C8372D;
+  --z1: #3E9B63; --z2: #8DB43F; --z3: #E0B12E; --z4: #E07B2E; --z5: #C9412F;
+  --f-display: "Lexend", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-dys: "Lexend", "Verdana", system-ui, sans-serif;
+  --scale: 1;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1918; --surface: #162422; --surface-2: #1E302D; --ink: #E2EEEA; --muted: #9AB5AF;
+    --line: #2B413D; --accent: #6BC2B8; --accent-ink: #0E1918; --accent-soft: #1C3A36;
+    --sun: #F0B654; --sun-soft: #3A2F18; --help: #FF8B76; --help-soft: #3A1E19;
+    --ok: #6FCF97; --s0: #8DB2FF; --s1: #E2EEEA; --muet: #FF8A80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1918; --surface: #162422; --surface-2: #1E302D; --ink: #E2EEEA; --muted: #9AB5AF;
+  --line: #2B413D; --accent: #6BC2B8; --accent-ink: #0E1918; --accent-soft: #1C3A36;
+  --sun: #F0B654; --sun-soft: #3A2F18; --help: #FF8B76; --help-soft: #3A1E19;
+  --ok: #6FCF97; --s0: #8DB2FF; --s1: #E2EEEA; --muet: #FF8A80; color-scheme: dark;
+}
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body);
+  font-size: calc(17px * var(--scale)); line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; line-height: 1.2; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 1.6em; } h2 { font-size: 1.3em; } h3 { font-size: 1.08em; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; border-radius: 6px; }
+.muted { color: var(--muted); }
+.small { font-size: 0.86em; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; padding: 12px 20px; border-radius: 999px; border: 2px solid transparent;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-weight: 500;
+  cursor: pointer; text-decoration: none; text-align: center;
+}
+.btn:hover { filter: brightness(1.06); }
+.btn.ghost { background: transparent; color: var(--accent); border-color: var(--accent); }
+.btn.soft { background: var(--accent-soft); color: var(--ink); }
+.btn.help { background: var(--help); color: #fff; }
+.btn.wide { width: 100%; }
+.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.link { background: none; border: 0; padding: 6px 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+label.lbl, .lbl { font-family: var(--f-display); font-weight: 500; display: block; margin-bottom: 6px; }
+.hint { font-size: 0.86em; color: var(--muted); margin-top: 4px; }
+input[type=text], input[type=password], input[type=time], input[type=number], textarea, select {
+  width: 100%; box-sizing: border-box; background: var(--surface); border: 2px solid var(--line);
+  border-radius: 12px; padding: 12px 14px; min-height: 50px;
+}
+textarea { min-height: 96px; resize: vertical; }
+input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 9px 16px;
+  min-height: 44px; cursor: pointer; font-family: var(--f-body);
+}
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.range { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+.range output { font-family: var(--f-display); font-weight: 600; font-size: 1.3em; min-width: 2.6em; text-align: right; font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 34px; }
+.scale-ends { display: flex; justify-content: space-between; font-size: 0.82em; color: var(--muted); margin-top: -2px; }
+.notice { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; font-size: 0.92em; }
+.mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.8em; word-break: break-all; }
+/* Lecture adaptée */
+.dys body, .dys { --f-body: var(--f-dys); }
+.dys body { letter-spacing: 0.04em; word-spacing: 0.16em; line-height: 1.85; }
+.dys h1, .dys h2, .dys h3 { letter-spacing: 0.02em; line-height: 1.4; }
+.dys p, .dys li { max-width: 34em; }
+.syl.s0 { color: var(--s0); }
+.syl.s1 { color: var(--s1); }
+.muet { color: var(--muet); opacity: 0.9; }
+.btn .syl, .chip .syl, .btn .muet, .chip .muet, .chip[aria-pressed="true"] .syl { color: inherit; }
+.btn .muet, .chip .muet { opacity: 0.65; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+.shell { max-width: 620px; margin: 0 auto; padding-block: 0 48px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0;
+  border-bottom: 1px solid var(--line); margin-bottom: 20px;
+}
+.brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 0; cursor: pointer; }
+.brand-mark { width: 34px; height: 34px; flex: none; }
+.brand-name { font-family: var(--f-display); font-weight: 600; font-size: 1.05em; }
+.top-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; cursor: pointer; color: var(--ink);
+}
+.help-btn {
+  min-height: 48px; padding: 0 16px; border-radius: 999px; border: 0; background: var(--help); color: #fff;
+  font-family: var(--f-display); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.back { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 6px 0; font-family: var(--f-display); font-weight: 500; }
+.greet { display: flex; flex-direction: column; gap: 4px; margin-bottom: 18px; }
+.greet .date { color: var(--muted); font-size: 0.9em; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+.tile {
+  display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: center; text-align: left;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; cursor: pointer;
+  min-height: 84px;
+}
+.tile:hover { border-color: var(--accent); }
+.tile-ico { width: 52px; height: 52px; border-radius: 14px; background: var(--accent-soft); display: grid; place-items: center; color: var(--accent); }
+.tile-t { font-family: var(--f-display); font-weight: 600; display: block; }
+.tile-d { color: var(--muted); font-size: 0.88em; display: block; margin-top: 2px; }
+.send-banner {
+  display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; background: var(--sun-soft);
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 18px; border: 0; width: 100%; text-align: left; cursor: pointer; color: var(--ink);
+}
+.send-banner b { font-family: var(--f-display); }
+.screen-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.screen-head p { color: var(--muted); }
+.weathers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.weather {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 4px 8px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.78em; color: var(--ink);
+}
+.weather svg { width: 42px; height: 42px; }
+.weather[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.steps-dots { display: flex; gap: 6px; }
+.steps-dots span { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.steps-dots span.on { background: var(--accent); }
+.wiz-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+details.ex { background: var(--surface-2); border-radius: 12px; padding: 10px 14px; }
+details.ex summary { cursor: pointer; font-family: var(--f-display); font-weight: 500; color: var(--accent); }
+.sud-big { font-family: var(--f-display); font-size: 3.4em; font-weight: 600; text-align: center; line-height: 1; font-variant-numeric: tabular-nums; }
+.sud-desc { text-align: center; color: var(--muted); min-height: 1.6em; }
+.sud-bar { height: 14px; border-radius: 7px; background: linear-gradient(90deg, var(--z1), var(--z3), var(--z5)); }
+.ladder { display: flex; flex-direction: column; gap: 8px; }
+.rung {
+  display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px; cursor: pointer; text-align: left; color: var(--ink);
+}
+.rung .lvl { width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; font-family: var(--f-display); font-weight: 600; color: #fff; }
+.rung .cnt { font-size: 0.82em; color: var(--muted); text-align: right; }
+.faces { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.faces .chip { padding: 8px 4px; border-radius: 12px; font-size: 0.8em; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.breath-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.breath-canvas { width: 100%; max-width: 420px; aspect-ratio: 1 / 1; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); }
+.breath-label { font-family: var(--f-display); font-size: 1.8em; font-weight: 600; min-height: 1.3em; text-align: center; }
+.breath-time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.dots-count { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.dot-tap { width: 56px; height: 56px; border-radius: 50%; border: 3px dashed var(--accent); background: transparent; cursor: pointer; }
+.dot-tap[aria-pressed="true"] { background: var(--accent); border-style: solid; }
+.big-num { font-family: var(--f-display); font-size: 4em; font-weight: 600; color: var(--accent); line-height: 1; text-align: center; }
+.task-steps { display: flex; flex-direction: column; gap: 8px; }
+.task-step { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.task-step span { min-width: 0; overflow-wrap: anywhere; }
+.task-step.done span { text-decoration: line-through; color: var(--muted); }
+.current-step { background: var(--accent-soft); border-radius: var(--radius); padding: 22px 18px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
+.current-step .what { font-family: var(--f-display); font-size: 1.45em; font-weight: 600; overflow-wrap: anywhere; }
+.timer-canvas { width: 220px; height: 220px; max-width: 100%; display: block; margin: 0 auto; }
+.gauge { display: flex; flex-direction: column-reverse; gap: 6px; }
+.gauge-lvl {
+  display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; border: 3px solid transparent;
+  background: var(--surface); border-radius: 12px; padding: 8px 12px; cursor: pointer; text-align: left; color: var(--ink);
+}
+.gauge-lvl .sw { width: 44px; height: 32px; border-radius: 8px; }
+.gauge-lvl[aria-pressed="true"] { border-color: var(--ink); }
+.fiche li { margin-bottom: 8px; }
+.fiche ul { padding-left: 1.2em; margin: 0; }
+.help-hero { background: var(--help-soft); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.numbers { display: flex; flex-direction: column; gap: 10px; }
+.num-card { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.num-card .n { font-family: var(--f-display); font-weight: 700; font-size: 1.7em; color: var(--help); grid-row: span 2; font-variant-numeric: tabular-nums; text-decoration: none; user-select: all; }
+.num-card .w { font-family: var(--f-display); font-weight: 600; }
+.num-card .d { color: var(--muted); font-size: 0.88em; }
+.sent-list { margin: 0; padding-left: 1.2em; }
+.msg-box { min-height: 120px; }
+ol.how { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; }
+.toggle { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.toggle:last-child { border-bottom: 0; }
+.switch { appearance: none; -webkit-appearance: none; width: 56px; height: 32px; border-radius: 16px; background: var(--line); position: relative; cursor: pointer; flex: none; }
+.switch::after { content: ""; position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); transition: left .15s; }
+.switch:checked { background: var(--accent); }
+.switch:checked::after { left: 28px; }
+.choice { display: flex; flex-direction: column; gap: 8px; text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); padding: 16px; cursor: pointer; color: var(--ink); }
+.choice[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.choice .t { font-family: var(--f-display); font-weight: 600; }
+.preview { background: var(--surface); border-radius: 12px; padding: 14px; border: 1px dashed var(--line); }
+.done-hero { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 24px; }
+.done-hero svg { width: 84px; height: 84px; color: var(--ok); }
+.code-chip { font-family: var(--f-display); font-weight: 600; background: var(--surface-2); border-radius: 8px; padding: 2px 8px; letter-spacing: 0.06em; }
+@media (max-width: 420px) {
+  .help-btn .lab-long { display: none; }
+  .weather { font-size: 0.7em; }
+  .weather svg { width: 34px; height: 34px; }
+}
+.sec-title { font-size: 1.05em; margin: 22px 0 10px; color: var(--muted); }
+.moods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mood { border: 2px solid var(--line); background: var(--surface); border-radius: 16px; padding: 10px 4px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink); font-size: 0.85em; }
+.mood[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent) inset; }
+.battery { position: relative; display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; padding: 6px; border: 3px solid var(--ink); border-radius: 12px; margin-right: 12px; }
+.battery .nub { position: absolute; right: -12px; top: 50%; transform: translateY(-50%); width: 7px; height: 22px; background: var(--ink); border-radius: 0 4px 4px 0; }
+.battery .cell { height: 48px; border: 0; border-radius: 5px; background: var(--surface-2); cursor: pointer; padding: 0; }
+.battery .cell.on { background: var(--sun); }
+.battery .cell.on:nth-child(-n+3) { background: var(--z4); }
+.battery .cell.on:nth-child(n+4):nth-child(-n+7) { background: var(--z3); }
+.battery .cell.on:nth-child(n+8) { background: var(--z1); }
+.bat-desc { font-family: var(--f-display); font-weight: 500; margin-top: 4px; }
+.qlist { list-style: none; counter-reset: q; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.qitem { counter-increment: q; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.qtext::before { content: counter(q) ". "; font-family: var(--f-display); font-weight: 600; color: var(--muted); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.segb { min-height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); cursor: pointer; font-family: var(--f-display); font-weight: 500; color: var(--ink); }
+.segb[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.sticky-send { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); }
+.sent-ok { color: var(--ok); font-family: var(--f-display); font-weight: 600; }
+.code-input { font-family: var(--f-display); font-size: 1.9em !important; letter-spacing: 0.18em; text-align: center; text-transform: uppercase; min-height: 64px !important; }
+.big-how { gap: 12px; font-size: 1.02em; margin-top: 12px; }
+.daynav { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 8px; text-align: center; }
+.daynav .dlab { font-family: var(--f-display); text-transform: none; }
+.daynav .icon-btn[disabled] { opacity: .35; }
+.flip svg { transform: scaleX(-1); }
+.meals { display: flex; flex-direction: column; gap: 8px; }
+.meal { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; cursor: pointer; color: var(--ink); }
+.meal-t { font-family: var(--f-display); font-weight: 600; }
+.st { font-size: 0.82em; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.st.todo { background: var(--surface-2); color: var(--muted); }
+.st.ok { background: var(--accent-soft); color: var(--ink); }
+.st.skip { background: var(--sun-soft); color: var(--ink); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.photo-btn { width: 100%; }
+.ph-prev { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.ph-prev img { border-radius: 12px; max-height: 260px; object-fit: cover; width: 100%; }
+.rassure { text-align: center; font-size: 1.1em; min-height: 3.2em; max-width: 26em; }
+</style>
+<div class="shell" id="app"></div>
+<script>
+/* ===== Outils partagés : encodage, compression, chiffrement, lecture adaptée ===== */
+const DEMO_PUB = "BBV7nya4K8W0jyGJq2xtiK5E5na6CAB23qNAI5RJhVfhiQbRRt_g9vrYtbJ0Jnm7yGxny1celneAbJEpW6XDQBg";
+const DEMO_CODE = "DEM-001";
+
+const B64 = {
+  enc(buf) {
+    const b = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+    let s = ""; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  },
+  dec(str) {
+    str = str.replace(/-/g, "+").replace(/_/g, "/"); while (str.length % 4) str += "=";
+    const s = atob(str); const b = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+    return b;
+  }
+};
+const TE = new TextEncoder(), TD = new TextDecoder();
+
+async function streamThrough(u8, stream) {
+  const w = stream.writable.getWriter(); w.write(u8); w.close();
+  return new Uint8Array(await new Response(stream.readable).arrayBuffer());
+}
+/* Emballe un objet JSON : 1 octet de drapeau (1 = compressé) + données */
+async function pack(obj) {
+  const raw = TE.encode(JSON.stringify(obj));
+  if (typeof CompressionStream !== "undefined") {
+    try { const c = await streamThrough(raw, new CompressionStream("deflate-raw"));
+      const out = new Uint8Array(c.length + 1); out[0] = 1; out.set(c, 1); return out; } catch (e) {}
+  }
+  const out = new Uint8Array(raw.length + 1); out[0] = 0; out.set(raw, 1); return out;
+}
+async function unpack(u8) {
+  let body = u8.slice(1);
+  if (u8[0] === 1) body = await streamThrough(body, new DecompressionStream("deflate-raw"));
+  return JSON.parse(TD.decode(body));
+}
+
+/* Code d'activation patient : ACT1.<données> */
+async function encodeActivation(cfg) { return "ACT1." + B64.enc(await pack(cfg)); }
+async function decodeActivation(text) {
+  const m = String(text).match(/ACT1\.([A-Za-z0-9_-]+)/);
+  if (!m) throw new Error("format");
+  const cfg = await unpack(B64.dec(m[1]));
+  if (!cfg || !cfg.c || !cfg.k) throw new Error("format");
+  return cfg;
+}
+
+/* Chiffrement patient -> praticienne : ECDH P-256 éphémère + AES-GCM 256
+   Message : PSY1.<clé éphémère (65 o) | iv (12 o) | données chiffrées> */
+const ECDH = { name: "ECDH", namedCurve: "P-256" };
+const AAD = TE.encode("PSY1");
+async function encryptForPractitioner(pubB64, obj) {
+  const pub = await crypto.subtle.importKey("raw", B64.dec(pubB64), ECDH, false, []);
+  const eph = await crypto.subtle.generateKey(ECDH, true, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({ name: "ECDH", public: pub }, eph.privateKey,
+    { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: AAD }, key, await pack(obj)));
+  const epk = new Uint8Array(await crypto.subtle.exportKey("raw", eph.publicKey));
+  const out = new Uint8Array(65 + 12 + ct.length);
+  out.set(epk, 0); out.set(iv, 65); out.set(ct, 77);
+  return "PSY1." + B64.enc(out);
+}
+async function decryptMessage(privJwk, msg) {
+  const m = String(msg).match(/PSY1\.([A-Za-z0-9_-]+)/);
+  if (!m) throw new Error("format");
+  const all = B64.dec(m[1]);
+  const priv = await crypto.subtle.importKey("jwk", privJwk, ECDH, false, ["deriveKey"]);
+  const epk = await crypto.subtle.importKey("raw", all.slice(0, 65), ECDH, false, []);
+  const key = await crypto.subtle.deriveKey({ name: "ECDH", public: epk }, priv,
+    { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(65, 77), additionalData: AAD }, key, all.slice(77));
+  return unpack(new Uint8Array(pt));
+}
+
+function uid() { return B64.enc(crypto.getRandomValues(new Uint8Array(9))); }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function lsGet(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+async function copyText(text, btn) {
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {}
+  if (btn) {
+    const old = btn.dataset.label || btn.textContent; btn.dataset.label = old;
+    btn.textContent = ok ? "Copié" : "Sélectionné : faites Copier";
+    setTimeout(() => { btn.textContent = old; }, 2200);
+  }
+  return ok;
+}
+function selectAll(el) { try { el.focus(); el.select(); el.setSelectionRange(0, el.value.length); } catch (e) {} }
+
+/* ===== Lecture adaptée : découpage syllabique et lettres muettes (approximation) ===== */
+const VOY = "aeiouyàâäéèêëîïôöùûüÿœæ";
+const isVoy = c => VOY.includes(c);
+const INSEP = /^(bl|br|cl|cr|dr|fl|fr|gl|gr|pl|pr|tr|vr|ch|ph|gn|th|qu|gu)$/;
+function syllabes(word) {
+  const w = word.toLowerCase(), n = w.length;
+  if (n <= 3) return [word];
+  const v = [];
+  for (let i = 0; i < n; i++) {
+    let x = isVoy(w[i]);
+    if (w[i] === "u" && i > 0 && (w[i - 1] === "q" || (w[i - 1] === "g" && i + 1 < n && "eiéèêy".includes(w[i + 1])))) x = false;
+    v.push(x);
+  }
+  const nuc = []; let i = 0;
+  while (i < n) { if (v[i]) { let j = i; while (j + 1 < n && v[j + 1]) j++; nuc.push([i, j]); i = j + 1; } else i++; }
+  if (nuc.length < 2) return [word];
+  const cuts = [];
+  for (let k = 0; k < nuc.length - 1; k++) {
+    const a = nuc[k][1] + 1, b = nuc[k + 1][0], cl = w.slice(a, b), L = cl.length;
+    const ins = L >= 2 && INSEP.test(cl.slice(-2));
+    cuts.push(L === 1 ? a : L === 2 ? (ins ? a : a + 1) : (ins ? b - 2 : b - 1));
+  }
+  const out = []; let p = 0;
+  for (const c of cuts) { out.push(word.slice(p, c)); p = c; }
+  out.push(word.slice(p));
+  return out.filter(Boolean);
+}
+const EXC_S = new Set("bus sens fils os ours mars tennis virus bonus autobus hélas maïs oasis jadis atlas cactus campus processus cosmos iris lys bis gratis express rébus tournevis métis stress as hiatus fœtus terminus détritus".split(" "));
+const EXC_X = new Set("six dix index fax box relax max lynx thorax larynx silex".split(" "));
+const EXC_T = new Set("net sept huit but brut ouest chut mat rapt transit scout kit flirt short test toast compost internet granit dot zut est-ce".split(" "));
+const EXC_D = new Set("sud bled raid stand weekend lord".split(" "));
+const EXC_P = new Set("cap stop top hip slip clip handicap ketchup cep".split(" "));
+const EXC_Z = new Set("gaz quiz fez jazz".split(" "));
+const EXC_R = new Set("hiver enfer super cancer laser amer hamster poster revolver starter master leader scooter reporter joker poker bunker cuiller hier fier cher mer fer ver".split(" "));
+const EXC_E = new Set("le je me te se ce de ne que".split(" "));
+function lettresMuettes(word) {
+  const w = word.toLowerCase(), n = w.length, set = new Set();
+  if (n >= 2 && w[0] === "h" && isVoy(w[1])) set.add(0);
+  if (n < 2) return set;
+  let idx = n - 1, steps = 0, lastWasE = false;
+  while (idx > 0 && steps < 3) {
+    const c = w[idx], prev = w[idx - 1];
+    let mute = false;
+    if (steps === 0) {
+      if (c === "s" && prev !== "s" && !EXC_S.has(w)) mute = true;
+      else if (c === "x" && !EXC_X.has(w)) mute = true;
+    }
+    if (!mute && c === "e" && !lastWasE && idx >= 2 && !EXC_E.has(w.slice(0, idx + 1)) && (steps === 0 || w[idx + 1] === "s")) mute = true;
+    else if (!mute && steps <= 1 && !lastWasE) {
+      if (c === "t" && !EXC_T.has(w) && (isVoy(prev) || "ncps".includes(prev))) mute = true;
+      else if (c === "d" && !EXC_D.has(w) && (isVoy(prev) || "nr".includes(prev))) mute = true;
+      else if (c === "p" && !EXC_P.has(w) && (isVoy(prev) || "m".includes(prev))) mute = true;
+      else if (c === "z" && !EXC_Z.has(w) && isVoy(prev)) mute = true;
+      else if (c === "r" && prev === "e" && n >= 5 && steps === 0 && !EXC_R.has(w)) mute = true;
+    }
+    if (!mute) break;
+    set.add(idx); lastWasE = c === "e"; idx--; steps++;
+    if (lastWasE) break;
+  }
+  return set;
+}
+/* Applique la mise en couleur dans un conteneur */
+function adapterTexte(root, opts) {
+  if (!opts || (!opts.syl && !opts.muet)) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      const p = node.parentElement;
+      if (!p || p.closest("textarea,input,select,svg,script,style,.no-lis,code")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  let alt = 0;
+  for (const node of nodes) {
+    const parts = node.nodeValue.split(/([A-Za-zÀ-ÖØ-öø-ÿœŒæÆ]+)/);
+    if (parts.length === 1) continue;
+    const frag = document.createDocumentFragment();
+    for (let k = 0; k < parts.length; k++) {
+      const part = parts[k];
+      if (!part) continue;
+      if (k % 2 === 0) { frag.appendChild(document.createTextNode(part)); continue; }
+      const muettes = opts.muet ? lettresMuettes(part) : new Set();
+      const syls = opts.syl ? syllabes(part) : [part];
+      const wspan = document.createElement("span"); wspan.className = "mot";
+      let pos = 0;
+      for (const s of syls) {
+        const sp = document.createElement("span");
+        if (opts.syl) sp.className = "syl s" + (alt++ % 2);
+        for (let c = 0; c < s.length; c++) {
+          if (muettes.has(pos + c)) { const m = document.createElement("span"); m.className = "muet"; m.textContent = s[c]; sp.appendChild(m); }
+          else sp.appendChild(document.createTextNode(s[c]));
+        }
+        pos += s.length; wspan.appendChild(sp);
+      }
+      frag.appendChild(wspan);
+    }
+    node.parentNode.replaceChild(frag, node);
+  }
+}
+/* ===== Code court, configuration chiffrée, relais ===== */
+function normCode(s) {
+  const c = String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return c.length === 6 ? c.slice(0, 3) + "-" + c.slice(3) : c;
+}
+async function cfgKey(code) {
+  const base = await crypto.subtle.importKey("raw", TE.encode(code.replace("-", "")), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: TE.encode("entre-seances/cfg/v1"), iterations: 120000, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+async function sealCfg(code, cfg) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await cfgKey(code), await pack(cfg)));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12); return B64.enc(out);
+}
+async function openCfg(code, blob) {
+  const all = B64.dec(blob);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, await cfgKey(code), all.slice(12));
+  return unpack(new Uint8Array(pt));
+}
+/* Appel au relais Google Apps Script (POST texte simple : pas de pré-vérification CORS) */
+async function relay(url, body, ms = 20000) {
+  const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const t = ctl ? setTimeout(() => ctl.abort(), ms) : 0;
+  try {
+    const r = await fetch(url, { method: "POST", body: JSON.stringify(body), redirect: "follow", signal: ctl ? ctl.signal : undefined });
+    const txt = await r.text();
+    try { return JSON.parse(txt); }
+    catch (e) {
+      const why = /<title>([^<]*)<\/title>/i.exec(txt);
+      const err = new Error("reponse"); err.detail = `Réponse inattendue du relais (code ${r.status}${why ? ", « " + why[1].trim() + " »" : ""}).`; throw err;
+    }
+  } catch (e) {
+    if (!e.detail) e.detail = e.name === "AbortError" ? "Le relais n'a pas répondu à temps." : "Relais injoignable : pas de connexion internet, adresse incorrecte, ou accès du déploiement différent de « Tout le monde ».";
+    throw e;
+  } finally { clearTimeout(t); }
+}
+/* Réduit une photo (≤ 900 px, JPEG) pour l'envoi */
+function shrinkPhoto(file, max = 900, q = 0.62) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      res(c.toDataURL("image/jpeg", q));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("image")); };
+    img.src = url;
+  });
+}
+/* Petit stockage IndexedDB pour les photos (localStorage est trop petit) */
+const PhotoDB = {
+  db: null,
+  open(name) {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => {
+      try {
+        const r = indexedDB.open(name, 1);
+        r.onupgradeneeded = () => r.result.createObjectStore("p");
+        r.onsuccess = () => { this.db = r.result; res(this.db); };
+        r.onerror = () => rej(r.error);
+      } catch (e) { rej(e); }
+    });
+  },
+  async op(name, mode, fn) {
+    const db = await this.open(name);
+    return new Promise((res, rej) => { const tx = db.transaction("p", mode); const st = tx.objectStore("p"); const rq = fn(st); tx.oncomplete = () => res(rq && rq.result); tx.onerror = () => rej(tx.error); });
+  },
+  put(name, k, v) { return this.op(name, "readwrite", st => st.put(v, k)); },
+  get(name, k) { return this.op(name, "readonly", st => st.get(k)); },
+  del(name, k) { return this.op(name, "readwrite", st => st.delete(k)); }
+};
+
+/* ---------- Humeur du jour : visages ---------- */
+const MOODS = [
+  ["super", "Super bien", "#7CC47F"], ["content", "Content·e", "#B9D86A"], ["calme", "Calme", "#7ECFC3"],
+  ["surexcite", "Surexcité·e", "#F4A261"], ["bof", "Bof", "#E8D36A"], ["fatigue", "Fatigué·e", "#A7B6CA"],
+  ["stresse", "Stressé·e", "#F2BE5C"], ["triste", "Triste", "#8EAEE2"], ["colere", "En colère", "#E5826C"]
+];
+const MOOD_LABEL = Object.fromEntries(MOODS.map(m => [m[0], m[1]]));
+function face(key, size = 48) {
+  const m = MOODS.find(x => x[0] === key) || MOODS[4], k = "#1F2B2A";
+  const dot = (x, y, r = 2.3) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${k}"/>`;
+  const st = d => `<path d="${d}" fill="none" stroke="${k}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const drop = (x, y) => `<path d="M${x} ${y}q3 4 0 6.5q-3-2.5 0-6.5z" fill="#5B9BD5"/>`;
+  const F = {
+    super: st("M14 21q3.5-4.5 7 0") + st("M27 21q3.5-4.5 7 0") + `<path d="M14 27q10 13 20 0z" fill="${k}"/>`,
+    content: dot(17, 20) + dot(31, 20) + st("M16 28q8 8 16 0"),
+    calme: st("M14 21q3.5 3 7 0") + st("M27 21q3.5 3 7 0") + st("M18 30q6 4 12 0"),
+    surexcite: st("M12 13l6-2") + st("M36 13l-6-2") + dot(17, 20, 3.4) + dot(31, 20, 3.4) + `<circle cx="18" cy="19" r="1.1" fill="#fff"/><circle cx="32" cy="19" r="1.1" fill="#fff"/><path d="M15 27q9 14 18 0z" fill="${k}"/>` + st("M41 8l2-3M43 13l3-1"),
+    bof: dot(17, 20) + dot(31, 20) + st("M17 31h14"),
+    fatigue: st("M13 22h8") + st("M27 22h8") + st("M20 32q4-2.5 8 0") + st("M35 6h5l-5 5h5"),
+    stresse: dot(17, 20) + dot(31, 20) + st("M14 31q2.5-3 5 0t5 0t5 0t5 0") + drop(39, 12),
+    triste: st("M13 15l6 2.5") + st("M35 15l-6 2.5") + dot(17, 21) + dot(31, 21) + st("M16 34q8-8 16 0") + drop(16, 25),
+    colere: st("M13 15l7 4") + st("M35 15l-7 4") + dot(17, 22) + dot(31, 22) + st("M17 33q7-5 14 0")
+  };
+  return `<svg viewBox="0 0 48 48" width="${size}" height="${size}" aria-hidden="true"><circle cx="24" cy="24" r="20.5" fill="${m[2]}" stroke="${k}" stroke-width="2"/>${F[m[0]]}</svg>`;
+}
+const ENERGIE_DESC = ["", "Épuisé·e", "Épuisé·e", "Très peu d'énergie", "Peu d'énergie", "Énergie moyenne", "Énergie correcte", "Bonne énergie", "Beaucoup d'énergie", "Énormément d'énergie", "Énergie débordante"];
+
+/* ===== Entre-Séances — application patient ===== */
+const KEY = "es_patient_v1";
+let S = lsGet(KEY);
+let view = { name: "home", p: {} };
+let cleanup = null; // arrête animations / minuteurs à chaque changement d'écran
+const PSY_EMAIL_DEFAULT = "annesophie.auray.psy@gmail.com";
+
+const T = (tu, vous) => (S && S.prefs && S.prefs.tv === "vous" ? vous : tu);
+function save() { lsSet(KEY, S); }
+
+/* ---------- Icônes ---------- */
+const I = {
+  humeur: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="3.2"/><path d="M9 2.5v1.3M9 14.2v1.3M2.5 9h1.3M3.9 3.9l.9.9M13.2 4.8l.9-.9"/><path d="M8 20h9.5a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.4 1.6A2.7 2.7 0 0 0 8 20z" fill="var(--surface)"/></svg>',
+  pensees: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M19 9h1a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v2.5L16 18h-3"/></svg>',
+  sud: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0z"/><path d="M12 10v7"/><path d="M17 6h3M17 10h3"/></svg>',
+  expo: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h4v-4h4v-4h4V9h4V5h2"/></svg>',
+  sommeil: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/><path d="M15 4h4l-4 4h4"/></svg>',
+  respi: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 9c2.5-3 5-3 7.5 0s5 3 7.5 0 3.5-3 5 0"/><path d="M2 15c2.5-3 5-3 7.5 0s5 3 7.5 0 3.5-3 5 0"/></svg>',
+  taches: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l1.5 1.5L8 5"/><path d="M4 12l1.5 1.5L8 11"/><path d="M11 6h9M11 12h9M11 18h9"/><circle cx="6" cy="18" r="1.5"/></svg>',
+  jauge: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 17a9 9 0 1 1 17 0"/><path d="M12 17l4-6"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></svg>',
+  fiches: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H11v17H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 4.5A1.5 1.5 0 0 0 18.5 3H13v17h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>',
+  repas: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="6.5"/><circle cx="12" cy="13" r="3.5"/><path d="M3 4v5a2 2 0 0 0 2 2v9M5 4v4M21 4c-1.5 1-2 3-2 5s1 2 2 2v9"/></svg>',
+  envie: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17c3 0 4-9 9-9s5 6 9 6"/><path d="M2 21h20"/></svg>',
+  angoisse: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5" opacity=".6"/><circle cx="12" cy="12" r="10" opacity=".3"/></svg>',
+  elan: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 8-9"/><path d="M15 6h5v5"/></svg>',
+  angst: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8l1.5 1.5L13 7M9 14l1.5 1.5L13 13M15 8h1M15 14h1"/></svg>',
+  send: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>',
+  life: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/></svg>',
+  back: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>',
+  mark: '<svg class="brand-mark" viewBox="0 0 34 34"><rect width="34" height="34" rx="10" fill="var(--accent)"/><path d="M7 14c3-3 6-3 9 0s6 3 10 0" stroke="var(--accent-ink)" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M7 21c3-3 6-3 9 0s6 3 10 0" stroke="var(--sun)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>'
+};
+
+/* ---------- Modules ---------- */
+const MODS = {
+  humeur:  { t: "Humeur du jour", d: () => T("Ton humeur et ton énergie", "Votre humeur et votre énergie") },
+  repas:   { t: "Mes repas du jour", d: () => "Repas, collations et grignotages" },
+  envie:   { t: "Gérer une envie de crise", d: () => "Laisser passer la vague, 15 minutes" },
+  angoisse:{ t: "Crise d'angoisse", d: () => "Respirer et redescendre, tout de suite" },
+  pensees: { t: "Tableau des pensées", d: () => T("Démêler une pensée qui te pèse", "Démêler une pensée qui vous pèse") },
+  sud:     { t: "Échelle de malaise", d: () => T("Noter ton malaise de 0 à 10", "Noter votre malaise de 0 à 10") },
+  expo:    { t: "Mon échelle d'exposition", d: () => "Avancer marche après marche" },
+  sommeil: { t: "Journal du sommeil", d: () => T("Noter ta nuit", "Noter votre nuit") },
+  respi:   { t: "Respirer et se poser", d: () => "La vague, la balle, 5-4-3-2-1" },
+  taches:  { t: "Découper une tâche", d: () => "Une étape à la fois, avec un minuteur" },
+  jauge:   { t: "Ma jauge", d: () => T("Bruit, lumière, fatigue : où en es-tu ?", "Bruit, lumière, fatigue : où en êtes-vous ?") },
+  fiches:  { t: "Fiches pratiques", d: () => "Astuces pour l'attention, les sens, les émotions" },
+  elan:    { t: "Mon élan ces 7 derniers jours", d: () => "10 questions, réponses en un clic", q: true },
+  angst:   { t: "Mes périodes d'énergie", d: () => "Questionnaire en 20 questions (vrai / faux)", q: true }
+};
+const ALL_MODS = Object.keys(MODS);
+const TYPE_LABEL = { humeur: "humeur du jour", pensees: "tableau des pensées", sud: "échelle de malaise", expo: "exposition", sommeil: "journal du sommeil", respi: "exercice de respiration", taches: "tâche découpée", jauge: "jauge", repas: "repas noté", envie: "envie de crise", angoisse: "crise d'angoisse", angst: "questionnaire", elan: "questionnaire" };
+const RELAIS = (typeof window !== "undefined" && window.ES_RELAIS ? String(window.ES_RELAIS) : "").trim();
+const spacedCode = c => String(c).replace("-", " ");
+const canDirect = () => !!(RELAIS && S && S.cfg && S.cfg.c !== DEMO_CODE);
+const SLOTS = { pdj: "Petit-déjeuner", cm: "Collation du matin", dej: "Déjeuner", gout: "Goûter", din: "Dîner", cs: "Collation du soir" };
+function demoCfg() {
+  return { v: 1, c: DEMO_CODE, k: DEMO_PUB, m: ALL_MODS.slice(), t: "tu", e: PSY_EMAIL_DEFAULT,
+    h: [["Demander l'heure à quelqu'un dans la rue", 3], ["Commander seul(e) au comptoir d'un café", 5], ["Poser une question en classe", 7], ["Passer un appel pour prendre un rendez-vous", 8]],
+    a: { p: ["HP"], r: ["pdj", "dej", "gout", "din"], o: { photo: 1, faim: 1, ctrl: 1, comp: 0, emo: 1, pens: 0, saute: 1, grig: 1 } } };
+}
+function newState(cfg) {
+  return { cfg, prefs: { done: false, dys: false, syl: false, muet: false, size: 1, tv: cfg.t === "vous" ? "vous" : "tu" }, entries: [], task: null };
+}
+function applyPrefs() {
+  const p = S && S.prefs; const root = document.documentElement;
+  root.classList.toggle("dys", !!(p && p.dys));
+  root.style.setProperty("--scale", p ? p.size : 1);
+}
+function addEntry(type, data) {
+  S.entries.push(Object.assign({ id: uid(), t: new Date().toISOString(), type }, data));
+  save();
+}
+function unsent() { return S.entries.filter(e => !e.sent); }
+function purgeOld() {
+  if (!S) return;
+  const lim = Date.now() - 60 * 864e5;
+  S.entries = S.entries.filter(e => !e.sent || new Date(e.t).getTime() > lim);
+}
+
+/* ---------- Petits composants ---------- */
+const field = (lbl, inner, hint) => `<div><span class="lbl">${lbl}</span>${inner}${hint ? `<p class="hint">${hint}</p>` : ""}</div>`;
+const range = (id, min, max, val, step = 1, suffix = "") =>
+  `<div class="range"><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}" data-suffix="${suffix}"><output for="${id}" class="no-lis">${val}${suffix}</output></div>`;
+const chips = (name, opts, multi, sel = []) =>
+  `<div class="chips" data-name="${name}" data-multi="${multi ? 1 : 0}">${opts.map(o => `<button type="button" class="chip" data-v="${esc(o)}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join("")}</div>`;
+const getChips = name => [...document.querySelectorAll(`.chips[data-name="${name}"] .chip[aria-pressed="true"]`)].map(b => b.dataset.v);
+const val = id => { const el = document.getElementById(id); return el ? el.value : ""; };
+const num = id => Number(val(id));
+const noPerso = () => T("Évite d'écrire des noms, des lieux précis ou des numéros.", "Évitez d'écrire des noms, des lieux précis ou des numéros.");
+const back = (to = "home", label = "Accueil") => `<button class="back" data-go="${to}">${I.back}<span>${label}</span></button>`;
+
+/* ---------- Navigation et rendu ---------- */
+function go(name, p = {}) { view = { name, p }; render(); window.scrollTo(0, 0); }
+function header() {
+  return `<header class="top">
+    <button class="brand" data-go="home" aria-label="Accueil">${I.mark}<span class="brand-name">Entre-Séances</span></button>
+    <div class="top-actions">
+      <button class="icon-btn" data-go="reglages" aria-label="Réglages">${I.gear}</button>
+      <button class="help-btn" data-go="aide">${I.life}<span>Aide<span class="lab-long"> urgente</span></span></button>
+    </div></header>`;
+}
+function render() {
+  if (cleanup) { try { cleanup(); } catch (e) {} cleanup = null; }
+  applyPrefs();
+  const app = document.getElementById("app");
+  let name = view.name;
+  if (!S || !S.cfg) name = ["aide", "installer"].includes(name) ? name : "activation";
+  else if (!S.prefs.done && name !== "aide") name = "accueil";
+  const scr = SCREENS[name] || SCREENS.home;
+  app.innerHTML = (!S || !S.cfg ? `<header class="top"><span class="brand">${I.mark}<span class="brand-name">Entre-Séances</span></span><div class="top-actions"><button class="help-btn" data-go="aide">${I.life}<span>Aide<span class="lab-long"> urgente</span></span></button></div></header>` : header())
+    + `<main id="main">${scr.html(view.p)}</main>`;
+  if (scr.mount) scr.mount(view.p);
+  if (S && S.prefs) adapterTexte(document.getElementById("main"), S.prefs);
+  const h = document.querySelector("#main h1"); if (h) { h.setAttribute("tabindex", "-1"); }
+}
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-go]");
+  if (g) { e.preventDefault(); go(g.dataset.go, g.dataset.p ? JSON.parse(g.dataset.p) : {}); return; }
+  const c = e.target.closest(".chip, .mood, .segb, .choice[data-group], .dot-tap, .gauge-lvl");
+  if (c) {
+    const box = c.closest(".chips, [data-group-box]");
+    const multi = box && box.dataset.multi === "1";
+    if (!multi && box) box.querySelectorAll("[aria-pressed]").forEach(b => { if (b !== c) b.setAttribute("aria-pressed", "false"); });
+    c.setAttribute("aria-pressed", multi || c.classList.contains("dot-tap") ? String(c.getAttribute("aria-pressed") !== "true") : "true");
+    c.dispatchEvent(new CustomEvent("picked", { bubbles: true }));
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.type === "range") {
+    const o = e.target.parentElement.querySelector("output");
+    if (o) o.textContent = e.target.value + (e.target.dataset.suffix || "");
+  }
+});
+
+/* ---------- Écrans ---------- */
+const SCREENS = {};
+
+/* ---------- Installation sur l'écran d'accueil ---------- */
+let installPrompt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; if (["activation", "installer"].includes(view.name)) render(); });
+const isStandalone = () => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; } };
+function detectOS() {
+  const ua = navigator.userAgent || "";
+  if (/iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) return "ios";
+  return /android/i.test(ua) ? "android" : "pc";
+}
+const SHARE_ICO = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-5px"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
+function installGuide(os) {
+  const steps = {
+    ios: [`Ouvrir cette page avec <b>Safari</b>.`, `Toucher le bouton <b>Partager</b> ${SHARE_ICO} en bas de l'écran.`, `Descendre et choisir <b>« Sur l'écran d'accueil »</b>, puis <b>« Ajouter »</b>.`, `Fermer Safari et ouvrir <b>Entre-Séances</b> depuis l'écran d'accueil.`],
+    android: [`Ouvrir cette page avec <b>Chrome</b>.`, installPrompt ? `Toucher le bouton <b>« Installer l'application »</b> ci-dessous.` : `Toucher le menu <b>⋮</b> en haut à droite, puis <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.`, `Ouvrir <b>Entre-Séances</b> depuis l'écran d'accueil.`],
+    pc: [`Ouvrir cette page avec <b>Chrome</b> ou <b>Edge</b>.`, installPrompt ? `Cliquer sur <b>« Installer l'application »</b> ci-dessous.` : `Cliquer sur l'icône d'installation à droite de la barre d'adresse (un petit écran avec une flèche), puis <b>« Installer »</b>.`, `Ouvrir <b>Entre-Séances</b> depuis le menu Démarrer ou le bureau.`]
+  }[os];
+  return `<div class="chips" data-name="os" data-multi="0">${[["ios", "iPhone / iPad"], ["android", "Android"], ["pc", "Ordinateur"]].map(([k, l]) => `<button class="chip" data-v="${k}" aria-pressed="${k === os}">${l}</button>`).join("")}</div>
+    <ol class="how big-how">${steps.map(s => `<li>${s}</li>`).join("")}</ol>
+    ${installPrompt && os !== "ios" ? `<button class="btn wide" id="doInstall">Installer l'application</button>` : ""}
+    ${os === "ios" ? `<p class="notice">Sur iPhone, le code s'entre dans l'application installée, pas dans Safari : ce sont deux espaces séparés.</p>` : ""}`;
+}
+function mountInstall(screen, p) {
+  document.querySelectorAll('.chips[data-name="os"] .chip').forEach(b => b.addEventListener("picked", () => go(screen, Object.assign({}, p, { os: b.dataset.v }))));
+  const bi = document.getElementById("doInstall");
+  if (bi) bi.onclick = async () => { try { installPrompt.prompt(); await installPrompt.userChoice; } catch (e) {} installPrompt = null; render(); };
+}
+SCREENS.installer = {
+  html: p => `${back(S && S.cfg ? "reglages" : "activation", "Retour")}<div class="stack"><div class="screen-head"><h1>Installer l'application</h1>
+    <p>Une fois installée, Entre-Séances s'ouvre comme une application, depuis l'écran d'accueil, même sans internet.</p></div>
+    ${isStandalone() ? `<div class="notice">L'application est déjà installée sur cet appareil.</div>` : installGuide(p.os || detectOS())}</div>`,
+  mount: p => mountInstall("installer", p)
+};
+
+/* ---------- Activation par code court ---------- */
+SCREENS.activation = {
+  html(p) {
+    const os = p.os || detectOS();
+    if (!isStandalone() && !p.code) return `<div class="stack">
+      <div class="screen-head"><h1>Bienvenue sur Entre-Séances</h1>
+        <p>Première étape : installer l'application sur l'écran d'accueil. C'est gratuit, il n'y a pas de compte à créer.</p></div>
+      <div class="card stack">${installGuide(os)}</div>
+      <button class="btn ghost wide" data-go="activation" data-p='{"code":true}'>C'est fait, ou continuer sans installer</button></div>`;
+    return `<div class="stack">
+      <div class="screen-head"><h1>Entrer mon code</h1><p>Le code de 6 caractères donné par la psychologue.</p></div>
+      <div class="card stack">
+        <label class="lbl" for="code">Mon code</label>
+        <input type="text" id="code" class="code-input no-lis" maxlength="8" placeholder="K7M 29Q" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
+        <p class="hint" id="actErr" role="alert"></p>
+        <button class="btn wide" id="actGo">Valider</button>
+      </div>
+      <div class="notice">Aucune information personnelle n'est demandée : ni nom, ni âge, ni adresse. Les réponses sont chiffrées avant d'être envoyées : seule la psychologue peut les lire.</div>
+      <button class="link" id="actDemo">Découvrir avec le code de démonstration</button>
+      ${!isStandalone() ? `<button class="link" data-go="activation">Revoir comment installer l'application</button>` : ""}</div>`;
+  },
+  mount(p) {
+    if (!isStandalone() && !p.code) { mountInstall("activation", p); return; }
+    const inp = document.getElementById("code"), err = document.getElementById("actErr"), btn = document.getElementById("actGo");
+    inp.oninput = () => { const c = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6); inp.value = c.length > 3 ? c.slice(0, 3) + " " + c.slice(3) : c; };
+    inp.onkeydown = e => { if (e.key === "Enter") btn.click(); };
+    btn.onclick = async () => {
+      const raw = inp.value.trim(); err.textContent = "";
+      if (/ACT1\./.test(raw)) { try { S = newState(await decodeActivation(raw)); save(); go("accueil"); } catch (e) { err.textContent = "Ce code long n'est pas reconnu."; } return; }
+      const code = normCode(raw);
+      if (code === DEMO_CODE) { S = newState(demoCfg()); save(); go("accueil"); return; }
+      if (!/^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(code)) { err.textContent = "Le code fait 6 caractères (lettres et chiffres)."; return; }
+      if (!RELAIS) {
+        let why;
+        try { why = window.self !== window.top ? "page de démonstration ouverte dans Claude : elle ne peut pas joindre le relais" : typeof window.ES_RELAIS === "undefined" ? "fichier config.js absent du site, ou mal écrit" : "fichier config.js présent mais vide"; } catch (x) { why = "page de démonstration"; }
+        err.textContent = `L'application n'est pas encore reliée à la psychologue (${why}). Lui signaler ce message.`; return;
+      }
+      btn.disabled = true; btn.textContent = "Vérification…";
+      try {
+        const r = await relay(RELAIS, { a: "cfg", code });
+        if (!r.ok) { err.textContent = "Ce code n'est pas reconnu. Vérifier les 6 caractères."; }
+        else { const cfg = await openCfg(code, r.blob); S = newState(Object.assign({}, cfg, { c: code, k: r.pub })); save(); go("accueil"); return; }
+      } catch (e) { err.textContent = e.detail || "Pas de connexion internet. Réessayer une fois connecté·e."; }
+      btn.disabled = false; btn.textContent = "Valider";
+    };
+    document.getElementById("actDemo").onclick = () => { S = newState(demoCfg()); save(); go("accueil"); };
+  }
+};
+async function refreshCfg() {
+  if (!canDirect() || !navigator.onLine) return false;
+  try {
+    const r = await relay(RELAIS, { a: "cfg", code: S.cfg.c });
+    if (!r.ok) return false;
+    const cfg = await openCfg(S.cfg.c, r.blob);
+    S.cfg = Object.assign({}, S.cfg, cfg, { c: S.cfg.c, k: r.pub }); save();
+    if (view.name === "home") render();
+    return true;
+  } catch (e) { return false; }
+}
+
+/* ---------- Envoi ---------- */
+async function sendEntries(list) {
+  if (!canDirect() || !list.length) return false;
+  const plain = list.filter(e => e.photo !== true), photos = list.filter(e => e.photo === true);
+  const batches = [];
+  for (let i = 0; i < plain.length; i += 60) batches.push(plain.slice(i, i + 60));
+  photos.forEach(e => batches.push([e]));
+  for (const b of batches) {
+    const items = [];
+    for (const e of b) {
+      const o = Object.assign({}, e); delete o.sent;
+      if (e.photo === true) { try { o.img = await PhotoDB.get("es_photos", e.id); } catch (x) {} if (!o.img) o.photo = "perdue"; }
+      items.push(o);
+    }
+    const msg = await encryptForPractitioner(S.cfg.k, { v: 1, c: S.cfg.c, s: new Date().toISOString(), e: items });
+    let r; try { r = await relay(RELAIS, { a: "send", code: S.cfg.c, msg }, 90000); } catch (x) { S.lastErr = { t: new Date().toISOString(), m: x.detail || "Erreur réseau." }; save(); return false; }
+    if (!r || !r.ok) { S.lastErr = { t: new Date().toISOString(), m: r && r.err === "inconnu" ? "Le relais ne connaît pas ce code : la psychologue doit rouvrir la fiche du patient pour republier ses exercices." : "Le relais a refusé le message (" + ((r && r.err) || "?") + ")." }; save(); return false; }
+    S.lastOk = new Date().toISOString(); S.lastErr = null;
+    for (const e of b) { e.sent = true; if (e.photo === true) { e.photo = "envoyee"; try { await PhotoDB.del("es_photos", e.id); } catch (x) {} } }
+    save();
+  }
+  return true;
+}
+async function saved(type, extra = {}) {
+  let sent = null;
+  if (canDirect()) sent = await sendEntries(unsent());
+  go("merci", Object.assign({ type, sent }, extra));
+}
+
+SCREENS.home = {
+  html() {
+    const mods = (S.cfg.m || ALL_MODS).filter(m => MODS[m] && (m !== "expo" || (S.cfg.h && S.cfg.h.length)) && (!["repas", "envie"].includes(m) || S.cfg.a));
+    const ex = mods.filter(m => !MODS[m].q), qs = mods.filter(m => MODS[m].q);
+    const n = unsent().length;
+    let today = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }); today = today.charAt(0).toUpperCase() + today.slice(1);
+    const tile = m => {
+      let d = MODS[m].d();
+      if (m === "repas") { const r = (S.cfg.a.r || []), done = r.filter(s => mealOf(todayISO(), s)).length; d = `${done} sur ${r.length} repas notés aujourd'hui`; }
+      return `<button class="tile" data-go="${m}"><span class="tile-ico">${I[m]}</span><span><span class="tile-t">${MODS[m].t}</span><span class="tile-d">${d}</span></span></button>`;
+    };
+    const unlinked = !canDirect() && S.cfg.c !== DEMO_CODE;
+    return `${unlinked ? `<div class="notice" style="margin-bottom:14px"><b>Envoi automatique désactivé.</b> L'application n'est pas reliée à la psychologue. <button class="link" data-go="reglages" data-p='{"diag":true}'>Voir le détail</button></div>` : ""}<div class="greet"><span class="date">${today}</span><h1>Bonjour</h1>
+      <p class="muted">${T("Que veux-tu faire aujourd'hui ?", "Que souhaitez-vous faire aujourd'hui ?")}</p></div>
+      ${n ? `<button class="send-banner" data-go="envoi"><span><b>${n} ${n > 1 ? "réponses" : "réponse"} à envoyer</b><br><span class="small">${canDirect() ? "Pas encore parties. Toucher pour réessayer." : T("Envoie-les à ta psychologue quand tu veux.", "Envoyez-les à votre psychologue quand vous le souhaitez.")}</span></span>${I.send}</button>` : ""}
+      <div class="tiles">${ex.map(tile).join("")}
+      <button class="tile" data-go="envoi"><span class="tile-ico">${I.send}</span><span><span class="tile-t">Envoyer à ma psychologue</span><span class="tile-d">${canDirect() ? "Envoi automatique, chiffré" : "Message chiffré, lisible par elle seule"}</span></span></button></div>
+      ${qs.length ? `<h2 class="sec-title">Questionnaires</h2><div class="tiles">${qs.map(tile).join("")}</div>` : ""}`;
+  }
+};
+
+SCREENS.merci = {
+  html(p) {
+    const n = unsent().length;
+    const extra = p.type === "jauge" && p.high ? `<div class="notice">${T("Ta jauge est haute. Une pause au calme ou un exercice de respiration peut aider.", "Votre jauge est haute. Une pause au calme ou un exercice de respiration peut aider.")}</div><button class="btn soft wide" data-go="respi">Respirer et se poser</button>` : "";
+    const sentLine = p.sent === true ? `<p class="sent-ok">${T("Envoyé à ta psychologue.", "Envoyé à votre psychologue.")}</p>`
+      : p.sent === false ? `<p class="notice">L'envoi n'a pas pu se faire (pas de connexion ?). C'est bien enregistré : ${T("tu pourras", "vous pourrez")} réessayer avec « Envoyer à ma psychologue ».</p>`
+      : (!canDirect() ? `<p class="notice">${S.cfg.c === DEMO_CODE ? "En démonstration, rien n'est envoyé." : "L'envoi automatique n'est pas activé sur cette application. Utiliser « Envoyer à ma psychologue » et prévenir la psychologue."}</p>` : "");
+    return `<div class="done-hero">${I.check}<h1>${p.sent === true ? "C'est envoyé" : "C'est noté"}</h1>
+      <p class="muted">${T("Merci, tu as pris ce temps pour toi.", "Merci, vous avez pris ce temps pour vous.")}</p>${sentLine}</div>
+      <div class="stack" style="margin-top:24px">${extra}
+      ${p.then ? `<button class="btn wide" data-go="${p.then}">Retour</button>` : ""}
+      <button class="btn ${p.then ? "ghost" : ""} wide" data-go="home">Retour à l'accueil</button>
+      ${n && !canDirect() ? `<button class="btn ghost wide" data-go="envoi">Envoyer mes ${n} ${n > 1 ? "réponses" : "réponse"}</button>` : ""}</div>`;
+  }
+};
+
+/* Humeur du jour : visage + jauge d'énergie */
+SCREENS.humeur = {
+  html: () => `${back()}<div class="stack">
+    <div class="screen-head"><h1>Humeur du jour</h1><p>${T("Choisis le visage qui te ressemble le plus aujourd'hui.", "Choisissez le visage qui vous ressemble le plus aujourd'hui.")}</p></div>
+    <div class="moods" data-group-box>${MOODS.map(([k, l]) => `<button class="mood" data-k="${k}" aria-pressed="false">${face(k, 52)}<span>${l}</span></button>`).join("")}</div>
+    <div><span class="lbl">${T("Ta jauge d'énergie", "Votre jauge d'énergie")}</span>
+      <div class="battery" id="bat" role="group" aria-label="Jauge d'énergie de 1 à 10">${Array.from({ length: 10 }, (_, i) => `<button type="button" class="cell" data-n="${i + 1}" aria-label="${i + 1} sur 10"></button>`).join("")}<span class="nub"></span></div>
+      <div class="scale-ends"><span>Vide</span><span>Pleine</span></div>
+      <p class="bat-desc" id="batD" aria-live="polite">${T("Touche la jauge pour la remplir.", "Touchez la jauge pour la remplir.")}</p></div>
+    ${field("Un mot sur la journée (facultatif)", `<textarea id="note" maxlength="400"></textarea>`, noPerso())}
+    <p class="hint" id="herr" role="alert"></p>
+    <button class="btn wide" id="ok">Enregistrer</button></div>`,
+  mount() {
+    let energie = null;
+    const cells = [...document.querySelectorAll("#bat .cell")];
+    cells.forEach(c => c.onclick = () => {
+      energie = Number(c.dataset.n);
+      cells.forEach(x => { const on = Number(x.dataset.n) <= energie; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(Number(x.dataset.n) === energie)); });
+      document.getElementById("batD").textContent = `${energie}/10 · ${ENERGIE_DESC[energie]}`;
+    });
+    document.getElementById("ok").onclick = () => {
+      const m = document.querySelector('.mood[aria-pressed="true"]');
+      if (!m && energie == null) { document.getElementById("herr").textContent = T("Choisis un visage ou remplis ta jauge.", "Choisissez un visage ou remplissez votre jauge."); return; }
+      addEntry("humeur", { humeur: m ? m.dataset.k : null, energie, note: val("note").trim() });
+      saved("humeur");
+    };
+  }
+};
+
+/* ---------- Questionnaires (envoi direct) ---------- */
+const ANGST = ["Moins d'heures de sommeil", "Davantage d'énergie et de résistance physique", "Davantage de confiance en soi", "Davantage de plaisir à faire plus de travail",
+  "Davantage d'activités sociales (plus d'appels téléphoniques, plus de visites)", "Plus de déplacements et voyages ; davantage d'imprudences au volant", "Dépenses d'argent excessives",
+  "Comportement déraisonnable dans les affaires", "Surcroît d'activité (y compris au travail)", "Davantage de projets et d'idées créatives", "Moins de timidité, moins d'inhibition",
+  "Plus bavard que d'habitude", "Plus d'impatience ou d'irritabilité que d'habitude", "Attention facilement distraite", "Augmentation des pulsions sexuelles",
+  "Augmentation de la consommation de café et de cigarettes", "Augmentation de la consommation d'alcool", "Exagérément optimiste, voire euphorique",
+  "Augmentation du rire (farces, plaisanteries, jeux de mots, calembours)", "Rapidité de la pensée, idées soudaines, calembours"];
+const ELAN = ["Je me suis senti·e beaucoup plus joyeux·se, excité·e ou « survolté·e » que d'habitude.", "Je me suis senti·e beaucoup plus irritable ou énervé·e que d'habitude.",
+  "J'ai eu beaucoup plus d'énergie que d'habitude.", "J'ai dormi beaucoup moins que d'habitude, sans me sentir fatigué·e.",
+  "Je me suis senti·e capable de tout, plus fort·e ou plus important·e que d'habitude.", "J'ai parlé beaucoup plus, ou beaucoup plus vite, que d'habitude.",
+  "Mes pensées allaient très vite, je sautais d'une idée à l'autre.", "J'étais très facilement distrait·e.",
+  "J'ai lancé beaucoup de projets ou d'activités en même temps, ou j'avais du mal à tenir en place.", "J'ai fait des choses risquées ou que j'ai regrettées ensuite (dépenses, conduite, sorties, rencontres…)."];
+function yesNoList(items, labels) {
+  return `<ol class="qlist">${items.map((q, i) => `<li class="qitem"><p class="qtext">${q}</p><div class="seg" data-group-box data-q="${i}">${labels.map(([v, l]) => `<button type="button" class="segb" data-v="${v}" aria-pressed="false">${l}</button>`).join("")}</div></li>`).join("")}</ol>`;
+}
+function answers(n) { return Array.from({ length: n }, (_, i) => { const b = document.querySelector(`.seg[data-q="${i}"] .segb[aria-pressed="true"]`); return b ? Number(b.dataset.v) : null; }); }
+function bindProgress(n, extraOk = () => true) {
+  const btn = document.getElementById("send"), pr = document.getElementById("prog");
+  const upd = () => { const a = answers(n), k = a.filter(x => x != null).length; pr.textContent = `${k} sur ${n} réponses`; btn.disabled = k < n || !extraOk(a); };
+  document.addEventListener("picked", upd); upd();
+  const prev = cleanup; cleanup = () => { document.removeEventListener("picked", upd); if (prev) prev(); };
+}
+SCREENS.angst = {
+  html: () => `${back()}<div class="stack"><div class="screen-head"><h1>Mes périodes d'énergie</h1>
+    <p>${T("Pense aux dernières périodes où tu t'es senti·e « bien dans ta peau, heureux·se, agité·e ou irritable ». Pour chaque phrase, réponds vrai ou faux.", "Pensez aux dernières périodes où vous vous êtes senti·e « bien dans votre peau, heureux·se, agité·e ou irritable ». Pour chaque phrase, répondez vrai ou faux.")}</p></div>
+    ${yesNoList(ANGST, [[1, "Vrai"], [0, "Faux"]])}
+    <div class="sticky-send"><span id="prog" class="small muted"></span><button class="btn wide" id="send" disabled>Envoyer à ma psychologue</button></div>
+    <p class="hint">Questionnaire d'auto-évaluation de J. Angst (version RESPADD).</p></div>`,
+  mount() {
+    bindProgress(ANGST.length);
+    document.getElementById("send").onclick = async e => {
+      e.currentTarget.disabled = true; e.currentTarget.textContent = "Envoi…";
+      const a = answers(ANGST.length); addEntry("angst", { rep: a, total: a.reduce((x, y) => x + y, 0) }); await saved("angst");
+    };
+  }
+};
+SCREENS.elan = {
+  html: () => `${back()}<div class="stack"><div class="screen-head"><h1>Mon élan ces 7 derniers jours</h1>
+    <p>${T("Pour chaque phrase, réponds oui ou non en pensant aux 7 derniers jours.", "Pour chaque phrase, répondez oui ou non en pensant aux 7 derniers jours.")}</p></div>
+    ${yesNoList(ELAN, [[1, "Oui"], [0, "Non"]])}
+    <div id="follow" class="card stack" hidden>
+      ${field("Pendant combien de jours ?", chips("jours", ["1 jour", "2 à 3 jours", "4 à 6 jours", "Tous les jours"], false))}
+      ${field("Est-ce que ça a causé des difficultés (école, travail, famille, amis) ?", chips("diff", ["Non", "Un peu", "Beaucoup"], false))}
+      ${field(T("Quelqu'un de ton entourage l'a-t-il remarqué ?", "Quelqu'un de votre entourage l'a-t-il remarqué ?"), chips("rem", ["Oui", "Non", "Je ne sais pas"], false))}</div>
+    <div class="sticky-send"><span id="prog" class="small muted"></span><button class="btn wide" id="send" disabled>Envoyer à ma psychologue</button></div></div>`,
+  mount() {
+    const anyYes = a => a.some(x => x === 1);
+    bindProgress(ELAN.length, a => !anyYes(a) || (getChips("jours").length && getChips("diff").length && getChips("rem").length));
+    const showF = () => { document.getElementById("follow").hidden = !anyYes(answers(ELAN.length)); };
+    document.addEventListener("picked", showF);
+    const prev = cleanup; cleanup = () => { document.removeEventListener("picked", showF); if (prev) prev(); };
+    document.getElementById("send").onclick = async e => {
+      e.currentTarget.disabled = true; e.currentTarget.textContent = "Envoi…";
+      const a = answers(ELAN.length), y = anyYes(a);
+      addEntry("elan", { rep: a, oui: a.reduce((x, v) => x + v, 0), jours: y ? getChips("jours")[0] : "", diff: y ? getChips("diff")[0] : "", rem: y ? getChips("rem")[0] : "" });
+      await saved("elan");
+    };
+  }
+};
+
+/* ---------- Mes repas du jour (TCA) ---------- */
+const todayISO = (off = 0) => { const d = new Date(); d.setDate(d.getDate() - off); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+const mealOf = (jour, slot) => S.entries.filter(e => e.type === "repas" && e.jour === jour && e.slot === slot).pop();
+const FAIM = ["Pas faim", "Un peu faim", "Faim", "Très faim", "Affamé·e"];
+const SATIETE = ["Encore faim", "Bien", "Plein·e", "Trop plein·e"];
+const COMP = ["Vomissement", "Laxatifs ou diurétiques", "Sport pour compenser", "Sauter le repas suivant", "Aucun"];
+const EMO_REPAS = ["Calme", "Joie", "Stress", "Tristesse", "Colère", "Ennui", "Solitude", "Honte", "Culpabilité", "Fatigue"];
+SCREENS.repas = {
+  html(p) {
+    const A = S.cfg.a || { r: [], o: {} }, off = p.off || 0, jour = todayISO(off);
+    if (p.form) return mealForm(A, jour, p);
+    const lab = off === 0 ? "Aujourd'hui" : off === 1 ? "Hier" : new Date(jour + "T12:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    const grig = S.entries.filter(e => e.type === "repas" && e.jour === jour && e.slot === "grig");
+    const status = e => !e ? `<span class="st todo">À noter</span>` : e.pris === false ? `<span class="st skip">Pas pris</span>` : `<span class="st ok">Noté${e.heure ? " · " + e.heure : ""}</span>`;
+    return `${back()}<div class="stack"><div class="screen-head"><h1>Mes repas du jour</h1>
+      <div class="daynav"><button class="icon-btn" data-go="repas" data-p='{"off":${Math.min(6, off + 1)}}' aria-label="Jour précédent" ${off >= 6 ? "disabled" : ""}>${I.back}</button><b class="dlab">${lab}</b><button class="icon-btn flip" data-go="repas" data-p='{"off":${Math.max(0, off - 1)}}' aria-label="Jour suivant" ${off === 0 ? "disabled" : ""}>${I.back}</button></div></div>
+      <div class="meals">${(A.r || []).map(s => { const e = mealOf(jour, s); return `<button class="meal" data-go="repas" data-p='${JSON.stringify({ off, form: s })}'><span class="meal-t">${SLOTS[s]}</span>${status(e)}${e && e.photo ? `<span class="small muted">photo ${e.photo === "envoyee" ? "envoyée" : "jointe"}</span>` : ""}</button>`; }).join("")}</div>
+      ${A.o.grig ? `<div class="stack"><h2 class="sec-title">Grignotages et prises hors repas</h2>
+        ${grig.length ? `<div class="task-steps">${grig.map(g => `<div class="task-step"><span>${esc(g.heure || "")} · ${esc(g.quoi || "Sans description")}${g.ctrl === "Oui" ? " · perte de contrôle" : ""}</span></div>`).join("")}</div>` : `<p class="hint">Aucun pour l'instant.</p>`}
+        <button class="btn soft wide" data-go="repas" data-p='${JSON.stringify({ off, form: "grig" })}'>Ajouter un grignotage</button></div>` : ""}
+      ${(S.cfg.m || []).includes("envie") ? `<button class="btn ghost wide" data-go="envie">Une envie de crise arrive</button>` : ""}
+      <p class="hint">${T("Tu notes ce que tu as mangé simplement, sans compter. L'important, c'est la régularité.", "Notez simplement ce que vous avez mangé, sans compter. L'important, c'est la régularité.")}</p></div>`;
+  },
+  mount(p) { if (p.form) mountMealForm(S.cfg.a || { o: {} }, todayISO(p.off || 0), p); }
+};
+function mealForm(A, jour, p) {
+  const o = A.o || {}, isG = p.form === "grig", prev = isG ? null : mealOf(jour, p.form);
+  const now = new Date(), hh = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+  return `${back("repas", "Mes repas")}<div class="stack"><div class="screen-head"><h1>${isG ? "Grignotage" : SLOTS[p.form]}</h1>${prev ? `<p class="small">Déjà noté : ${T("tu peux", "vous pouvez")} le remplacer.</p>` : ""}</div>
+    ${!isG && o.saute ? field(T("As-tu pris ce repas ?", "Avez-vous pris ce repas ?"), chips("pris", ["Oui", "Non"], false, ["Oui"])) : ""}
+    <div id="nonpris" hidden>${field("Pourquoi ? (facultatif)", chips("raison", ["Pas faim", "Pas le temps", "Je n'ai pas voulu", "Autre"], false))}</div>
+    <div id="mf" class="stack">
+      ${field("Heure", `<input type="time" id="heure" value="${prev && prev.heure ? prev.heure : hh}">`)}
+      ${field(isG ? "Ce que j'ai mangé" : "Ce que j'ai mangé (facultatif)", `<textarea id="quoi" maxlength="300" placeholder="Décrire simplement, sans quantités">${esc(prev ? prev.quoi || "" : "")}</textarea>`)}
+      ${o.photo ? `<div><span class="lbl">Photo (facultatif)</span><label class="btn soft photo-btn" for="ph">Ajouter une photo</label><input type="file" id="ph" accept="image/*" class="sr-only"><div id="phv" class="ph-prev"></div></div>` : ""}
+      ${field("Où ?", chips("lieu", ["À la maison", "Dehors", "École / travail"], false)) }
+      ${field("Avec qui ?", chips("avec", ["Seul·e", "Accompagné·e"], false))}
+      ${o.faim ? field("Ma faim avant", chips("faim", FAIM, false)) + field("Après avoir mangé", chips("sat", SATIETE, false)) : ""}
+      ${o.ctrl ? field(T("As-tu eu l'impression de perdre le contrôle ?", "Avez-vous eu l'impression de perdre le contrôle ?"), chips("ctrl", ["Non", "Un peu", "Oui"], false)) : ""}
+      ${o.emo ? field("Mes émotions", chips("emo", EMO_REPAS, true), "Plusieurs choix possibles") : ""}
+      ${o.comp ? field("Après, j'ai…", chips("comp", COMP, true)) : ""}
+      ${o.pens ? field("Mes pensées pendant ou après (facultatif)", `<textarea id="pens" maxlength="300" placeholder="Sur la nourriture, le corps, le poids…"></textarea>`) : ""}
+    </div>
+    <button class="btn wide" id="ok">Enregistrer</button></div>`;
+}
+function mountMealForm(A, jour, p) {
+  let img = null;
+  const pris = () => (getChips("pris")[0] || "Oui") === "Oui";
+  const tog = () => { document.getElementById("mf").hidden = !pris(); document.getElementById("nonpris").hidden = pris(); };
+  document.querySelectorAll('.chips[data-name="pris"] .chip').forEach(b => b.addEventListener("picked", tog));
+  const ph = document.getElementById("ph");
+  if (ph) ph.onchange = async () => {
+    const f = ph.files && ph.files[0]; if (!f) return;
+    const box = document.getElementById("phv"); box.textContent = "Préparation…";
+    try { img = await shrinkPhoto(f); box.innerHTML = `<img src="${img}" alt="Photo du repas"><button class="link" id="phx">Retirer la photo</button>`; document.getElementById("phx").onclick = () => { img = null; box.innerHTML = ""; ph.value = ""; }; }
+    catch (e) { box.textContent = "Cette photo n'a pas pu être lue."; }
+  };
+  document.getElementById("ok").onclick = async e => {
+    e.currentTarget.disabled = true;
+    const isG = p.form === "grig";
+    const d = { jour, slot: p.form };
+    if (!isG && !pris()) Object.assign(d, { pris: false, raison: getChips("raison")[0] || "" });
+    else Object.assign(d, { pris: true, heure: val("heure"), quoi: val("quoi").trim(), lieu: getChips("lieu")[0] || "", avec: getChips("avec")[0] || "", faim: getChips("faim")[0] || "", satiete: getChips("sat")[0] || "", ctrl: getChips("ctrl")[0] || "", emotions: getChips("emo"), comp: getChips("comp").filter(x => x !== "Aucun"), pensees: val("pens").trim() });
+    const id = uid();
+    if (img) { try { await PhotoDB.put("es_photos", id, img); d.photo = true; } catch (x) { d.photo = false; } }
+    S.entries.push(Object.assign({ id, t: new Date().toISOString(), type: "repas" }, d)); save();
+    const ctrlCrise = d.ctrl === "Oui";
+    await saved("repas", { then: "repas", crise: ctrlCrise });
+  };
+}
+
+/* ---------- Gérer une envie de crise (surfer sur la vague) ---------- */
+const ACTIVITES = ["Sortir marcher", "Prendre une douche", "Appeler ou écrire à quelqu'un", "Changer de pièce", "Occuper mes mains", "Écouter de la musique", "Me brosser les dents", "Faire l'exercice de respiration"];
+SCREENS.envie = {
+  html(p) {
+    const ph = p.phase || "start";
+    if (ph === "start") return `${back()}<div class="stack"><div class="screen-head"><h1>Une envie de crise arrive</h1>
+      <p>${T("Une envie, c'est comme une vague : elle monte, atteint un sommet, puis redescend, même sans manger. On va la regarder passer ensemble.", "Une envie, c'est comme une vague : elle monte, atteint un sommet, puis redescend, même sans manger. Regardons-la passer ensemble.")}</p></div>
+      ${field("Force de l'envie maintenant (0 à 10)", range("av", 0, 10, 7))}
+      ${field("Pendant la vague, je vais…", chips("act", ACTIVITES, true), "Choisir une ou plusieurs idées")}
+      ${field("Durée", chips("dur", ["10 min", "15 min", "20 min"], false, ["15 min"]))}
+      <p class="notice small">${T("Si tu as vraiment faim, prendre le repas ou la collation prévue fait partie du plan : ce n'est pas une crise.", "Si vous avez vraiment faim, prendre le repas ou la collation prévue fait partie du plan : ce n'est pas une crise.")}</p>
+      <button class="btn wide" id="go">Commencer</button></div>`;
+    if (ph === "run") return `<div class="breath-wrap"><h1 class="breath-label no-lis" id="lab">La vague monte</h1>
+      <canvas class="breath-canvas" id="cv" width="600" height="600" aria-hidden="true"></canvas>
+      <p class="breath-time no-lis" id="tm"></p>
+      ${p.act && p.act.length ? `<div class="card small" style="width:100%"><b>Mon plan :</b> ${p.act.map(esc).join(" · ")}</div>` : ""}
+      <button class="btn ghost" id="stop">L'envie est passée</button></div>`;
+    return `<div class="stack"><div class="screen-head"><h1>Et maintenant ?</h1></div>
+      ${field("Force de l'envie maintenant", range("ap", 0, 10, Math.max(0, (p.av || 7) - 3)))}
+      ${field("Comment ça s'est terminé ?", chips("issue", ["L'envie est passée", "L'envie a baissé", "J'ai fait une crise"], false))}
+      <div id="cmsg" class="notice" hidden>${T("Ce n'est pas un échec. Noter ce qui s'est passé aide à comprendre ce qui déclenche les crises.", "Ce n'est pas un échec. Noter ce qui s'est passé aide à comprendre ce qui déclenche les crises.")}</div>
+      ${field("Ce qui a déclenché l'envie (facultatif)", `<textarea id="decl" maxlength="300"></textarea>`, noPerso())}
+      <button class="btn wide" id="fin">Enregistrer</button></div>`;
+  },
+  mount(p) {
+    const ph = p.phase || "start";
+    if (ph === "start") document.getElementById("go").onclick = () => go("envie", { phase: "run", av: num("av"), act: getChips("act"), dur: parseInt(getChips("dur")[0] || "15", 10), t0: Date.now() });
+    if (ph === "run") runSurf(p);
+    if (ph === "fin") {
+      document.querySelectorAll('.chips[data-name="issue"] .chip').forEach(b => b.addEventListener("picked", () => { document.getElementById("cmsg").hidden = b.dataset.v !== "J'ai fait une crise"; }));
+      document.getElementById("fin").onclick = () => {
+        addEntry("envie", { avant: p.av, apres: num("ap"), issue: getChips("issue")[0] || "", activites: p.act || [], minutes: Math.round((Date.now() - p.t0) / 60000), declencheur: val("decl").trim() });
+        saved("envie");
+      };
+    }
+  }
+};
+function runSurf(p) {
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d"), lab = document.getElementById("lab"), tm = document.getElementById("tm");
+  const total = p.dur * 60000, t0 = performance.now(), col = { a: cssVar("--accent"), soft: cssVar("--accent-soft"), ink: cssVar("--ink"), sun: cssVar("--sun") };
+  let raf, stop = false; const release = wakeLock();
+  function frame(now) {
+    if (stop) return;
+    const el = now - t0, pr = Math.min(1, el / total), W = cv.width, H = cv.height, amp = Math.sin(Math.PI * Math.min(1, pr * 1.15));
+    ctx.fillStyle = col.soft; ctx.fillRect(0, 0, W, H);
+    const crestX = W * (0.15 + 0.7 * pr);
+    for (let layer = 0; layer < 2; layer++) {
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (let x = 0; x <= W; x += 5) {
+        const swell = Math.exp(-Math.pow((x - crestX) / 120, 2)) * amp * H * 0.42;
+        ctx.lineTo(x, H * 0.78 - swell + layer * 20 + Math.sin(x / 60 + now / (800 + layer * 300)) * 8);
+      }
+      ctx.lineTo(W, H); ctx.closePath(); ctx.globalAlpha = layer ? 1 : 0.45; ctx.fillStyle = col.a; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    const ph = pr < 0.35 ? "La vague monte" : pr < 0.6 ? "Elle est au plus haut" : pr < 1 ? "Elle redescend" : "La vague est passée";
+    if (lab.textContent !== ph) lab.textContent = ph;
+    const s = Math.ceil((total - Math.min(el, total)) / 1000); tm.textContent = s > 0 ? `Encore ${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s` : "";
+    if (pr >= 1) { done(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  function done() { stop = true; cancelAnimationFrame(raf); release(); go("envie", Object.assign({}, p, { phase: "fin" })); }
+  document.getElementById("stop").onclick = done;
+  raf = requestAnimationFrame(frame);
+  cleanup = () => { stop = true; cancelAnimationFrame(raf); release(); };
+}
+
+/* ---------- Crise d'angoisse ---------- */
+const RASSURE = () => [T("Tu es en sécurité. C'est très désagréable, mais ce n'est pas dangereux.", "Vous êtes en sécurité. C'est très désagréable, mais ce n'est pas dangereux."),
+  "Le cœur qui bat vite, c'est l'alarme du corps. Elle va se calmer.", T("Pose tes pieds bien à plat sur le sol. Sens le contact.", "Posez vos pieds bien à plat sur le sol. Sentez le contact."),
+  T("Souffle plus longtemps que tu n'inspires.", "Soufflez plus longtemps que vous n'inspirez."), "Une crise d'angoisse redescend d'elle-même, en général en quelques minutes.",
+  T("Tu n'as rien à faire de plus que respirer avec le cercle.", "Vous n'avez rien à faire de plus que respirer avec le cercle.")];
+SCREENS.angoisse = {
+  html(p) {
+    if (!p.fin) return `<div class="breath-wrap"><h1 class="breath-label no-lis" id="lab">Inspire</h1>
+      <canvas class="breath-canvas" id="cv" width="600" height="600" aria-hidden="true"></canvas>
+      <p class="rassure" id="ras" aria-live="polite">${RASSURE()[0]}</p>
+      <div class="row" style="justify-content:center"><button class="btn" id="mieux">Ça va mieux</button><button class="btn ghost" data-go="respi" data-p='{"phase":"run","ex":"ancrage","t0":${Date.now()}}'>Essayer 5-4-3-2-1</button></div>
+      <p class="hint" style="text-align:center">Douleur dans la poitrine inhabituelle, malaise qui ne passe pas : appeler le <b>15</b>.</p></div>`;
+    return `<div class="stack"><div class="screen-head"><h1>${T("Bravo, tu as traversé la crise", "Bravo, vous avez traversé la crise")}</h1></div>
+      ${field("Angoisse au plus fort (0 à 10)", range("pic", 0, 10, 8))}
+      ${field("Angoisse maintenant", range("ap", 0, 10, 3))}
+      ${field("Ce qui l'a déclenchée (facultatif)", `<textarea id="decl" maxlength="300"></textarea>`, noPerso())}
+      <button class="btn wide" id="fin">Enregistrer</button><button class="link" data-go="home">Ne pas enregistrer</button></div>`;
+  },
+  mount(p) {
+    if (p.fin) { document.getElementById("fin").onclick = () => { addEntry("angoisse", { pic: num("pic"), apres: num("ap"), minutes: Math.round((Date.now() - p.t0) / 60000), declencheur: val("decl").trim() }); saved("angoisse"); }; return; }
+    const t0 = Date.now(), cv = document.getElementById("cv"), ctx = cv.getContext("2d"), lab = document.getElementById("lab"), ras = document.getElementById("ras");
+    const col = { a: cssVar("--accent"), soft: cssVar("--accent-soft"), sun: cssVar("--sun") }, release = wakeLock();
+    const inL = S.prefs.tv === "vous" ? "Inspirez" : "Inspire", outL = S.prefs.tv === "vous" ? "Expirez" : "Expire";
+    let raf, stop = false, ri = 0, lastR = 0;
+    const R = RASSURE();
+    function frame(now) {
+      if (stop) return;
+      const el = Date.now() - t0, c = el % 10000, insp = c < 4000, f = insp ? 0.5 - 0.5 * Math.cos(Math.PI * c / 4000) : 0.5 + 0.5 * Math.cos(Math.PI * (c - 4000) / 6000);
+      const W = cv.width; ctx.clearRect(0, 0, W, W);
+      ctx.fillStyle = col.soft; ctx.beginPath(); ctx.arc(W / 2, W / 2, W * 0.46, 0, 7); ctx.fill();
+      ctx.fillStyle = col.a; ctx.globalAlpha = 0.9; ctx.beginPath(); ctx.arc(W / 2, W / 2, W * (0.16 + 0.26 * f), 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+      const L = insp ? inL : outL; if (lab.textContent !== L) lab.textContent = L;
+      if (el - lastR > 9000) { lastR = el; ri = (ri + 1) % R.length; ras.textContent = R[ri]; }
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+    cleanup = () => { stop = true; cancelAnimationFrame(raf); release(); };
+    document.getElementById("mieux").onclick = () => go("angoisse", { fin: true, t0 });
+  }
+};
+
+/* Premier lancement : réglage de la lecture */
+const SAMPLE = "Quand je me sens dépassé, je respire doucement et je découpe ma journée en petites étapes.";
+SCREENS.accueil = {
+  html(p) {
+    const step = p.step || 1, pr = S.prefs;
+    if (step === 1) return `<div class="stack">
+      <div class="screen-head"><h1>${T("Réglons la lecture pour toi", "Réglons la lecture pour vous")}</h1>
+      <p>${T("Choisis ce qui te correspond. Tu pourras changer plus tard dans les réglages.", "Choisissez ce qui vous correspond. Vous pourrez changer plus tard dans les réglages.")}</p></div>
+      <div class="stack" data-group-box>
+        <button class="choice" data-group="1" data-dys="0" aria-pressed="${!pr.dys}"><span class="t">${T("Je lis sans difficulté particulière", "Je lis sans difficulté particulière")}</span><span class="muted small">Affichage classique</span></button>
+        <button class="choice" data-group="1" data-dys="1" aria-pressed="${pr.dys}"><span class="t">${T("J'ai une dyslexie, ou lire me demande des efforts", "J'ai une dyslexie, ou lire me demande des efforts")}</span><span class="muted small">Police adaptée, texte espacé, syllabes en couleur et lettres muettes en rouge</span></button>
+      </div>
+      <div id="dysOpts" ${pr.dys ? "" : "hidden"} class="card">
+        <div class="toggle"><span>Syllabes en deux couleurs</span><input type="checkbox" class="switch" id="oSyl" ${pr.syl ? "checked" : ""}></div>
+        <div class="toggle"><span>Lettres muettes en rouge</span><input type="checkbox" class="switch" id="oMuet" ${pr.muet ? "checked" : ""}></div>
+      </div>
+      <div><span class="lbl">Aperçu</span><div class="preview" id="prev"><p>${SAMPLE}</p></div></div>
+      <button class="btn wide" data-go="accueil" data-p='{"step":2}'>Continuer</button>
+    </div>`;
+    return `<div class="stack">
+      <div class="screen-head"><h1>Taille du texte</h1><p>${T("Choisis la taille la plus confortable.", "Choisissez la taille la plus confortable.")}</p></div>
+      <div class="row">
+        <button class="btn soft" id="sMinus" aria-label="Plus petit">A −</button>
+        <button class="btn soft" id="sPlus" aria-label="Plus grand">A +</button>
+      </div>
+      <div class="preview"><p>${SAMPLE}</p></div>
+      <button class="btn wide" id="finish">C'est parti</button>
+      <button class="link" data-go="accueil" data-p='{"step":1}'>Revenir au choix de lecture</button>
+    </div>`;
+  },
+  mount(p) {
+    const pr = S.prefs;
+    if ((p.step || 1) === 1) {
+      const refresh = () => {
+        const box = document.getElementById("prev"); box.innerHTML = `<p>${SAMPLE}</p>`;
+        document.getElementById("dysOpts").hidden = !pr.dys; applyPrefs(); adapterTexte(box, pr);
+      };
+      document.querySelectorAll(".choice[data-dys]").forEach(b => b.addEventListener("picked", () => {
+        pr.dys = b.dataset.dys === "1"; pr.syl = pr.dys; pr.muet = pr.dys; save();
+        document.getElementById("oSyl").checked = pr.syl; document.getElementById("oMuet").checked = pr.muet;
+        render();
+      }));
+      document.getElementById("oSyl").onchange = e => { pr.syl = e.target.checked; save(); refresh(); };
+      document.getElementById("oMuet").onchange = e => { pr.muet = e.target.checked; save(); refresh(); };
+    } else {
+      const set = d => { pr.size = Math.min(1.5, Math.max(0.9, Math.round((pr.size + d) * 10) / 10)); save(); applyPrefs(); };
+      document.getElementById("sMinus").onclick = () => set(-0.1);
+      document.getElementById("sPlus").onclick = () => set(0.1);
+      document.getElementById("finish").onclick = () => { pr.done = true; save(); go("home"); };
+    }
+  }
+};
+
+const EMOS = ["Joie", "Calme", "Fierté", "Tristesse", "Colère", "Peur", "Stress", "Fatigue", "Ennui", "Honte", "Solitude"];
+
+/* Tableau des pensées (une étape par écran) */
+const PENSEE_STEPS = 6;
+SCREENS.pensees = {
+  html(p) {
+    const d = p.d || (p.d = {}); const s = p.s || 1;
+    const dots = `<div class="steps-dots" aria-label="Étape ${s} sur ${PENSEE_STEPS}">${Array.from({ length: PENSEE_STEPS }, (_, i) => `<span class="${i < s ? "on" : ""}"></span>`).join("")}</div>`;
+    const ex = (txt) => `<details class="ex"><summary>Voir un exemple</summary><p style="margin-top:8px">${txt}</p></details>`;
+    let body = "";
+    if (s === 1) body = `<h2>Que s'est-il passé ?</h2>
+      ${field("La situation", `<textarea id="f" maxlength="500">${esc(d.situation || "")}</textarea>`, T("Où, quand, ce qui se passait. Sans donner de noms.", "Où, quand, ce qui se passait. Sans donner de noms."))}
+      ${ex("Mardi, au self. Un groupe a rigolé quand je suis passé avec mon plateau.")}`;
+    if (s === 2) body = `<h2>Quelle pensée est arrivée ?</h2>
+      ${field(T("La phrase dans ta tête", "La phrase dans votre tête"), `<textarea id="f" maxlength="400">${esc(d.pensee || "")}</textarea>`)}
+      ${ex("« Ils se moquent de moi. Tout le monde me trouve bizarre. »")}
+      ${field(T("À quel point y crois-tu ?", "À quel point y croyez-vous ?"), range("g", 0, 100, d.croyance ?? 70, 5, " %"))}`;
+    if (s === 3) body = `<h2>Quelle émotion ?</h2>
+      ${field(T("Ce que tu as ressenti", "Ce que vous avez ressenti"), chips("emo", EMOS.concat(["Gêne", "Jalousie"]), true, d.emotions || []))}
+      ${field("Intensité", range("g", 0, 100, d.intensite ?? 60, 5, " %"))}`;
+    if (s === 4) body = `<h2>Enquêter sur la pensée</h2>
+      <p class="muted">${T("Comme un détective : quels indices ?", "Comme un détective : quels indices ?")}</p>
+      ${field("Ce qui va dans le sens de la pensée", `<textarea id="f" maxlength="400">${esc(d.pour || "")}</textarea>`)}
+      ${field("Ce qui ne va pas dans son sens", `<textarea id="f2" maxlength="400">${esc(d.contre || "")}</textarea>`)}
+      ${ex("Pour : ils ont ri au moment où je passais. Contre : je n'ai pas entendu ce qu'ils disaient, ils riaient déjà avant.")}`;
+    if (s === 5) body = `<h2>Une autre façon de voir</h2>
+      ${field(T("Que dirais-tu à un ami dans la même situation ?", "Que diriez-vous à un ami dans la même situation ?"), `<textarea id="f" maxlength="400">${esc(d.alternative || "")}</textarea>`)}
+      ${ex("« Ils riaient peut-être d'autre chose. Même si c'était de moi, ça ne dit pas qui je suis. »")}
+      ${field(T("À quel point y crois-tu ?", "À quel point y croyez-vous ?"), range("g", 0, 100, d.croyanceAlt ?? 50, 5, " %"))}`;
+    if (s === 6) body = `<h2>Et maintenant ?</h2>
+      ${field(T("L'intensité de l'émotion du départ, maintenant", "L'intensité de l'émotion du départ, maintenant"), range("g", 0, 100, d.intensiteApres ?? d.intensite ?? 50, 5, " %"))}
+      ${field(T("Croyance dans la première pensée, maintenant", "Croyance dans la première pensée, maintenant"), range("g2", 0, 100, d.croyanceApres ?? d.croyance ?? 50, 5, " %"))}`;
+    return `${back()}<div class="stack"><div class="screen-head"><h1>Tableau des pensées</h1>${dots}<p class="small">Étape ${s} sur ${PENSEE_STEPS}</p></div>
+      ${body}
+      <div class="wiz-nav">${s > 1 ? `<button class="btn ghost" id="prevS">Précédent</button>` : `<span></span>`}
+      <button class="btn" id="nextS">${s === PENSEE_STEPS ? "Enregistrer" : "Suivant"}</button></div></div>`;
+  },
+  mount(p) {
+    const d = p.d, s = p.s || 1;
+    const collect = () => {
+      if (s === 1) d.situation = val("f").trim();
+      if (s === 2) { d.pensee = val("f").trim(); d.croyance = num("g"); }
+      if (s === 3) { d.emotions = getChips("emo"); d.intensite = num("g"); }
+      if (s === 4) { d.pour = val("f").trim(); d.contre = val("f2").trim(); }
+      if (s === 5) { d.alternative = val("f").trim(); d.croyanceAlt = num("g"); }
+      if (s === 6) { d.intensiteApres = num("g"); d.croyanceApres = num("g2"); }
+    };
+    const pv = document.getElementById("prevS");
+    if (pv) pv.onclick = () => { collect(); go("pensees", { d, s: s - 1 }); };
+    document.getElementById("nextS").onclick = () => {
+      collect();
+      if (s < PENSEE_STEPS) go("pensees", { d, s: s + 1 });
+      else { addEntry("pensees", d); saved("pensees"); }
+    };
+  }
+};
+
+/* Échelle de malaise (SUD) */
+const SUD_DESC = ["Aucun malaise, calme complet", "Très léger", "Léger", "Gênant mais gérable", "Assez gênant", "Moyen, ça se sent bien", "Fort", "Très fort", "Difficile à supporter", "Presque insupportable", "Le maximum imaginable"];
+SCREENS.sud = {
+  html: () => `${back()}<div class="stack">
+    <div class="screen-head"><h1>Échelle de malaise</h1><p>${T("De 0 (aucun malaise) à 10 (le plus fort que tu puisses imaginer).", "De 0 (aucun malaise) à 10 (le plus fort que vous puissiez imaginer).")}</p></div>
+    <div class="card stack"><div class="sud-big" id="sv">5</div><div class="sud-desc" id="sd">${SUD_DESC[5]}</div>
+      <div class="sud-bar" aria-hidden="true"></div>
+      <input type="range" id="sud" min="0" max="10" value="5" aria-label="Niveau de malaise"></div>
+    ${field("Ce qui se passe (facultatif)", `<textarea id="note" maxlength="300"></textarea>`, noPerso())}
+    <button class="btn wide" id="ok">Enregistrer</button></div>`,
+  mount() {
+    const r = document.getElementById("sud");
+    r.oninput = () => { document.getElementById("sv").textContent = r.value; document.getElementById("sd").textContent = SUD_DESC[r.value]; };
+    document.getElementById("ok").onclick = () => { addEntry("sud", { sud: Number(r.value), note: val("note").trim() }); saved("sud"); };
+  }
+};
+
+/* Échelle d'exposition (marches définies par la praticienne) */
+const zoneColor = s => s <= 2 ? "var(--z1)" : s <= 4 ? "var(--z2)" : s <= 6 ? "var(--z3)" : s <= 8 ? "var(--z4)" : "var(--z5)";
+SCREENS.expo = {
+  html(p) {
+    const H = (S.cfg.h || []).map((h, i) => ({ i, label: h[0], sud: h[1] }));
+    if (p.step == null) {
+      const sorted = H.slice().sort((a, b) => b.sud - a.sud);
+      const count = i => S.entries.filter(e => e.type === "expo" && e.marche === i).length;
+      return `${back()}<div class="stack"><div class="screen-head"><h1>Mon échelle d'exposition</h1>
+        <p>${T("Les marches ont été préparées avec ta psychologue. Commence par le bas, et monte à ton rythme.", "Les marches ont été préparées avec votre psychologue. Commencez par le bas, et montez à votre rythme.")}</p></div>
+        <div class="ladder">${sorted.map(h => `<button class="rung" data-go="expo" data-p='{"step":${h.i}}'><span class="lvl" style="background:${zoneColor(h.sud)}">${h.sud}</span><span>${esc(h.label)}</span><span class="cnt">${count(h.i) ? count(h.i) + " fois" : ""}</span></button>`).join("")}</div>
+        <p class="hint">Le chiffre indique le malaise prévu, de 0 à 10.</p></div>`;
+    }
+    const h = H[p.step];
+    return `${back("expo", "Mon échelle")}<div class="stack"><div class="screen-head"><h1>${esc(h.label)}</h1><p>${T("Note ton malaise avant, au plus fort, et à la fin.", "Notez votre malaise avant, au plus fort, et à la fin.")}</p></div>
+      ${field("Malaise juste avant (0 à 10)", range("a", 0, 10, h.sud))}
+      ${field("Malaise au plus fort", range("b", 0, 10, h.sud))}
+      ${field("Malaise à la fin", range("c", 0, 10, Math.max(0, h.sud - 2)))}
+      ${field("Combien de temps ?", chips("duree", ["Moins de 5 min", "5 à 15 min", "15 à 30 min", "Plus de 30 min"], false))}
+      ${field(T("Es-tu resté(e) jusqu'à ce que ça redescende ?", "Êtes-vous resté(e) jusqu'à ce que ça redescende ?"), chips("reste", ["Oui", "En partie", "Non, je suis parti(e) avant"], false))}
+      ${field("Ce qui a aidé, ce qui était dur (facultatif)", `<textarea id="note" maxlength="300"></textarea>`, noPerso())}
+      <button class="btn wide" id="ok">Enregistrer</button></div>`;
+  },
+  mount(p) {
+    if (p.step == null) return;
+    document.getElementById("ok").onclick = () => {
+      const h = S.cfg.h[p.step];
+      addEntry("expo", { marche: p.step, label: h[0], prevu: h[1], avant: num("a"), pic: num("b"), fin: num("c"), duree: getChips("duree")[0] || "", reste: getChips("reste")[0] || "", note: val("note").trim() });
+      saved("expo");
+    };
+  }
+};
+
+/* Journal du sommeil */
+SCREENS.sommeil = {
+  html: () => `${back()}<div class="stack"><div class="screen-head"><h1>Journal du sommeil</h1><p>${T("Le mieux : le remplir le matin, au réveil.", "Le mieux : le remplir le matin, au réveil.")}</p></div>
+    ${field("Quelle nuit ?", chips("nuit", ["La nuit dernière", "La nuit d'avant"], false, ["La nuit dernière"]))}
+    <div class="two">${field("Couché(e) à", `<input type="time" id="c" value="23:00">`)}${field("Levé(e) à", `<input type="time" id="l" value="07:00">`)}</div>
+    ${field("Temps pour s'endormir", chips("endo", ["Moins de 15 min", "15 à 30 min", "30 min à 1 h", "Plus d'1 h"], false))}
+    ${field("Réveils pendant la nuit", chips("rev", ["0", "1", "2", "3 ou plus"], false))}
+    ${field("Qualité de la nuit", `<div class="chips faces" data-name="q" data-multi="0">${["Très mauvaise", "Mauvaise", "Moyenne", "Bonne", "Très bonne"].map((l, i) => `<button type="button" class="chip" data-v="${i + 1}" aria-pressed="false"><b class="no-lis">${i + 1}</b><span>${l}</span></button>`).join("")}</div>`)}
+    ${field("Écran dans l'heure avant de dormir ?", chips("ecran", ["Oui", "Non"], false))}
+    ${field("Sieste dans la journée ?", chips("sieste", ["Oui", "Non"], false))}
+    <button class="btn wide" id="ok">Enregistrer</button></div>`,
+  mount() {
+    document.getElementById("ok").onclick = () => {
+      const d = new Date(); d.setDate(d.getDate() - (getChips("nuit")[0] === "La nuit d'avant" ? 2 : 1));
+      addEntry("sommeil", { nuit: d.toISOString().slice(0, 10), coucher: val("c"), lever: val("l"), endormissement: getChips("endo")[0] || "", reveils: getChips("rev")[0] || "", qualite: Number(getChips("q")[0] || 0), ecran: getChips("ecran")[0] || "", sieste: getChips("sieste")[0] || "" });
+      saved("sommeil");
+    };
+  }
+};
+
+/* Respiration et ancrage */
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function wakeLock() { let lock = null; try { navigator.wakeLock && navigator.wakeLock.request("screen").then(l => lock = l).catch(() => {}); } catch (e) {} return () => { try { lock && lock.release(); } catch (e) {} }; }
+const RESPI = {
+  vague: { t: "La vague", d: () => T("Inspire quand la vague monte, expire quand elle redescend. 5 secondes chacune.", "Inspirez quand la vague monte, expirez quand elle redescend. 5 secondes chacune.") },
+  balle: { t: "La balle", d: () => T("Suis la balle autour du carré : inspire, bloque, expire, bloque. 4 secondes par côté.", "Suivez la balle autour du carré : inspirez, bloquez, expirez, bloquez. 4 secondes par côté.") },
+  ancrage: { t: "5-4-3-2-1", d: () => T("Revenir dans l'instant grâce à tes cinq sens.", "Revenir dans l'instant grâce à vos cinq sens.") }
+};
+SCREENS.respi = {
+  html(p) {
+    const ph = p.phase || "menu";
+    if (ph === "menu") return `${back()}<div class="stack"><div class="screen-head"><h1>Respirer et se poser</h1><p>${T("Choisis un exercice.", "Choisissez un exercice.")}</p></div>
+      ${Object.entries(RESPI).map(([k, r]) => `<button class="tile" data-go="respi" data-p='{"phase":"avant","ex":"${k}"}'><span class="tile-ico">${k === "ancrage" ? I.fiches : I.respi}</span><span><span class="tile-t">${r.t}</span><span class="tile-d">${r.d()}</span></span></button>`).join("")}</div>`;
+    const r = RESPI[p.ex];
+    if (ph === "avant") return `${back("respi", "Exercices")}<div class="stack"><div class="screen-head"><h1>${r.t}</h1><p>${r.d()}</p></div>
+      ${field(T("Ton niveau de stress maintenant (0 à 10)", "Votre niveau de stress maintenant (0 à 10)"), range("st", 0, 10, 5))}
+      ${p.ex !== "ancrage" ? field("Durée", chips("dur", ["1 min", "3 min", "5 min"], false, ["3 min"])) : ""}
+      <button class="btn wide" id="go">Commencer</button>
+      <button class="link" id="skip">Commencer sans noter</button></div>`;
+    if (ph === "run" && p.ex !== "ancrage") return `<div class="breath-wrap">
+      <h1 class="breath-label no-lis" id="lab" aria-live="polite">Prêt ?</h1>
+      <canvas class="breath-canvas" id="cv" width="600" height="600" aria-hidden="true"></canvas>
+      <p class="breath-time no-lis" id="tm"></p>
+      <button class="btn ghost" id="stop">Terminer</button></div>`;
+    if (ph === "run") {
+      const SENS = [[5, T("choses que tu vois", "choses que vous voyez"), "Regarde autour de toi : une couleur, un objet, une forme…"], [4, T("choses que tu peux toucher", "choses que vous pouvez toucher"), "Le tissu de tes vêtements, la table, tes mains…"], [3, T("sons que tu entends", "sons que vous entendez"), "Proches ou lointains."], [2, T("odeurs que tu sens", "odeurs que vous sentez"), "Ou deux odeurs que tu aimes, en y pensant."], [1, T("goût dans ta bouche", "goût dans votre bouche"), "Ou une phrase gentille à te dire."]];
+      const i = p.i || 0, [n, quoi, aide] = SENS[i];
+      return `<div class="stack" style="text-align:center"><p class="small muted">Sens ${i + 1} sur 5</p>
+        <div class="big-num no-lis">${n}</div><h1>${quoi}</h1><p class="muted">${T(aide, aide.replace("Regarde autour de toi", "Regardez autour de vous").replace("tes vêtements", "vos vêtements").replace("tes mains", "vos mains").replace("que tu aimes", "que vous aimez").replace("à te dire", "à vous dire"))}</p>
+        <p class="small">${T("Touche un rond à chaque fois que tu en trouves un.", "Touchez un rond à chaque fois que vous en trouvez un.")}</p>
+        <div class="dots-count">${Array.from({ length: n }, () => `<button class="dot-tap" aria-pressed="false" aria-label="Trouvé"></button>`).join("")}</div>
+        <button class="btn wide" id="nx">${i < 4 ? "Suivant" : "Terminer"}</button></div>`;
+    }
+    return `<div class="stack"><div class="screen-head"><h1>Bravo</h1><p>${T("Prends un instant pour sentir comment tu te sens.", "Prenez un instant pour sentir comment vous vous sentez.")}</p></div>
+      ${p.avant != null ? field(T("Ton niveau de stress maintenant", "Votre niveau de stress maintenant"), range("st2", 0, 10, Math.max(0, p.avant - 2))) : ""}
+      <button class="btn wide" id="fin">Enregistrer</button></div>`;
+  },
+  mount(p) {
+    const ph = p.phase || "menu";
+    if (ph === "avant") {
+      const start = withScore => go("respi", { phase: "run", ex: p.ex, avant: withScore ? num("st") : null, dur: parseInt(getChips("dur")[0] || "3", 10) || 3, t0: Date.now() });
+      document.getElementById("go").onclick = () => start(true);
+      document.getElementById("skip").onclick = () => start(false);
+    }
+    if (ph === "run" && p.ex === "ancrage") {
+      document.getElementById("nx").onclick = () => { const i = (p.i || 0) + 1; if (i < 5) go("respi", Object.assign({}, p, { i })); else go("respi", Object.assign({}, p, { phase: "apres" })); };
+    }
+    if (ph === "run" && p.ex !== "ancrage") runBreath(p);
+    if (ph === "apres") document.getElementById("fin").onclick = () => {
+      addEntry("respi", { exercice: RESPI[p.ex].t, avant: p.avant, apres: p.avant != null ? num("st2") : null, duree: Math.round((Date.now() - (p.t0 || Date.now())) / 1000) });
+      saved("respi");
+    };
+  }
+};
+function runBreath(p) {
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d"), lab = document.getElementById("lab"), tm = document.getElementById("tm");
+  const total = p.dur * 60 * 1000, t0 = performance.now();
+  const col = { a: cssVar("--accent"), soft: cssVar("--accent-soft"), sun: cssVar("--sun"), line: cssVar("--line"), ink: cssVar("--ink") };
+  let raf, stopped = false; const release = wakeLock();
+  const ease = x => 0.5 - 0.5 * Math.cos(Math.PI * x);
+  function frame(now) {
+    if (stopped) return;
+    const el = now - t0, left = Math.max(0, total - el);
+    const W = cv.width, H = cv.height; ctx.clearRect(0, 0, W, H);
+    let label;
+    if (p.ex === "vague") {
+      const cyc = (el % 10000) / 5000, insp = cyc < 1, f = insp ? ease(cyc) : 1 - ease(cyc - 1);
+      label = insp ? "Inspire" : "Expire"; if (S.prefs.tv === "vous") label = insp ? "Inspirez" : "Expirez";
+      const secs = Math.ceil(5 - (cyc % 1) * 5);
+      const level = H * (0.82 - 0.6 * f);
+      ctx.fillStyle = col.soft; ctx.fillRect(0, 0, W, H);
+      for (let layer = 0; layer < 2; layer++) {
+        ctx.beginPath(); ctx.moveTo(0, H);
+        for (let x = 0; x <= W; x += 6) ctx.lineTo(x, level + layer * 18 + Math.sin(x / 70 + now / (900 + layer * 300) + layer) * (14 - layer * 4));
+        ctx.lineTo(W, H); ctx.closePath(); ctx.globalAlpha = layer ? 1 : 0.45; ctx.fillStyle = col.a; ctx.fill();
+      }
+      ctx.globalAlpha = 1; ctx.fillStyle = col.ink; ctx.font = "600 64px Lexend, sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(String(secs), W / 2, 110);
+    } else {
+      const side = Math.floor((el % 16000) / 4000), f = (el % 4000) / 4000, m = 120, L = W - 2 * m;
+      const names = S.prefs.tv === "vous" ? ["Inspirez", "Bloquez", "Expirez", "Bloquez"] : ["Inspire", "Bloque", "Expire", "Bloque"];
+      label = names[side];
+      ctx.lineWidth = 10; ctx.lineCap = "round";
+      const pts = [[m, m + L], [m, m], [m + L, m], [m + L, m + L]];
+      for (let s = 0; s < 4; s++) { const a = pts[s], b = pts[(s + 1) % 4]; ctx.strokeStyle = s === side ? col.sun : col.line; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); }
+      const a = pts[side], b = pts[(side + 1) % 4], x = a[0] + (b[0] - a[0]) * f, y = a[1] + (b[1] - a[1]) * f;
+      const r = side === 0 ? 26 + 16 * f : side === 2 ? 42 - 16 * f : side === 1 ? 42 : 26;
+      ctx.fillStyle = col.a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = col.ink; ctx.font = "600 72px Lexend, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(Math.ceil(4 - f * 4)), W / 2, H / 2);
+    }
+    if (lab.textContent !== label) lab.textContent = label;
+    const s = Math.ceil(left / 1000); tm.textContent = `Encore ${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s`;
+    if (left <= 0) { finish(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  function finish() { stopped = true; cancelAnimationFrame(raf); release(); go("respi", Object.assign({}, p, { phase: "apres" })); }
+  document.getElementById("stop").onclick = finish;
+  raf = requestAnimationFrame(frame);
+  cleanup = () => { stopped = true; cancelAnimationFrame(raf); release(); };
+}
+
+/* Découper une tâche + minuteur visuel */
+SCREENS.taches = {
+  html() {
+    const t = S.task;
+    if (!t || !t.started) {
+      const steps = (t && t.steps) || [];
+      return `${back()}<div class="stack"><div class="screen-head"><h1>Découper une tâche</h1><p>${T("Une grosse tâche fait peur. Coupe-la en petits morceaux faciles.", "Une grosse tâche fait peur. Coupez-la en petits morceaux faciles.")}</p></div>
+        ${field("La tâche", `<input type="text" id="titre" maxlength="80" value="${esc(t ? t.titre : "")}" placeholder="Ex. : réviser le contrôle d'histoire">`)}
+        <div><span class="lbl">Les petites étapes</span>
+          <div class="task-steps" id="list">${steps.map((s, i) => `<div class="task-step"><span>${esc(s.t)}</span><button class="link" data-del="${i}">Retirer</button></div>`).join("") || `<p class="hint">${T("Aucune étape pour l'instant.", "Aucune étape pour l'instant.")}</p>`}</div></div>
+        <div class="row" style="flex-wrap:nowrap"><input type="text" id="step" maxlength="80" placeholder="Ex. : relire la fiche du chapitre 1"><button class="btn soft" id="add">Ajouter</button></div>
+        <p class="hint">${T("Astuce : une étape = moins de 15 minutes.", "Astuce : une étape = moins de 15 minutes.")}</p>
+        <button class="btn wide" id="start" ${steps.length ? "" : "disabled"}>Commencer</button></div>`;
+    }
+    const i = t.steps.findIndex(s => !s.done);
+    if (i === -1) return `<div class="stack"><div class="done-hero">${I.check}<h1>Tout est fait !</h1></div>
+      ${field("C'était comment ?", chips("ressenti", ["Facile", "Moyen", "Difficile"], false))}
+      <button class="btn wide" id="save">Enregistrer</button></div>`;
+    return `${back()}<div class="stack"><div class="screen-head"><h1>${esc(t.titre || "Ma tâche")}</h1><p class="small">Étape ${i + 1} sur ${t.steps.length}</p></div>
+      <div class="current-step"><span class="small muted">Maintenant, seulement ça :</span><span class="what">${esc(t.steps[i].t)}</span>
+        <button class="btn" id="done">C'est fait</button></div>
+      <div class="card stack"><span class="lbl">Minuteur visuel</span>
+        <canvas class="timer-canvas" id="tc" width="440" height="440" aria-hidden="true"></canvas>
+        <p class="breath-time no-lis" id="tt" style="text-align:center" aria-live="polite"></p>
+        ${chips("tdur", ["5 min", "10 min", "15 min", "25 min"], false, ["10 min"])}
+        <div class="row"><button class="btn soft" id="tgo">Lancer</button><button class="btn ghost" id="treset">Remettre à zéro</button></div></div>
+      <button class="link" id="stopTask">Arrêter la tâche ici</button></div>`;
+  },
+  mount() {
+    const t = S.task;
+    if (!t || !t.started) {
+      const keep = () => { S.task = S.task || { titre: "", steps: [], started: false }; S.task.titre = val("titre").trim(); };
+      const add = () => { const v = val("step").trim(); if (!v) return; keep(); S.task.steps.push({ t: v, done: false }); save(); render(); const f = document.getElementById("step"); f && f.focus(); };
+      document.getElementById("add").onclick = add;
+      document.getElementById("step").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); add(); } };
+      document.getElementById("titre").onchange = () => { keep(); save(); };
+      document.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { keep(); S.task.steps.splice(Number(b.dataset.del), 1); save(); render(); });
+      document.getElementById("start").onclick = () => { keep(); S.task.started = true; S.task.t0 = Date.now(); save(); render(); };
+      return;
+    }
+    const i = t.steps.findIndex(s => !s.done);
+    if (i === -1) {
+      document.getElementById("save").onclick = () => {
+        addEntry("taches", { titre: t.titre, etapes: t.steps.length, faites: t.steps.length, ressenti: getChips("ressenti")[0] || "", minutes: Math.round((Date.now() - (t.t0 || Date.now())) / 60000) });
+        S.task = null; save(); saved("taches");
+      };
+      return;
+    }
+    document.getElementById("done").onclick = () => { t.steps[i].done = true; save(); render(); };
+    document.getElementById("stopTask").onclick = () => {
+      const faites = t.steps.filter(s => s.done).length;
+      addEntry("taches", { titre: t.titre, etapes: t.steps.length, faites, ressenti: "Arrêtée avant la fin", minutes: Math.round((Date.now() - (t.t0 || Date.now())) / 60000) });
+      S.task = null; save(); saved("taches");
+    };
+    timerWidget();
+  }
+};
+let timerState = { end: 0, total: 600000, running: false, paused: 600000 };
+function timerWidget() {
+  const cv = document.getElementById("tc"), ctx = cv.getContext("2d"), out = document.getElementById("tt"), btn = document.getElementById("tgo");
+  const col = { sun: cssVar("--sun"), line: cssVar("--line"), ink: cssVar("--ink"), surf: cssVar("--surface") };
+  let raf, alive = true;
+  const remaining = () => timerState.running ? Math.max(0, timerState.end - Date.now()) : timerState.paused;
+  function draw() {
+    if (!alive) return;
+    const r = remaining(), W = cv.width, c = W / 2, R = W / 2 - 16;
+    ctx.clearRect(0, 0, W, W);
+    ctx.fillStyle = col.surf; ctx.strokeStyle = col.line; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; ctx.beginPath(); ctx.moveTo(c + Math.sin(a) * (R - 4), c - Math.cos(a) * (R - 4)); ctx.lineTo(c + Math.sin(a) * (R - 22), c - Math.cos(a) * (R - 22)); ctx.strokeStyle = col.line; ctx.lineWidth = 4; ctx.stroke(); }
+    const frac = r / timerState.total;
+    if (frac > 0) { ctx.fillStyle = col.sun; ctx.beginPath(); ctx.moveTo(c, c); ctx.arc(c, c, R - 26, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle = col.ink; ctx.beginPath(); ctx.arc(c, c, 12, 0, Math.PI * 2); ctx.fill();
+    const s = Math.ceil(r / 1000); out.textContent = r > 0 ? `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s` : "Temps écoulé : petite pause méritée.";
+    if (timerState.running && r <= 0) { timerState.running = false; timerState.paused = 0; btn.textContent = "Lancer"; bip(); }
+    raf = requestAnimationFrame(draw);
+  }
+  const setDur = () => { const m = parseInt(getChips("tdur")[0] || "10", 10); timerState = { total: m * 60000, paused: m * 60000, running: false, end: 0 }; btn.textContent = "Lancer"; };
+  document.querySelectorAll('.chips[data-name="tdur"] .chip').forEach(b => b.addEventListener("picked", setDur));
+  btn.textContent = timerState.running ? "Pause" : "Lancer";
+  btn.onclick = () => {
+    if (timerState.running) { timerState.paused = remaining(); timerState.running = false; btn.textContent = "Reprendre"; }
+    else { if (timerState.paused <= 0) timerState.paused = timerState.total; timerState.end = Date.now() + timerState.paused; timerState.running = true; btn.textContent = "Pause"; }
+  };
+  document.getElementById("treset").onclick = setDur;
+  draw();
+  cleanup = () => { alive = false; cancelAnimationFrame(raf); };
+}
+function bip() {
+  try { const A = new (window.AudioContext || window.webkitAudioContext)(); [0, 0.35].forEach(d => { const o = A.createOscillator(), g = A.createGain(); o.frequency.value = 660; g.gain.setValueAtTime(0.0001, A.currentTime + d); g.gain.exponentialRampToValueAtTime(0.2, A.currentTime + d + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + d + 0.3); o.connect(g); g.connect(A.destination); o.start(A.currentTime + d); o.stop(A.currentTime + d + 0.32); }); } catch (e) {}
+}
+
+/* Ma jauge (énergie / surcharge sensorielle) */
+const JAUGE = [[1, "Je suis bien, j'ai de l'énergie"], [2, "Un peu chargé(e), ça va"], [3, "Ça commence à faire beaucoup"], [4, "Presque trop, j'ai besoin de me protéger"], [5, "C'est trop, j'ai besoin d'une pause tout de suite"]];
+SCREENS.jauge = {
+  html: () => `${back()}<div class="stack"><div class="screen-head"><h1>Ma jauge</h1><p>${T("Où en est ta jauge en ce moment ?", "Où en est votre jauge en ce moment ?")}</p></div>
+    <div class="gauge" data-group-box>${JAUGE.map(([n, l]) => `<button class="gauge-lvl" data-n="${n}" aria-pressed="false"><span class="sw" style="background:var(--z${n})"></span><span><b class="no-lis">${n}</b> · ${l}</span></button>`).join("")}</div>
+    ${field("Ce qui remplit la jauge", chips("src", ["Bruit", "Lumière", "Beaucoup de monde", "Toucher, vêtements", "Odeurs", "Changement imprévu", "Fatigue", "Faim", "Trop de demandes", "Écrans"], true), "Plusieurs choix possibles")}
+    ${field("Ce qui m'aide", chips("aide", ["Casque ou bouchons", "Pause au calme", "Bouger", "Musique", "Objet à manipuler", "Respirer", "Prévenir quelqu'un", "Manger, boire"], true))}
+    ${field("Note (facultatif)", `<textarea id="note" maxlength="300"></textarea>`, noPerso())}
+    <button class="btn wide" id="ok">Enregistrer</button></div>`,
+  mount() {
+    document.getElementById("ok").onclick = () => {
+      const b = document.querySelector('.gauge-lvl[aria-pressed="true"]');
+      if (!b) { b || document.querySelector(".gauge-lvl").focus(); return; }
+      const n = Number(b.dataset.n);
+      addEntry("jauge", { niveau: n, sources: getChips("src"), aides: getChips("aide"), note: val("note").trim() });
+      saved("jauge", { high: n >= 4 });
+    };
+  }
+};
+
+/* Fiches pratiques */
+function fiches() {
+  return [
+    { id: "attention", t: "Quand mon attention s'éparpille", s: "Astuces pour s'organiser (TDAH)", li: [
+      T("Découpe chaque tâche en petites étapes de moins de 15 minutes.", "Découpez chaque tâche en petites étapes de moins de 15 minutes."),
+      T("Garde une seule chose visible à la fois : range le reste hors de ta vue.", "Gardez une seule chose visible à la fois : rangez le reste hors de vue."),
+      T("Utilise un minuteur court, puis fais une vraie pause où tu bouges.", "Utilisez un minuteur court, puis faites une vraie pause où vous bougez."),
+      T("Note une idée ou une chose à faire tout de suite, sinon elle s'envole.", "Notez une idée ou une chose à faire tout de suite, sinon elle s'envole."),
+      T("Prépare tes affaires la veille, toujours au même endroit.", "Préparez vos affaires la veille, toujours au même endroit."),
+      T("Prévois une petite récompense après l'effort.", "Prévoyez une petite récompense après l'effort.")] },
+    { id: "sens", t: "Quand c'est trop pour mes sens", s: "Gérer la surcharge sensorielle (TSA)", li: [
+      T("Repère les premiers signes : tension, irritation, envie de fuir. Ta jauge t'aide à les voir tôt.", "Repérez les premiers signes : tension, irritation, envie de fuir. La jauge aide à les voir tôt."),
+      T("Garde avec toi ce qui te protège : casque, bouchons, lunettes, capuche.", "Gardez avec vous ce qui vous protège : casque, bouchons, lunettes, capuche."),
+      T("Prépare une phrase toute prête : « J'ai besoin de 5 minutes au calme. »", "Préparez une phrase toute prête : « J'ai besoin de 5 minutes au calme. »"),
+      T("Repère à l'avance un endroit calme où te retirer.", "Repérez à l'avance un endroit calme où vous retirer."),
+      T("Après une journée chargée, prévois un temps de récupération sans demandes.", "Après une journée chargée, prévoyez un temps de récupération sans demandes.")] },
+    { id: "imprevu", t: "Préparer un changement", s: "Rendre un imprévu moins difficile", li: [
+      T("Demande les informations à l'avance : où, quand, avec qui, combien de temps.", "Demandez les informations à l'avance : où, quand, avec qui, combien de temps."),
+      T("Regarde des photos ou le plan du lieu avant d'y aller.", "Regardez des photos ou le plan du lieu avant d'y aller."),
+      T("Prépare un plan B : « Si ça ne se passe pas comme prévu, alors je… »", "Préparez un plan B : « Si ça ne se passe pas comme prévu, alors je… »"),
+      T("Garde un repère rassurant avec toi : un objet, une musique, une routine.", "Gardez un repère rassurant avec vous : un objet, une musique, une routine.")] },
+    { id: "emotions", t: "Mon thermomètre des émotions", s: "Reconnaître une émotion qui monte", li: [
+      T("Donne un nom à l'émotion : colère, peur, tristesse, honte…", "Donnez un nom à l'émotion : colère, peur, tristesse, honte…"),
+      T("Note sa force de 0 à 10.", "Notez sa force de 0 à 10."),
+      T("Repère où elle se trouve dans ton corps : ventre, gorge, mâchoire, poings.", "Repérez où elle se trouve dans votre corps : ventre, gorge, mâchoire, poings."),
+      T("Avant 5 : tu peux réfléchir et parler. Au-dessus de 7 : d'abord te calmer (respirer, bouger, t'isoler), ensuite parler.", "Avant 5 : vous pouvez réfléchir et parler. Au-dessus de 7 : d'abord vous calmer (respirer, bouger, vous isoler), ensuite parler.")] }
+  ];
+}
+SCREENS.fiches = {
+  html(p) {
+    const F = fiches();
+    if (!p.id) return `${back()}<div class="stack"><div class="screen-head"><h1>Fiches pratiques</h1></div>
+      ${F.map(f => `<button class="tile" data-go="fiches" data-p='{"id":"${f.id}"}'><span class="tile-ico">${I.fiches}</span><span><span class="tile-t">${f.t}</span><span class="tile-d">${f.s}</span></span></button>`).join("")}</div>`;
+    const f = F.find(x => x.id === p.id);
+    return `${back("fiches", "Fiches")}<article class="stack fiche"><div class="screen-head"><h1>${f.t}</h1><p>${f.s}</p></div>
+      <div class="card"><ul>${f.li.map(l => `<li>${l}</li>`).join("")}</ul></div></article>`;
+  }
+};
+
+/* Envoi à la psychologue : direct si le relais est configuré, sinon message à copier */
+function summarize(list) {
+  const c = {}; list.forEach(e => c[e.type] = (c[e.type] || 0) + 1);
+  return Object.entries(c).map(([k, n]) => `${n} ${TYPE_LABEL[k] || k}`);
+}
+SCREENS.envoi = {
+  html(p) {
+    const email = S.cfg.e || PSY_EMAIL_DEFAULT;
+    if (p.ok) return `<div class="done-hero">${I.check}<h1>C'est envoyé</h1><p class="muted">${T("Ta psychologue recevra tes réponses.", "Votre psychologue recevra vos réponses.")}</p></div><div class="stack" style="margin-top:24px"><button class="btn wide" data-go="home">Retour à l'accueil</button></div>`;
+    if (p.msg) return `${back()}<div class="stack"><div class="screen-head"><h1>${T("Ton message est prêt", "Votre message est prêt")}</h1>
+      <p>Il est chiffré : seule la psychologue peut le lire.${p.nophoto ? " Les photos ne passent que par l'envoi direct." : ""}</p></div>
+      <textarea class="mono no-lis msg-box" id="msg" readonly>${p.msg}</textarea>
+      <ol class="how">
+        <li><button class="btn wide" id="cp">Copier le message</button></li>
+        <li>${T("Ouvre ta messagerie et écris à :", "Ouvrez votre messagerie et écrivez à :")}<br><b class="no-lis" style="user-select:all">${esc(email)}</b> <button class="link" id="cpm">copier l'adresse</button></li>
+        <li>${T("Colle le message et envoie-le.", "Collez le message et envoyez-le.")}</li>
+        <li>${T("Reviens ici et appuie sur le bouton ci-dessous.", "Revenez ici et appuyez sur le bouton ci-dessous.")}</li>
+      </ol>
+      ${navigator.share ? `<button class="btn ghost wide" id="share">Partager directement (mail, SMS…)</button>` : ""}
+      <button class="btn wide" id="sent">C'est envoyé</button></div>`;
+    const list = p.all ? S.entries.filter(e => Date.now() - new Date(e.t) < 30 * 864e5) : unsent();
+    const direct = canDirect() && !p.manual;
+    return `${back()}<div class="stack"><div class="screen-head"><h1>Envoyer à ma psychologue</h1>
+      <p>${T("Tes réponses sont chiffrées avant de partir : personne d'autre ne peut les lire.", "Vos réponses sont chiffrées avant de partir : personne d'autre ne peut les lire.")}</p></div>
+      ${list.length ? `<div class="card"><p class="lbl">${list.length} ${list.length > 1 ? "réponses" : "réponse"} ${p.all ? "des 30 derniers jours" : "pas encore envoyées"}</p><ul class="sent-list">${summarize(list).map(s => `<li>${s}</li>`).join("")}</ul></div>
+        <p class="hint" id="serr" role="alert"></p>
+        <button class="btn wide" id="prep">${direct ? "Envoyer maintenant" : "Préparer le message chiffré"}</button>` : `<div class="notice">Tout a déjà été envoyé.</div>`}
+      ${direct ? `<button class="link" data-go="envoi" data-p='{"manual":true}'>Autre méthode : copier un message à envoyer moi-même</button>` : ""}
+      ${!p.all && S.entries.length ? `<button class="link" data-go="envoi" data-p='${JSON.stringify({ all: true, manual: !!p.manual })}'>Renvoyer les réponses des 30 derniers jours</button>` : ""}
+      <p class="hint">Code : <span class="code-chip no-lis">${esc(S.cfg.c)}</span>. Ce code ne contient aucune information ${T("sur toi", "sur vous")}.</p></div>`;
+  },
+  mount(p) {
+    if (p.ok) return;
+    if (p.msg) {
+      const ta = document.getElementById("msg");
+      document.getElementById("cp").onclick = async e => { if (!(await copyText(p.msg, e.currentTarget))) selectAll(ta); };
+      document.getElementById("cpm").onclick = e => copyText(S.cfg.e || PSY_EMAIL_DEFAULT, e.currentTarget);
+      const sh = document.getElementById("share");
+      if (sh) sh.onclick = () => { navigator.share({ title: "Entre-Séances " + S.cfg.c, text: p.msg }).catch(() => {}); };
+      document.getElementById("sent").onclick = () => { p.ids.forEach(id => { const e = S.entries.find(x => x.id === id); if (e) e.sent = true; }); save(); go("home"); };
+      return;
+    }
+    const prep = document.getElementById("prep");
+    if (!prep) return;
+    const list = p.all ? S.entries.filter(e => Date.now() - new Date(e.t) < 30 * 864e5) : unsent();
+    prep.onclick = async () => {
+      prep.disabled = true; prep.textContent = canDirect() && !p.manual ? "Envoi…" : "Chiffrement…";
+      if (canDirect() && !p.manual) {
+        if (p.all) list.forEach(e => { e.sent = false; });
+        const ok = await sendEntries(list);
+        if (ok) { go("envoi", { ok: true }); return; }
+        document.getElementById("serr").textContent = "L'envoi n'a pas abouti. Vérifier la connexion internet, puis réessayer.";
+        prep.disabled = false; prep.textContent = "Réessayer"; return;
+      }
+      try {
+        const nophoto = list.some(e => e.photo === true);
+        const payload = { v: 1, c: S.cfg.c, s: new Date().toISOString(), e: list.map(e => { const o = Object.assign({}, e); delete o.sent; return o; }) };
+        const msg = await encryptForPractitioner(S.cfg.k, payload);
+        go("envoi", { msg, nophoto, ids: list.map(e => e.id) });
+      } catch (e) { prep.disabled = false; prep.textContent = "Réessayer"; }
+    };
+  }
+};
+
+/* Aide urgente */
+SCREENS.aide = {
+  html: () => {
+    const tv = S && S.prefs ? S.prefs.tv : "tu";
+    const t = (a, b) => tv === "vous" ? b : a;
+    const nums = [
+      ["3114", "Prévention du suicide", t("Si tu as des idées de suicide, ou si tu t'inquiètes pour quelqu'un. Gratuit, 24 h/24, 7 j/7.", "Si vous avez des idées de suicide, ou si vous vous inquiétez pour quelqu'un. Gratuit, 24 h/24, 7 j/7.")],
+      ["119", "Allô Enfance en danger", t("Si un enfant ou un ado subit des violences, à la maison ou ailleurs. Tu peux appeler pour toi ou pour quelqu'un d'autre. Gratuit, 24 h/24.", "Si un enfant ou un adolescent subit des violences, à la maison ou ailleurs. Gratuit, 24 h/24, n'apparaît pas sur les factures.")],
+      ["3919", "Violences Femmes Info", "Violences dans le couple ou dans la famille. Écoute anonyme et gratuite, 24 h/24."],
+      ["15", "SAMU", "Urgence médicale."],
+      ["17", "Police secours", "En cas de danger ou de violence en cours."],
+      ["112", "Numéro d'urgence européen", "Depuis n'importe quel téléphone, partout en Europe."],
+      ["114", "Urgences par SMS", "Pour les personnes sourdes, malentendantes ou qui ne peuvent pas parler."],
+      ["0 800 235 236", "Fil Santé Jeunes", "Pour les 12-25 ans : écoute anonyme et gratuite, tous les jours."],
+      ["09 69 325 900", "Anorexie Boulimie Info Écoute", "Troubles alimentaires : écoute par des professionnels, du lundi au vendredi de 16 h à 18 h. Prix d'un appel local."]
+    ];
+    return `${S && S.cfg ? back() : back("home", "Retour")}<div class="stack">
+      <div class="help-hero"><h1>${t("Tu as besoin d'aide maintenant ?", "Vous avez besoin d'aide maintenant ?")}</h1>
+        <p><b>${t("Si tu es en danger immédiat, appelle le 15 ou le 112.", "En cas de danger immédiat, appelez le 15 ou le 112.")}</b></p>
+        <p>${t("Cette application n'est pas surveillée en continu : ta psychologue ne voit tes réponses qu'au moment où elle les reçoit.", "Cette application n'est pas surveillée en continu : votre psychologue ne voit vos réponses qu'au moment où elle les reçoit.")}</p></div>
+      ${S && S.cfg && (S.cfg.m || []).includes("angoisse") ? `<button class="btn wide" data-go="angoisse">${t("Je fais une crise d'angoisse", "Je fais une crise d'angoisse")}</button>` : ""}
+      <div class="numbers">${nums.map(([n, w, d]) => `<div class="num-card"><a class="n no-lis" href="tel:${n.replace(/\s/g, "")}">${n}</a><span class="w">${w}</span><span class="d">${d}</span></div>`).join("")}</div>
+      <p class="hint">Toucher un numéro pour appeler depuis un téléphone.</p></div>`;
+  }
+};
+
+/* Réglages */
+SCREENS.reglages = {
+  html(p) {
+    const pr = S.prefs;
+    if (p.confirm) return `${back("reglages", "Réglages")}<div class="stack"><div class="help-hero"><h1>Tout effacer ?</h1>
+      <p>Toutes les réponses enregistrées sur cet appareil seront supprimées, y compris celles qui n'ont pas été envoyées. Il faudra un nouveau code d'activation.</p></div>
+      <button class="btn help wide" id="wipe">Oui, tout effacer</button><button class="btn ghost wide" data-go="reglages">Annuler</button></div>`;
+    return `${back()}<div class="stack"><div class="screen-head"><h1>Réglages</h1></div>
+      <div class="card"><h3>Lecture</h3>
+        <div class="toggle"><span>Lecture adaptée (dyslexie)<br><span class="hint">Police et espacements plus confortables</span></span><input type="checkbox" class="switch" id="oDys" ${pr.dys ? "checked" : ""}></div>
+        <div class="toggle"><span>Syllabes en deux couleurs</span><input type="checkbox" class="switch" id="oSyl" ${pr.syl ? "checked" : ""}></div>
+        <div class="toggle"><span>Lettres muettes en rouge</span><input type="checkbox" class="switch" id="oMuet" ${pr.muet ? "checked" : ""}></div>
+        <div class="toggle"><span>Taille du texte</span><span class="row"><button class="btn soft" id="sMinus" aria-label="Plus petit">A −</button><button class="btn soft" id="sPlus" aria-label="Plus grand">A +</button></span></div>
+        <p class="hint">Le découpage en syllabes est automatique : il peut contenir quelques erreurs.</p></div>
+      <div class="card"><h3>L'application ${T("me dit", "me dit")}</h3>
+        <div class="chips" data-name="tv" data-multi="0" style="margin-top:10px">
+          <button class="chip" data-v="tu" aria-pressed="${pr.tv === "tu"}">« tu »</button><button class="chip" data-v="vous" aria-pressed="${pr.tv === "vous"}">« vous »</button></div></div>
+      <div class="card stack" id="diagCard"><h3>Liaison avec la psychologue</h3>
+        <p class="small">${S.cfg.c === DEMO_CODE ? "Mode démonstration : aucun envoi." : RELAIS ? "Application reliée au relais. " + (S.lastOk ? "Dernier envoi réussi : " + new Date(S.lastOk).toLocaleString("fr-FR") + "." : "Aucun envoi réussi pour l'instant.") : "<b>Non reliée</b> : l'adresse du relais est absente du fichier config.js du site."}</p>
+        ${S.lastErr ? `<p class="notice small">Dernière erreur (${new Date(S.lastErr.t).toLocaleString("fr-FR")}) : ${esc(S.lastErr.m)}</p>` : ""}
+        <p class="small muted">${unsent().length} réponse(s) en attente d'envoi.</p>
+        ${RELAIS && S.cfg.c !== DEMO_CODE ? `<button class="btn soft" id="diag">Vérifier la liaison</button><div id="diagOut" class="stack"></div>` : ""}</div>
+      <div class="card stack"><h3>Mes exercices</h3>
+        <p class="small muted">${canDirect() ? T("Tes exercices se mettent à jour tout seuls quand ta psychologue les change.", "Vos exercices se mettent à jour automatiquement quand votre psychologue les modifie.") : "Mise à jour automatique indisponible en démonstration."}</p>
+        ${canDirect() ? `<button class="btn soft" id="upd">Mettre à jour maintenant</button><p class="hint" id="actMsg" role="status"></p>` : ""}
+        <button class="link" data-go="installer">Installer l'application sur l'écran d'accueil</button></div>
+      <div class="card stack"><h3>Mon code</h3><p><span class="code-chip no-lis">${esc(S.cfg.c)}</span></p>
+        <p class="small muted">Ce code ne permet pas ${T("de te reconnaître", "de vous reconnaître")}. Les réponses envoyées depuis plus de 60 jours sont effacées automatiquement de cet appareil.</p>
+        <button class="btn ghost" data-go="reglages" data-p='{"confirm":true}'>Effacer toutes mes données</button></div></div>`;
+  },
+  mount(p) {
+    if (p.diag) { const dc = document.getElementById("diagCard"); if (dc) setTimeout(() => dc.scrollIntoView(), 0); }
+    if (p.confirm) { document.getElementById("wipe").onclick = () => { lsDel(KEY); S = null; go("activation"); }; return; }
+    const pr = S.prefs;
+    const bind = (id, k) => document.getElementById(id).onchange = e => { pr[k] = e.target.checked; save(); render(); };
+    bind("oDys", "dys"); bind("oSyl", "syl"); bind("oMuet", "muet");
+    const set = d => { pr.size = Math.min(1.5, Math.max(0.9, Math.round((pr.size + d) * 10) / 10)); save(); applyPrefs(); };
+    document.getElementById("sMinus").onclick = () => set(-0.1);
+    document.getElementById("sPlus").onclick = () => set(0.1);
+    document.querySelectorAll('.chips[data-name="tv"] .chip').forEach(b => b.addEventListener("picked", () => { pr.tv = b.dataset.v; save(); render(); }));
+    const dg = document.getElementById("diag");
+    if (dg) dg.onclick = async () => {
+      const out = document.getElementById("diagOut"), line = (ok, t) => `<p class="small">${ok ? "✔" : "✖"} ${t}</p>`;
+      dg.disabled = true; out.innerHTML = `<p class="small">Vérification…</p>`; let html = "";
+      try {
+        const r = await relay(RELAIS, { a: "cfg", code: S.cfg.c });
+        html += line(true, "Le relais répond.");
+        html += r.ok ? line(true, `Le code ${esc(spacedCode(S.cfg.c))} est reconnu.`) : line(false, `Le code ${esc(spacedCode(S.cfg.c))} est inconnu du relais : prévenir la psychologue.`);
+        if (r.ok && r.pub !== S.cfg.k) { S.cfg.k = r.pub; save(); html += line(true, "Clé de chiffrement mise à jour."); }
+        if (r.ok && unsent().length) { const ok = await sendEntries(unsent()); html += ok ? line(true, "Réponses en attente envoyées.") : line(false, "Envoi impossible : " + esc((S.lastErr && S.lastErr.m) || "")); }
+      } catch (e) { html += line(false, esc(e.detail || "Relais injoignable.")); }
+      out.innerHTML = html; dg.disabled = false;
+    };
+    const upd = document.getElementById("upd");
+    if (upd) upd.onclick = async () => { const m = document.getElementById("actMsg"); m.textContent = "Mise à jour…"; m.textContent = (await refreshCfg()) ? "Exercices à jour." : "Pas de connexion, réessayer plus tard."; };
+  }
+};
+
+/* Démarrage */
+purgeOld(); if (S) save();
+render();
+refreshCfg().then(() => { if (S && canDirect() && unsent().length) sendEntries(unsent()).then(() => { if (view.name === "home") render(); }); });
+window.addEventListener("online", () => { refreshCfg(); if (S && canDirect() && unsent().length) sendEntries(unsent()); });
+</script>
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
+</body></html>

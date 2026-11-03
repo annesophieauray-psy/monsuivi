@@ -1,0 +1,1327 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest-pro.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Entre-Séances"><meta name="robots" content="noindex, nofollow">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+
+<title>Entre-Séances Praticienne</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#1E6A64">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Lexend:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+/* Concept : carnet calme et lisible — une colonne, de grands boutons, peu d'éléments à la fois.
+   Couleurs : lagune (vert d'eau profond), ambre pour l'énergie, rouge réservé à l'aide. */
+:root {
+  --bg: #EDF3F1; --surface: #FFFFFF; --surface-2: #E1EBE7; --ink: #15302C; --muted: #52706A;
+  --line: #C6D7D2; --accent: #1E6A64; --accent-ink: #FFFFFF; --accent-soft: #D2E8E3;
+  --sun: #C98A1C; --sun-soft: #F6E7C8; --help: #B3321F; --help-soft: #F8E1DC;
+  --ok: #2E7D4F; --s0: #1C4FC4; --s1: #15302C; --muet: #C8372D;
+  --z1: #3E9B63; --z2: #8DB43F; --z3: #E0B12E; --z4: #E07B2E; --z5: #C9412F;
+  --f-display: "Lexend", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-dys: "Lexend", "Verdana", system-ui, sans-serif;
+  --scale: 1;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1918; --surface: #162422; --surface-2: #1E302D; --ink: #E2EEEA; --muted: #9AB5AF;
+    --line: #2B413D; --accent: #6BC2B8; --accent-ink: #0E1918; --accent-soft: #1C3A36;
+    --sun: #F0B654; --sun-soft: #3A2F18; --help: #FF8B76; --help-soft: #3A1E19;
+    --ok: #6FCF97; --s0: #8DB2FF; --s1: #E2EEEA; --muet: #FF8A80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1918; --surface: #162422; --surface-2: #1E302D; --ink: #E2EEEA; --muted: #9AB5AF;
+  --line: #2B413D; --accent: #6BC2B8; --accent-ink: #0E1918; --accent-soft: #1C3A36;
+  --sun: #F0B654; --sun-soft: #3A2F18; --help: #FF8B76; --help-soft: #3A1E19;
+  --ok: #6FCF97; --s0: #8DB2FF; --s1: #E2EEEA; --muet: #FF8A80; color-scheme: dark;
+}
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body);
+  font-size: calc(17px * var(--scale)); line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; line-height: 1.2; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 1.6em; } h2 { font-size: 1.3em; } h3 { font-size: 1.08em; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; border-radius: 6px; }
+.muted { color: var(--muted); }
+.small { font-size: 0.86em; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; padding: 12px 20px; border-radius: 999px; border: 2px solid transparent;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--f-display); font-weight: 500;
+  cursor: pointer; text-decoration: none; text-align: center;
+}
+.btn:hover { filter: brightness(1.06); }
+.btn.ghost { background: transparent; color: var(--accent); border-color: var(--accent); }
+.btn.soft { background: var(--accent-soft); color: var(--ink); }
+.btn.help { background: var(--help); color: #fff; }
+.btn.wide { width: 100%; }
+.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.link { background: none; border: 0; padding: 6px 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+label.lbl, .lbl { font-family: var(--f-display); font-weight: 500; display: block; margin-bottom: 6px; }
+.hint { font-size: 0.86em; color: var(--muted); margin-top: 4px; }
+input[type=text], input[type=password], input[type=time], input[type=number], textarea, select {
+  width: 100%; box-sizing: border-box; background: var(--surface); border: 2px solid var(--line);
+  border-radius: 12px; padding: 12px 14px; min-height: 50px;
+}
+textarea { min-height: 96px; resize: vertical; }
+input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 9px 16px;
+  min-height: 44px; cursor: pointer; font-family: var(--f-body);
+}
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.range { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+.range output { font-family: var(--f-display); font-weight: 600; font-size: 1.3em; min-width: 2.6em; text-align: right; font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 34px; }
+.scale-ends { display: flex; justify-content: space-between; font-size: 0.82em; color: var(--muted); margin-top: -2px; }
+.notice { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; font-size: 0.92em; }
+.mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.8em; word-break: break-all; }
+/* Lecture adaptée */
+.dys body, .dys { --f-body: var(--f-dys); }
+.dys body { letter-spacing: 0.04em; word-spacing: 0.16em; line-height: 1.85; }
+.dys h1, .dys h2, .dys h3 { letter-spacing: 0.02em; line-height: 1.4; }
+.dys p, .dys li { max-width: 34em; }
+.syl.s0 { color: var(--s0); }
+.syl.s1 { color: var(--s1); }
+.muet { color: var(--muet); opacity: 0.9; }
+.btn .syl, .chip .syl, .btn .muet, .chip .muet, .chip[aria-pressed="true"] .syl { color: inherit; }
+.btn .muet, .chip .muet { opacity: 0.65; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+body { font-size: 16px; }
+.shell { max-width: 1080px; margin: 0 auto; padding-block: 0 56px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface);
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--line); margin-bottom: 24px;
+}
+.top-in { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.brand-mark { width: 32px; height: 32px; flex: none; }
+.brand-name { font-family: var(--f-display); font-weight: 600; }
+.brand-sub { color: var(--muted); font-size: 0.85em; }
+.tabs { display: flex; gap: 4px; background: var(--surface-2); border-radius: 999px; padding: 4px; }
+.tab { border: 0; background: transparent; border-radius: 999px; padding: 8px 16px; cursor: pointer; font-family: var(--f-display); font-weight: 500; color: var(--muted); min-height: 40px; }
+.tab[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+.btn { min-height: 44px; padding: 10px 18px; }
+.lockbtn { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; min-height: 40px; }
+.demo-band { background: var(--sun-soft); border-radius: 12px; padding: 10px 14px; margin-bottom: 18px; font-size: 0.92em; }
+.lock { max-width: 460px; margin: 6vh auto 0; display: flex; flex-direction: column; gap: 18px; }
+.lock h1 { font-size: 1.7em; }
+.grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+.pcard { display: flex; flex-direction: column; gap: 6px; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; cursor: pointer; color: var(--ink); }
+.pcard:hover { border-color: var(--accent); }
+.pcard .top-line { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.pcard .lab { font-family: var(--f-display); font-weight: 600; font-size: 1.08em; }
+.code-chip { font-family: var(--f-display); font-weight: 600; background: var(--surface-2); border-radius: 8px; padding: 2px 8px; letter-spacing: 0.06em; font-size: 0.86em; white-space: nowrap; }
+.pill { display: inline-block; font-size: 0.78em; padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
+.pill.new { background: var(--sun-soft); }
+.head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.detail-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.detail-head .row { justify-content: space-between; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.kpi b { font-family: var(--f-display); font-size: 1.5em; display: block; font-variant-numeric: tabular-nums; }
+.kpi span { color: var(--muted); font-size: 0.85em; }
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.panel h3 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.panel h3 small { font-family: var(--f-body); font-weight: 400; color: var(--muted); font-size: 0.78em; }
+.chart { width: 100%; height: auto; display: block; }
+.chart text { font-family: var(--f-body); font-size: 12px; fill: var(--muted); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.82em; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.freq { display: flex; flex-direction: column; gap: 6px; }
+.freq-row { display: grid; grid-template-columns: minmax(0, 9em) 1fr 2em; gap: 8px; align-items: center; font-size: 0.88em; }
+.freq-row .bar { height: 10px; border-radius: 5px; background: var(--accent); opacity: 0.85; }
+.freq-row .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--f-display); font-weight: 500; color: var(--muted); font-size: 0.85em; }
+td.num { font-variant-numeric: tabular-nums; text-align: right; }
+.journal { display: flex; flex-direction: column; gap: 8px; }
+.jrow { display: grid; grid-template-columns: 8.5em 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.jrow:last-child { border-bottom: 0; }
+.jrow .when { color: var(--muted); font-size: 0.86em; font-variant-numeric: tabular-nums; }
+.jrow .what { min-width: 0; overflow-wrap: anywhere; }
+.jrow .kind { font-family: var(--f-display); font-weight: 500; }
+.tr-card { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 9em 1fr; gap: 6px 12px; font-size: 0.92em; }
+.tr-card dt { color: var(--muted); }
+.tr-card dd { margin: 0; overflow-wrap: anywhere; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 8px; }
+.mod-check { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer; }
+.mod-check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); }
+.hier { display: flex; flex-direction: column; gap: 8px; }
+.hier-row { display: grid; grid-template-columns: 1fr 6.5em auto; gap: 8px; align-items: center; }
+.hier-row select { min-height: 46px; }
+.result { border-radius: 12px; padding: 10px 14px; background: var(--accent-soft); }
+.result.err { background: var(--help-soft); }
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 16px; align-items: start; }
+.empty { text-align: center; padding: 40px 16px; color: var(--muted); display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.danger-zone { border-color: var(--help); }
+@media (max-width: 520px) {
+  .jrow { grid-template-columns: 1fr; gap: 2px; }
+  .tr-card { grid-template-columns: 1fr; }
+  .brand-sub { display: none; }
+}
+.flash { margin-bottom: 16px; }
+.pill.warn { background: var(--help-soft); color: var(--ink); }
+.grp { font-family: var(--f-display); font-weight: 500; color: var(--muted); font-size: 0.86em; margin: 4px 0 8px; }
+.mods + .hint { margin-top: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.mood-strip { display: flex; flex-wrap: wrap; gap: 6px; }
+.mood-strip .ms { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 0.7em; color: var(--muted); font-variant-numeric: tabular-nums; }
+.score-box { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; border-radius: 12px; padding: 12px 14px; background: var(--surface-2); border-left: 6px solid var(--z1); }
+.score-box.hi { background: var(--help-soft); border-left-color: var(--help); }
+.score-box b { font-family: var(--f-display); font-size: 2em; font-variant-numeric: tabular-nums; line-height: 1; }
+.score-box b small { font-size: 0.45em; color: var(--muted); }
+.score-box span { font-size: 0.88em; }
+.meal-grid td, .meal-grid th { white-space: nowrap; font-size: 0.86em; }
+.meal-grid .c-none { color: var(--muted); }
+.meal-grid .c-skip { background: var(--sun-soft); }
+.meal-grid .c-ok { background: var(--accent-soft); }
+.meal-grid .c-ctrl { background: var(--help-soft); }
+.f-ctrl, .f-comp, .f-ph { font-style: normal; font-size: 0.78em; font-weight: 700; border-radius: 6px; padding: 1px 5px; margin-left: 3px; }
+.f-ctrl { background: var(--help); color: #fff; }
+.f-comp { background: var(--sun); color: #1a1a1a; }
+.f-ph { padding: 0; }
+.legend .f-ctrl, .legend .f-comp { margin: 0 4px 0 0; }
+.ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.ph-card { margin: 0; display: flex; flex-direction: column; gap: 4px; font-size: 0.8em; color: var(--muted); }
+.ph-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; background: var(--surface-2); display: block; }
+.ph-card.missing img { visibility: hidden; }
+.ph-card.missing figcaption::after { content: " · photo indisponible sur cet appareil"; }
+.print-sheet { align-items: stretch; }
+.ps-head { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-size: 1.1em; }
+.qr-wrap { display: flex; justify-content: center; }
+.qr-wrap svg { max-width: 100%; height: auto; border-radius: 8px; }
+.big-url { font-family: var(--f-display); font-weight: 600; font-size: 1.25em; text-align: center; overflow-wrap: anywhere; }
+.big-code { font-family: var(--f-display); font-weight: 700; font-size: 2.6em; letter-spacing: 0.14em; text-align: center; font-variant-numeric: tabular-nums; }
+ol.guide { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 14px; }
+ol.guide li p { margin-top: 4px; font-size: 0.94em; }
+@media print {
+  body * { visibility: hidden; }
+  .print-sheet, .print-sheet * { visibility: visible; }
+  .print-sheet { position: absolute; inset: 0 auto auto 0; width: 100%; border: 0; }
+  .no-print { display: none !important; }
+}
+.panel .chart { max-width: 760px; }
+.legend i.f-ctrl, .legend i.f-comp { width: auto; height: auto; border-radius: 6px; vertical-align: baseline; }
+.f-ph { background: var(--surface); color: var(--muted); border: 1px solid var(--line); padding: 0 5px; font-weight: 500; }
+</style>
+<div class="shell" id="app"></div>
+<script>
+/* ===== Outils partagés : encodage, compression, chiffrement, lecture adaptée ===== */
+const DEMO_PUB = "BBV7nya4K8W0jyGJq2xtiK5E5na6CAB23qNAI5RJhVfhiQbRRt_g9vrYtbJ0Jnm7yGxny1celneAbJEpW6XDQBg";
+const DEMO_CODE = "DEM-001";
+
+const B64 = {
+  enc(buf) {
+    const b = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+    let s = ""; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  },
+  dec(str) {
+    str = str.replace(/-/g, "+").replace(/_/g, "/"); while (str.length % 4) str += "=";
+    const s = atob(str); const b = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+    return b;
+  }
+};
+const TE = new TextEncoder(), TD = new TextDecoder();
+
+async function streamThrough(u8, stream) {
+  const w = stream.writable.getWriter(); w.write(u8); w.close();
+  return new Uint8Array(await new Response(stream.readable).arrayBuffer());
+}
+/* Emballe un objet JSON : 1 octet de drapeau (1 = compressé) + données */
+async function pack(obj) {
+  const raw = TE.encode(JSON.stringify(obj));
+  if (typeof CompressionStream !== "undefined") {
+    try { const c = await streamThrough(raw, new CompressionStream("deflate-raw"));
+      const out = new Uint8Array(c.length + 1); out[0] = 1; out.set(c, 1); return out; } catch (e) {}
+  }
+  const out = new Uint8Array(raw.length + 1); out[0] = 0; out.set(raw, 1); return out;
+}
+async function unpack(u8) {
+  let body = u8.slice(1);
+  if (u8[0] === 1) body = await streamThrough(body, new DecompressionStream("deflate-raw"));
+  return JSON.parse(TD.decode(body));
+}
+
+/* Code d'activation patient : ACT1.<données> */
+async function encodeActivation(cfg) { return "ACT1." + B64.enc(await pack(cfg)); }
+async function decodeActivation(text) {
+  const m = String(text).match(/ACT1\.([A-Za-z0-9_-]+)/);
+  if (!m) throw new Error("format");
+  const cfg = await unpack(B64.dec(m[1]));
+  if (!cfg || !cfg.c || !cfg.k) throw new Error("format");
+  return cfg;
+}
+
+/* Chiffrement patient -> praticienne : ECDH P-256 éphémère + AES-GCM 256
+   Message : PSY1.<clé éphémère (65 o) | iv (12 o) | données chiffrées> */
+const ECDH = { name: "ECDH", namedCurve: "P-256" };
+const AAD = TE.encode("PSY1");
+async function encryptForPractitioner(pubB64, obj) {
+  const pub = await crypto.subtle.importKey("raw", B64.dec(pubB64), ECDH, false, []);
+  const eph = await crypto.subtle.generateKey(ECDH, true, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({ name: "ECDH", public: pub }, eph.privateKey,
+    { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: AAD }, key, await pack(obj)));
+  const epk = new Uint8Array(await crypto.subtle.exportKey("raw", eph.publicKey));
+  const out = new Uint8Array(65 + 12 + ct.length);
+  out.set(epk, 0); out.set(iv, 65); out.set(ct, 77);
+  return "PSY1." + B64.enc(out);
+}
+async function decryptMessage(privJwk, msg) {
+  const m = String(msg).match(/PSY1\.([A-Za-z0-9_-]+)/);
+  if (!m) throw new Error("format");
+  const all = B64.dec(m[1]);
+  const priv = await crypto.subtle.importKey("jwk", privJwk, ECDH, false, ["deriveKey"]);
+  const epk = await crypto.subtle.importKey("raw", all.slice(0, 65), ECDH, false, []);
+  const key = await crypto.subtle.deriveKey({ name: "ECDH", public: epk }, priv,
+    { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(65, 77), additionalData: AAD }, key, all.slice(77));
+  return unpack(new Uint8Array(pt));
+}
+
+function uid() { return B64.enc(crypto.getRandomValues(new Uint8Array(9))); }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function lsGet(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+async function copyText(text, btn) {
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {}
+  if (btn) {
+    const old = btn.dataset.label || btn.textContent; btn.dataset.label = old;
+    btn.textContent = ok ? "Copié" : "Sélectionné : faites Copier";
+    setTimeout(() => { btn.textContent = old; }, 2200);
+  }
+  return ok;
+}
+function selectAll(el) { try { el.focus(); el.select(); el.setSelectionRange(0, el.value.length); } catch (e) {} }
+
+/* ===== Lecture adaptée : découpage syllabique et lettres muettes (approximation) ===== */
+const VOY = "aeiouyàâäéèêëîïôöùûüÿœæ";
+const isVoy = c => VOY.includes(c);
+const INSEP = /^(bl|br|cl|cr|dr|fl|fr|gl|gr|pl|pr|tr|vr|ch|ph|gn|th|qu|gu)$/;
+function syllabes(word) {
+  const w = word.toLowerCase(), n = w.length;
+  if (n <= 3) return [word];
+  const v = [];
+  for (let i = 0; i < n; i++) {
+    let x = isVoy(w[i]);
+    if (w[i] === "u" && i > 0 && (w[i - 1] === "q" || (w[i - 1] === "g" && i + 1 < n && "eiéèêy".includes(w[i + 1])))) x = false;
+    v.push(x);
+  }
+  const nuc = []; let i = 0;
+  while (i < n) { if (v[i]) { let j = i; while (j + 1 < n && v[j + 1]) j++; nuc.push([i, j]); i = j + 1; } else i++; }
+  if (nuc.length < 2) return [word];
+  const cuts = [];
+  for (let k = 0; k < nuc.length - 1; k++) {
+    const a = nuc[k][1] + 1, b = nuc[k + 1][0], cl = w.slice(a, b), L = cl.length;
+    const ins = L >= 2 && INSEP.test(cl.slice(-2));
+    cuts.push(L === 1 ? a : L === 2 ? (ins ? a : a + 1) : (ins ? b - 2 : b - 1));
+  }
+  const out = []; let p = 0;
+  for (const c of cuts) { out.push(word.slice(p, c)); p = c; }
+  out.push(word.slice(p));
+  return out.filter(Boolean);
+}
+const EXC_S = new Set("bus sens fils os ours mars tennis virus bonus autobus hélas maïs oasis jadis atlas cactus campus processus cosmos iris lys bis gratis express rébus tournevis métis stress as hiatus fœtus terminus détritus".split(" "));
+const EXC_X = new Set("six dix index fax box relax max lynx thorax larynx silex".split(" "));
+const EXC_T = new Set("net sept huit but brut ouest chut mat rapt transit scout kit flirt short test toast compost internet granit dot zut est-ce".split(" "));
+const EXC_D = new Set("sud bled raid stand weekend lord".split(" "));
+const EXC_P = new Set("cap stop top hip slip clip handicap ketchup cep".split(" "));
+const EXC_Z = new Set("gaz quiz fez jazz".split(" "));
+const EXC_R = new Set("hiver enfer super cancer laser amer hamster poster revolver starter master leader scooter reporter joker poker bunker cuiller hier fier cher mer fer ver".split(" "));
+const EXC_E = new Set("le je me te se ce de ne que".split(" "));
+function lettresMuettes(word) {
+  const w = word.toLowerCase(), n = w.length, set = new Set();
+  if (n >= 2 && w[0] === "h" && isVoy(w[1])) set.add(0);
+  if (n < 2) return set;
+  let idx = n - 1, steps = 0, lastWasE = false;
+  while (idx > 0 && steps < 3) {
+    const c = w[idx], prev = w[idx - 1];
+    let mute = false;
+    if (steps === 0) {
+      if (c === "s" && prev !== "s" && !EXC_S.has(w)) mute = true;
+      else if (c === "x" && !EXC_X.has(w)) mute = true;
+    }
+    if (!mute && c === "e" && !lastWasE && idx >= 2 && !EXC_E.has(w.slice(0, idx + 1)) && (steps === 0 || w[idx + 1] === "s")) mute = true;
+    else if (!mute && steps <= 1 && !lastWasE) {
+      if (c === "t" && !EXC_T.has(w) && (isVoy(prev) || "ncps".includes(prev))) mute = true;
+      else if (c === "d" && !EXC_D.has(w) && (isVoy(prev) || "nr".includes(prev))) mute = true;
+      else if (c === "p" && !EXC_P.has(w) && (isVoy(prev) || "m".includes(prev))) mute = true;
+      else if (c === "z" && !EXC_Z.has(w) && isVoy(prev)) mute = true;
+      else if (c === "r" && prev === "e" && n >= 5 && steps === 0 && !EXC_R.has(w)) mute = true;
+    }
+    if (!mute) break;
+    set.add(idx); lastWasE = c === "e"; idx--; steps++;
+    if (lastWasE) break;
+  }
+  return set;
+}
+/* Applique la mise en couleur dans un conteneur */
+function adapterTexte(root, opts) {
+  if (!opts || (!opts.syl && !opts.muet)) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      const p = node.parentElement;
+      if (!p || p.closest("textarea,input,select,svg,script,style,.no-lis,code")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  let alt = 0;
+  for (const node of nodes) {
+    const parts = node.nodeValue.split(/([A-Za-zÀ-ÖØ-öø-ÿœŒæÆ]+)/);
+    if (parts.length === 1) continue;
+    const frag = document.createDocumentFragment();
+    for (let k = 0; k < parts.length; k++) {
+      const part = parts[k];
+      if (!part) continue;
+      if (k % 2 === 0) { frag.appendChild(document.createTextNode(part)); continue; }
+      const muettes = opts.muet ? lettresMuettes(part) : new Set();
+      const syls = opts.syl ? syllabes(part) : [part];
+      const wspan = document.createElement("span"); wspan.className = "mot";
+      let pos = 0;
+      for (const s of syls) {
+        const sp = document.createElement("span");
+        if (opts.syl) sp.className = "syl s" + (alt++ % 2);
+        for (let c = 0; c < s.length; c++) {
+          if (muettes.has(pos + c)) { const m = document.createElement("span"); m.className = "muet"; m.textContent = s[c]; sp.appendChild(m); }
+          else sp.appendChild(document.createTextNode(s[c]));
+        }
+        pos += s.length; wspan.appendChild(sp);
+      }
+      frag.appendChild(wspan);
+    }
+    node.parentNode.replaceChild(frag, node);
+  }
+}
+/* ===== Code court, configuration chiffrée, relais ===== */
+function normCode(s) {
+  const c = String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return c.length === 6 ? c.slice(0, 3) + "-" + c.slice(3) : c;
+}
+async function cfgKey(code) {
+  const base = await crypto.subtle.importKey("raw", TE.encode(code.replace("-", "")), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: TE.encode("entre-seances/cfg/v1"), iterations: 120000, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+async function sealCfg(code, cfg) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await cfgKey(code), await pack(cfg)));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12); return B64.enc(out);
+}
+async function openCfg(code, blob) {
+  const all = B64.dec(blob);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, await cfgKey(code), all.slice(12));
+  return unpack(new Uint8Array(pt));
+}
+/* Appel au relais Google Apps Script (POST texte simple : pas de pré-vérification CORS) */
+async function relay(url, body, ms = 20000) {
+  const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const t = ctl ? setTimeout(() => ctl.abort(), ms) : 0;
+  try {
+    const r = await fetch(url, { method: "POST", body: JSON.stringify(body), redirect: "follow", signal: ctl ? ctl.signal : undefined });
+    const txt = await r.text();
+    try { return JSON.parse(txt); }
+    catch (e) {
+      const why = /<title>([^<]*)<\/title>/i.exec(txt);
+      const err = new Error("reponse"); err.detail = `Réponse inattendue du relais (code ${r.status}${why ? ", « " + why[1].trim() + " »" : ""}).`; throw err;
+    }
+  } catch (e) {
+    if (!e.detail) e.detail = e.name === "AbortError" ? "Le relais n'a pas répondu à temps." : "Relais injoignable : pas de connexion internet, adresse incorrecte, ou accès du déploiement différent de « Tout le monde ».";
+    throw e;
+  } finally { clearTimeout(t); }
+}
+/* Réduit une photo (≤ 900 px, JPEG) pour l'envoi */
+function shrinkPhoto(file, max = 900, q = 0.62) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      res(c.toDataURL("image/jpeg", q));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("image")); };
+    img.src = url;
+  });
+}
+/* Petit stockage IndexedDB pour les photos (localStorage est trop petit) */
+const PhotoDB = {
+  db: null,
+  open(name) {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => {
+      try {
+        const r = indexedDB.open(name, 1);
+        r.onupgradeneeded = () => r.result.createObjectStore("p");
+        r.onsuccess = () => { this.db = r.result; res(this.db); };
+        r.onerror = () => rej(r.error);
+      } catch (e) { rej(e); }
+    });
+  },
+  async op(name, mode, fn) {
+    const db = await this.open(name);
+    return new Promise((res, rej) => { const tx = db.transaction("p", mode); const st = tx.objectStore("p"); const rq = fn(st); tx.oncomplete = () => res(rq && rq.result); tx.onerror = () => rej(tx.error); });
+  },
+  put(name, k, v) { return this.op(name, "readwrite", st => st.put(v, k)); },
+  get(name, k) { return this.op(name, "readonly", st => st.get(k)); },
+  del(name, k) { return this.op(name, "readwrite", st => st.delete(k)); }
+};
+
+/* ---------- Humeur du jour : visages ---------- */
+const MOODS = [
+  ["super", "Super bien", "#7CC47F"], ["content", "Content·e", "#B9D86A"], ["calme", "Calme", "#7ECFC3"],
+  ["surexcite", "Surexcité·e", "#F4A261"], ["bof", "Bof", "#E8D36A"], ["fatigue", "Fatigué·e", "#A7B6CA"],
+  ["stresse", "Stressé·e", "#F2BE5C"], ["triste", "Triste", "#8EAEE2"], ["colere", "En colère", "#E5826C"]
+];
+const MOOD_LABEL = Object.fromEntries(MOODS.map(m => [m[0], m[1]]));
+function face(key, size = 48) {
+  const m = MOODS.find(x => x[0] === key) || MOODS[4], k = "#1F2B2A";
+  const dot = (x, y, r = 2.3) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${k}"/>`;
+  const st = d => `<path d="${d}" fill="none" stroke="${k}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const drop = (x, y) => `<path d="M${x} ${y}q3 4 0 6.5q-3-2.5 0-6.5z" fill="#5B9BD5"/>`;
+  const F = {
+    super: st("M14 21q3.5-4.5 7 0") + st("M27 21q3.5-4.5 7 0") + `<path d="M14 27q10 13 20 0z" fill="${k}"/>`,
+    content: dot(17, 20) + dot(31, 20) + st("M16 28q8 8 16 0"),
+    calme: st("M14 21q3.5 3 7 0") + st("M27 21q3.5 3 7 0") + st("M18 30q6 4 12 0"),
+    surexcite: st("M12 13l6-2") + st("M36 13l-6-2") + dot(17, 20, 3.4) + dot(31, 20, 3.4) + `<circle cx="18" cy="19" r="1.1" fill="#fff"/><circle cx="32" cy="19" r="1.1" fill="#fff"/><path d="M15 27q9 14 18 0z" fill="${k}"/>` + st("M41 8l2-3M43 13l3-1"),
+    bof: dot(17, 20) + dot(31, 20) + st("M17 31h14"),
+    fatigue: st("M13 22h8") + st("M27 22h8") + st("M20 32q4-2.5 8 0") + st("M35 6h5l-5 5h5"),
+    stresse: dot(17, 20) + dot(31, 20) + st("M14 31q2.5-3 5 0t5 0t5 0t5 0") + drop(39, 12),
+    triste: st("M13 15l6 2.5") + st("M35 15l-6 2.5") + dot(17, 21) + dot(31, 21) + st("M16 34q8-8 16 0") + drop(16, 25),
+    colere: st("M13 15l7 4") + st("M35 15l-7 4") + dot(17, 22) + dot(31, 22) + st("M17 33q7-5 14 0")
+  };
+  return `<svg viewBox="0 0 48 48" width="${size}" height="${size}" aria-hidden="true"><circle cx="24" cy="24" r="20.5" fill="${m[2]}" stroke="${k}" stroke-width="2"/>${F[m[0]]}</svg>`;
+}
+const ENERGIE_DESC = ["", "Épuisé·e", "Épuisé·e", "Très peu d'énergie", "Peu d'énergie", "Énergie moyenne", "Énergie correcte", "Bonne énergie", "Beaucoup d'énergie", "Énormément d'énergie", "Énergie débordante"];
+
+/* ===== Entre-Séances — espace praticienne ===== */
+const VKEY = "es_praticienne_v1";
+const DEMO_PRIV = {"key_ops":["deriveKey"],"ext":true,"kty":"EC","x":"FXufJrgrxbSPIYmrbG2IrkTmdroIAHbeo0AjlEmFV-E","y":"iQbRRt_g9vrYtbJ0Jnm7yGxny1celneAbJEpW6XDQBg","crv":"P-256","d":"xW4H5AUxJv1XbmZ8CzsbV1qiQHsZUI6ERusujKccI2s"};
+const RELAIS_GS = "/* =====================================================================\n   Entre-Séances : relais de réception (Google Apps Script)\n   - Reçoit uniquement des messages CHIFFRÉS : Google ne peut pas les lire.\n   - Garde les messages 60 jours, puis les efface.\n   - Vous prévient par mail (sans aucun contenu) quand un patient envoie.\n   Ne rien modifier ci-dessous, sauf les deux réglages.\n   ===================================================================== */\nconst RETENTION_DAYS = 60;   // durée de conservation des messages chiffrés\nconst NOTIFY = true;         // false pour ne pas recevoir de mail de notification\n\nfunction doGet() { return out_({ ok: true, app: \"entre-seances\" }); }\n\nfunction doPost(e) {\n  let p = {};\n  try { p = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, err: \"format\" }); }\n  const lock = LockService.getScriptLock();\n  try { lock.waitLock(20000); return out_(route_(p)); }\n  catch (err) { return out_({ ok: false, err: String(err) }); }\n  finally { try { lock.releaseLock(); } catch (x) {} }\n}\n\nfunction out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }\nfunction sheet_() {\n  const ss = SpreadsheetApp.getActiveSpreadsheet();\n  return ss.getSheetByName(\"Messages\") || ss.insertSheet(\"Messages\");\n}\nfunction folder_() {\n  const it = DriveApp.getFoldersByName(\"Entre-Séances (messages chiffrés)\");\n  return it.hasNext() ? it.next() : DriveApp.createFolder(\"Entre-Séances (messages chiffrés)\");\n}\nfunction okCode_(c) { return typeof c === \"string\" && /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(c); }\n\nfunction route_(p) {\n  const props = PropertiesService.getScriptProperties();\n  const token = props.getProperty(\"TOKEN\");\n  switch (p.a) {\n    case \"ping\": return { ok: true, init: !!token };\n    case \"init\":\n      if (token) return { ok: false, err: \"deja\" };\n      if (typeof p.token !== \"string\" || p.token.length < 24 || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ TOKEN: p.token, PUB: p.pub, SEQ: \"0\" });\n      return { ok: true };\n    case \"cfg\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"inconnu\" };\n      const blob = props.getProperty(\"C_\" + p.code);\n      return blob ? { ok: true, pub: props.getProperty(\"PUB\"), blob: blob } : { ok: false, err: \"inconnu\" };\n    }\n    case \"send\": {\n      if (!okCode_(p.code) || !props.getProperty(\"C_\" + p.code)) return { ok: false, err: \"inconnu\" };\n      if (typeof p.msg !== \"string\" || !/^PSY1\\.[A-Za-z0-9_-]+$/.test(p.msg) || p.msg.length > 20000000) return { ok: false, err: \"format\" };\n      const seq = Number(props.getProperty(\"SEQ\") || \"0\") + 1;\n      props.setProperty(\"SEQ\", String(seq));\n      let cell = p.msg;\n      if (p.msg.length > 45000) cell = \"DRIVE:\" + folder_().createFile(\"m\" + seq + \".txt\", p.msg, \"text/plain\").getId();\n      sheet_().appendRow([seq, new Date(), p.code, cell]);\n      try { notify_(); } catch (e) {}\n      return { ok: true, seq: seq };\n    }\n  }\n  if (!token || p.token !== token) return { ok: false, err: \"auth\" };\n  switch (p.a) {\n    case \"check\": return { ok: true };\n    case \"setcfg\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 8500) return { ok: false, err: \"format\" };\n      props.setProperty(\"C_\" + p.code, p.blob);\n      return { ok: true };\n    case \"delcfg\":\n      if (okCode_(p.code)) props.deleteProperty(\"C_\" + p.code);\n      return { ok: true };\n    case \"inbox\": {\n      purge_();\n      const since = Number(p.since || 0), sh = sheet_(), n = sh.getLastRow();\n      if (n < 1) return { ok: true, items: [] };\n      const rows = sh.getRange(1, 1, n, 4).getValues();\n      const items = [];\n      rows.forEach(function (r) {\n        if (Number(r[0]) <= since) return;\n        let msg = String(r[3]);\n        if (msg.indexOf(\"DRIVE:\") === 0) { try { msg = DriveApp.getFileById(msg.slice(6)).getBlob().getDataAsString(); } catch (e) { return; } }\n        items.push({ seq: Number(r[0]), t: new Date(r[1]).toISOString(), code: String(r[2]), msg: msg });\n      });\n      return { ok: true, items: items };\n    }\n  }\n  return { ok: false, err: \"action\" };\n}\n\nfunction purge_() {\n  const sh = sheet_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const lim = Date.now() - RETENTION_DAYS * 864e5;\n  const rows = sh.getRange(1, 1, n, 4).getValues();\n  let k = 0;\n  while (k < rows.length && new Date(rows[k][1]).getTime() < lim) {\n    const cell = String(rows[k][3]);\n    if (cell.indexOf(\"DRIVE:\") === 0) { try { DriveApp.getFileById(cell.slice(6)).setTrashed(true); } catch (e) {} }\n    k++;\n  }\n  if (k > 0) sh.deleteRows(1, k);\n}\n\nfunction notify_() {\n  if (!NOTIFY) return;\n  const cache = CacheService.getScriptCache();\n  if (cache.get(\"notif\")) return;\n  cache.put(\"notif\", \"1\", 1800);\n  MailApp.sendEmail(Session.getEffectiveUser().getEmail(), \"Entre-Séances : nouvelles réponses\",\n    \"Un patient vient d'envoyer des réponses.\\nOuvrez votre espace praticienne pour les relever.\\n\\nCe mail ne contient aucune donnée de patient.\");\n}\n\n/* À lancer une fois depuis l'éditeur (bouton Exécuter) pour accorder les autorisations. */\nfunction autoriser() { sheet_(); folder_(); Logger.log(\"Autorisations accordées. Vous pouvez déployer.\"); }\n";
+let vault = null, vkey = null, vsalt = null, demo = false;
+let view = { tab: "patients", p: {} };
+let lockTimer = null, flash = "";
+const LOCK_MIN = 15;
+const inFrame = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const MOD_INFO = {
+  humeur: ["Humeur du jour", "Visages d'humeur + jauge d'énergie 1-10"], pensees: ["Tableau des pensées", "Colonnes de Beck guidées pas à pas"],
+  sud: ["Échelle de malaise (SUD)", "0 à 10, contexte facultatif"], expo: ["Échelle d'exposition", "Marches définies ci-dessous"],
+  sommeil: ["Journal du sommeil", "Horaires, latence, réveils, qualité"], respi: ["Respirer et se poser", "Vague, balle, 5-4-3-2-1, stress avant/après"],
+  angoisse: ["Crise d'angoisse", "Respiration 4-6 guidée, phrases rassurantes, pic/après"],
+  fiches: ["Fiches pratiques", "Attention, sens, imprévus, émotions"],
+  taches: ["Découper une tâche", "Étapes + minuteur visuel (TDAH)"], jauge: ["Ma jauge", "Surcharge sensorielle et énergie (TSA)"],
+  repas: ["Mes repas du jour", "Carnet alimentaire, grignotages, photos (réglages TCA ci-dessous)"], envie: ["Gérer une envie de crise", "Surfer sur la vague 10-20 min, issue, déclencheur"],
+  elan: ["Suivi de l'élan (7 jours)", "10 signes d'hypomanie, Oui/Non, envoi direct. Repère non validé"],
+  angst: ["Questionnaire d'Angst", "20 items Vrai/Faux, seuil > 10, envoi direct"]
+};
+const MOD_GROUPS = [["Suivi général", ["humeur", "pensees", "sud", "expo", "sommeil", "respi", "angoisse", "fiches"]], ["Troubles du neurodéveloppement", ["taches", "jauge"]],
+  ["Troubles du comportement alimentaire", ["repas", "envie"]], ["Hypomanie : questionnaires", ["elan", "angst"]]];
+const ALL_MODS = Object.keys(MOD_INFO);
+const DEFAULT_MODS = ["humeur", "pensees", "sud", "expo", "sommeil", "respi", "angoisse", "fiches", "taches", "jauge"];
+const TYPE_LABEL = { humeur: "Humeur", pensees: "Tableau des pensées", sud: "Malaise (SUD)", expo: "Exposition", sommeil: "Sommeil", respi: "Respiration", taches: "Tâche", jauge: "Jauge",
+  repas: "Repas", envie: "Envie de crise", angoisse: "Crise d'angoisse", angst: "Angst", elan: "Élan" };
+const SLOTS = { pdj: "Petit-déjeuner", cm: "Collation du matin", dej: "Déjeuner", gout: "Goûter", din: "Dîner", cs: "Collation du soir", grig: "Grignotage" };
+const TCA_PROFILES = { AN: "Anorexie mentale", BN: "Boulimie", HP: "Hyperphagie boulimique", AU: "Autre TCA / non spécifié" };
+const TCA_OPTS = { photo: "Photos des repas", faim: "Faim avant / satiété après", ctrl: "Sensation de perte de contrôle", comp: "Comportements compensatoires",
+  emo: "Émotions", pens: "Pensées (corps, poids, nourriture)", saute: "Signaler les repas non pris", grig: "Grignotages" };
+const TCA_PRESET = { AN: ["photo", "faim", "emo", "pens", "saute", "comp"], BN: ["photo", "faim", "ctrl", "comp", "emo", "pens", "saute", "grig"],
+  HP: ["photo", "faim", "ctrl", "emo", "saute", "grig"], AU: ["photo", "faim", "ctrl", "comp", "emo", "pens", "saute", "grig"] };
+const ANGST_ITEMS = ["Moins d'heures de sommeil", "Davantage d'énergie et de résistance physique", "Davantage de confiance en soi", "Davantage de plaisir à faire plus de travail",
+  "Davantage d'activités sociales", "Plus de déplacements et voyages ; imprudences au volant", "Dépenses d'argent excessives", "Comportement déraisonnable dans les affaires",
+  "Surcroît d'activité", "Davantage de projets et d'idées créatives", "Moins de timidité, moins d'inhibition", "Plus bavard que d'habitude", "Plus d'impatience ou d'irritabilité",
+  "Attention facilement distraite", "Augmentation des pulsions sexuelles", "Plus de café et de cigarettes", "Plus d'alcool", "Exagérément optimiste, voire euphorique",
+  "Augmentation du rire", "Rapidité de la pensée, idées soudaines"];
+const ELAN_ITEMS = ["Humeur exaltée, excitée", "Irritabilité inhabituelle", "Énergie augmentée", "Besoin de sommeil réduit", "Estime de soi augmentée", "Parle plus / plus vite",
+  "Pensées rapides, fuite des idées", "Distractibilité", "Activité augmentée, agitation", "Conduites à risque"];
+const MARK = '<svg class="brand-mark" viewBox="0 0 34 34"><rect width="34" height="34" rx="10" fill="var(--accent)"/><path d="M7 14c3-3 6-3 9 0s6 3 10 0" stroke="var(--accent-ink)" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M7 21c3-3 6-3 9 0s6 3 10 0" stroke="var(--sun)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
+/* Repère indicatif inspiré de la structure des critères (non validé) */
+function elanFlag(e) {
+  const r = e.rep || [], others = r.slice(2).filter(x => x === 1).length;
+  if (r[0] === 1) return others >= 3;
+  if (r[1] === 1) return others >= 4;
+  return false;
+}
+
+/* ---------- Coffre chiffré ---------- */
+async function deriveVaultKey(pw, salt) {
+  const base = await crypto.subtle.importKey("raw", TE.encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 310000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+async function persist() {
+  if (demo || !vault) return;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, vkey, await pack(vault));
+  lsSet(VKEY, { v: 1, salt: B64.enc(vsalt), iv: B64.enc(iv), ct: B64.enc(ct) });
+}
+async function openVault(pw) {
+  const rec = lsGet(VKEY); vsalt = B64.dec(rec.salt);
+  vkey = await deriveVaultKey(pw, vsalt);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: B64.dec(rec.iv) }, vkey, B64.dec(rec.ct));
+  vault = await unpack(new Uint8Array(pt)); demo = false;
+}
+async function createVault(pw) {
+  vsalt = crypto.getRandomValues(new Uint8Array(16));
+  vkey = await deriveVaultKey(pw, vsalt);
+  const kp = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveKey"]);
+  vault = { v: 1, priv: await crypto.subtle.exportKey("jwk", kp.privateKey), pub: B64.enc(await crypto.subtle.exportKey("raw", kp.publicKey)),
+    email: "annesophie.auray.psy@gmail.com", appUrl: "", relay: "", token: "", cursor: 0, patients: {}, created: new Date().toISOString() };
+  demo = false; await persist();
+}
+function lock() { for (const k in memPhotos) delete memPhotos[k]; vault = null; vkey = null; demo = false; view = { tab: "patients", p: {} }; render(); }
+function touch() {
+  clearTimeout(lockTimer);
+  if (vault && !demo) lockTimer = setTimeout(lock, LOCK_MIN * 60000);
+}
+["click", "keydown"].forEach(ev => document.addEventListener(ev, touch, true));
+
+
+/* ---------- Données de démonstration (fictives) ---------- */
+function demoPlate(seed) {
+  try {
+    const c = document.createElement("canvas"); c.width = 480; c.height = 360; const g = c.getContext("2d");
+    g.fillStyle = ["#C9B79C", "#9DB4A8", "#B7A3C4"][seed % 3]; g.fillRect(0, 0, 480, 360);
+    g.fillStyle = "#F7F5F0"; g.beginPath(); g.ellipse(240, 185, 170, 140, 0, 0, 7); g.fill();
+    g.fillStyle = "#E9E5DC"; g.beginPath(); g.ellipse(240, 185, 125, 100, 0, 0, 7); g.fill();
+    const food = [["#E2A84B", 200, 160, 50, 34], ["#6FA35A", 275, 205, 46, 30], ["#C9563C", 230, 225, 34, 22], ["#E8D27A", 285, 150, 38, 26]];
+    food.slice(0, 2 + (seed % 3)).forEach(([col, x, y, rx, ry]) => { g.fillStyle = col; g.beginPath(); g.ellipse(x, y, rx, ry, seed, 0, 7); g.fill(); });
+    g.fillStyle = "rgba(0,0,0,.45)"; g.font = "600 18px sans-serif"; g.fillText("Photo de démonstration", 16, 340);
+    return c.toDataURL("image/jpeg", 0.7);
+  } catch (e) { return null; }
+}
+function demoVault() {
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const pick = a => a[Math.floor(rnd() * a.length)];
+  const day = (n, h = 20, m) => { const d = new Date(); d.setDate(d.getDate() - n); d.setHours(h, m == null ? Math.floor(rnd() * 59) : m, 0, 0); return d.toISOString(); };
+  const iso = n => day(n, 12, 0).slice(0, 10);
+  const E = []; let k = 0;
+  const add = (n, type, data, h) => E.push(Object.assign({ id: "d" + (k++), t: day(n, h), type }, data));
+  const moods = ["super", "content", "calme", "bof", "fatigue", "stresse", "triste", "colere", "surexcite"];
+  for (let n = 34; n >= 0; n--) {
+    if (rnd() < 0.75) { const hi = n < 8; const en = Math.max(1, Math.min(10, Math.round((hi ? 7.5 : 4.5) + (rnd() - 0.5) * 3))); add(n, "humeur", { humeur: hi ? pick(["surexcite", "super", "content", "stresse"]) : pick(moods.slice(1, 8)), energie: en, note: n === 3 ? "Plein d'idées, j'ai dormi 5 h." : "" }); }
+    if (rnd() < 0.7) { const c = pick(["23:00", "23:30", "00:15", "01:00", "22:45"]); add(n, "sommeil", { nuit: day(n + 1).slice(0, 10), coucher: c, lever: pick(["06:45", "07:00", "07:15", "09:30"]), endormissement: pick(["Moins de 15 min", "15 à 30 min", "30 min à 1 h", "Plus d'1 h"]), reveils: pick(["0", "1", "1", "2"]), qualite: 1 + Math.floor(rnd() * 5), ecran: pick(["Oui", "Oui", "Non"]), sieste: pick(["Non", "Non", "Oui"]) }, 8); }
+    if (rnd() < 0.3) add(n, "jauge", { niveau: 1 + Math.floor(rnd() * 5), sources: [pick(["Bruit", "Beaucoup de monde", "Fatigue", "Changement imprévu"]), pick(["Lumière", "Trop de demandes", "Bruit"])].filter((v, i, a) => a.indexOf(v) === i), aides: [pick(["Casque ou bouchons", "Pause au calme", "Musique", "Respirer"])], note: "" }, 17);
+    if (rnd() < 0.2) { const a = 5 + Math.floor(rnd() * 4); add(n, "respi", { exercice: pick(["La vague", "La balle", "5-4-3-2-1"]), avant: a, apres: Math.max(0, a - 2 - Math.floor(rnd() * 3)), duree: 180 }, 21); }
+    if (rnd() < 0.2) add(n, "sud", { sud: Math.max(0, Math.min(10, Math.round(7 - (34 - n) / 10 + (rnd() - 0.5) * 3))), note: "" }, 12);
+    if (n <= 13) {
+      [["pdj", 7], ["dej", 12], ["gout", 16], ["din", 19]].forEach(([s, h]) => {
+        if (rnd() < 0.12) return;
+        const skip = s === "pdj" && rnd() < 0.35;
+        add(n, "repas", skip ? { jour: iso(n), slot: s, pris: false, raison: pick(["Pas faim", "Pas le temps"]) } : { jour: iso(n), slot: s, pris: true, heure: `${String(h).padStart(2, "0")}:${pick(["00", "15", "30"])}`, quoi: pick(["Pâtes, salade", "Tartines, yaourt", "Poulet, riz, haricots", "Fruit et biscuits", "Soupe, pain, fromage"]), lieu: pick(["À la maison", "École / travail"]), avec: pick(["Seul·e", "Accompagné·e"]), faim: pick(["Un peu faim", "Faim", "Très faim"]), satiete: pick(["Bien", "Bien", "Plein·e"]), ctrl: "Non", emotions: [pick(["Calme", "Stress", "Fatigue"])], comp: [], pensees: "" }, h);
+      });
+      const ng = rnd() < 0.5 ? 0 : 1 + Math.floor(rnd() * 2);
+      for (let g = 0; g < ng; g++) { const crise = rnd() < 0.3; add(n, "repas", { jour: iso(n), slot: "grig", pris: true, heure: pick(["17:30", "21:45", "22:30", "15:10"]), quoi: crise ? "Paquet de gâteaux, chips, pain" : pick(["Biscuits", "Chocolat", "Chips"]), lieu: "À la maison", avec: "Seul·e", faim: pick(["Pas faim", "Un peu faim"]), satiete: crise ? "Trop plein·e" : "Bien", ctrl: crise ? "Oui" : pick(["Non", "Un peu"]), emotions: [pick(["Ennui", "Stress", "Solitude", "Tristesse"])], comp: [], pensees: "" }, 21); }
+    }
+  }
+  [[11, "dej"], [6, "din"], [2, "dej"]].forEach(([n, s], i) => { const e = E.find(x => x.type === "repas" && x.jour === iso(n) && x.slot === s && x.pris); if (e) e.photo = "ok", e._demoImg = i; });
+  add(9, "envie", { avant: 8, apres: 3, issue: "L'envie est passée", activites: ["Sortir marcher", "Écouter de la musique"], minutes: 15, declencheur: "Seul le soir après une journée difficile." }, 21);
+  add(4, "envie", { avant: 9, apres: 6, issue: "J'ai fait une crise", activites: ["Changer de pièce"], minutes: 8, declencheur: "Dispute." }, 22);
+  add(1, "envie", { avant: 7, apres: 2, issue: "L'envie a baissé", activites: ["Appeler ou écrire à quelqu'un"], minutes: 15, declencheur: "" }, 20);
+  add(12, "angoisse", { pic: 8, apres: 3, minutes: 6, declencheur: "Dans le bus, beaucoup de monde." }, 8);
+  add(3, "angoisse", { pic: 7, apres: 2, minutes: 4, declencheur: "" }, 18);
+  [[27, [1, 0, 0, 0, 0, 0, 0, 1, 0, 0]], [20, [0, 0, 0, 0, 0, 0, 0, 1, 0, 0]], [13, [0, 0, 1, 0, 0, 1, 0, 1, 0, 0]], [6, [1, 0, 1, 1, 1, 1, 1, 1, 0, 0]], [0, [1, 1, 1, 1, 1, 1, 1, 1, 1, 0]]].forEach(([n, rep]) => {
+    const y = rep.some(v => v); add(n, "elan", { rep, oui: rep.reduce((a, b) => a + b, 0), jours: y ? (n < 7 ? "4 à 6 jours" : "1 jour") : "", diff: y ? (n === 0 ? "Un peu" : "Non") : "", rem: y ? (n === 0 ? "Oui" : "Non") : "" }, 19);
+  });
+  const ag = [1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1];
+  add(2, "angst", { rep: ag, total: ag.reduce((a, b) => a + b, 0) }, 19);
+  add(14, "pensees", { situation: "Au self, un groupe a ri quand je suis passé.", pensee: "Ils se moquent de moi, tout le monde me trouve bizarre.", croyance: 85, emotions: ["Honte", "Tristesse"], intensite: 80, pour: "Ils ont ri au moment où je passais.", contre: "Je n'ai pas entendu ce qu'ils disaient. Ils riaient déjà avant.", alternative: "Ils riaient peut-être d'autre chose. Même si c'était de moi, ça ne dit pas qui je suis.", croyanceAlt: 55, intensiteApres: 45, croyanceApres: 40 });
+  add(9, "taches", { titre: "Réviser l'histoire", etapes: 4, faites: 4, ressenti: "Moyen", minutes: 52 });
+  E.sort((a, b) => a.t < b.t ? -1 : 1);
+  E.filter(e => e._demoImg != null).forEach(e => { const d = demoPlate(e._demoImg); if (d) memPhotos[e.id] = d; else e.photo = "perdue"; delete e._demoImg; });
+  const E2 = [];
+  for (let n = 20; n >= 0; n -= 2) E2.push({ id: "e" + n, t: day(n), type: "humeur", humeur: pick(["bof", "fatigue", "calme", "content"]), energie: 3 + Math.round(rnd() * 3), note: "" });
+  return { v: 2, priv: DEMO_PRIV, pub: DEMO_PUB, email: "annesophie.auray.psy@gmail.com", appUrl: "https://entre-seances.github.io", created: day(40), relay: "", token: "", cursor: 0,
+    patients: {
+      [DEMO_CODE]: { code: DEMO_CODE, label: "Patient fictif (ado)", tv: "tu", mods: ALL_MODS.slice(), created: day(36), lastImport: day(1),
+        tca: { p: ["HP"], r: ["pdj", "dej", "gout", "din"], o: { photo: 1, faim: 1, ctrl: 1, comp: 0, emo: 1, pens: 0, saute: 1, grig: 1 } },
+        hier: [["Demander l'heure à quelqu'un dans la rue", 3], ["Commander seul(e) au comptoir d'un café", 5], ["Poser une question en classe", 7], ["Passer un appel pour prendre un rendez-vous", 8]], entries: E },
+      "H4K-7TP": { code: "H4K-7TP", label: "Patiente fictive (adulte)", tv: "vous", mods: ["humeur", "sommeil", "respi", "fiches"], created: day(25), lastImport: day(3), hier: [], tca: null, entries: E2 }
+    } };
+}
+
+/* ---------- Outils ---------- */
+const ALPH = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function newCode() {
+  let c;
+  do { const r = crypto.getRandomValues(new Uint8Array(6)); c = [...r].map(x => ALPH[x % ALPH.length]).join(""); c = c.slice(0, 3) + "-" + c.slice(3); }
+  while (vault.patients[c]);
+  return c;
+}
+const pl = (n, w) => `${n} ${w}${n > 1 ? "s" : ""}`;
+const spaced = c => String(c).replace("-", " ");
+const fmtD = (iso, opt = { day: "2-digit", month: "2-digit" }) => new Date(iso).toLocaleDateString("fr-FR", opt);
+const fmtDT = iso => new Date(iso).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
+const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+const r1 = x => x == null ? "–" : (Math.round(x * 10) / 10).toString().replace(".", ",");
+function sleepHours(e) {
+  if (!e.coucher || !e.lever) return null;
+  const [ch, cm] = e.coucher.split(":").map(Number), [lh, lm] = e.lever.split(":").map(Number);
+  let m = (lh * 60 + lm) - (ch * 60 + cm); if (m <= 0) m += 1440; return m / 60;
+}
+function cfgFor(pt) { return { v: 2, m: pt.mods, h: (pt.hier || []).filter(h => h[0].trim()), t: pt.tv, e: vault.email, a: pt.tca || null }; }
+function activationCfg(pt) { return Object.assign(cfgFor(pt), { c: pt.code, k: vault.pub }); }
+const getChips = name => [...document.querySelectorAll(`.chips[data-name="${name}"] .chip[aria-pressed="true"]`)].map(b => b.dataset.v);
+document.addEventListener("click", e => {
+  const c = e.target.closest(".chip");
+  if (c) {
+    const box = c.closest(".chips");
+    if (box.dataset.multi === "1") c.setAttribute("aria-pressed", String(c.getAttribute("aria-pressed") !== "true"));
+    else box.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", String(b === c)));
+    c.dispatchEvent(new CustomEvent("picked", { bubbles: true }));
+  }
+  const g = e.target.closest("[data-nav]");
+  if (g) { e.preventDefault(); nav(g.dataset.nav, g.dataset.p ? JSON.parse(g.dataset.p) : {}); }
+});
+function nav(tab, p = {}) { view = { tab, p }; render(); window.scrollTo(0, 0); }
+
+/* ---------- Photos (IndexedDB, chiffrées avec la clé du coffre) ---------- */
+const memPhotos = {};
+async function storePhoto(id, dataUrl) {
+  if (demo) { memPhotos[id] = dataUrl; return; }
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, vkey, TE.encode(dataUrl)));
+  await PhotoDB.put("es_pro_photos", id, { iv, ct });
+}
+async function loadPhoto(id) {
+  if (memPhotos[id]) return memPhotos[id];
+  if (demo || !vkey) return null;
+  const r = await PhotoDB.get("es_pro_photos", id); if (!r) return null;
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: r.iv }, vkey, r.ct);
+  return (memPhotos[id] = TD.decode(pt));
+}
+function hydratePhotos() {
+  document.querySelectorAll("img[data-ph]").forEach(async im => {
+    let d = null; try { d = await loadPhoto(im.dataset.ph); } catch (e) {}
+    const card = im.closest(".ph-card");
+    if (!d) { if (card) card.classList.add("missing"); return; }
+    im.src = d; if (card) card.querySelectorAll("a[data-dl]").forEach(a => { a.href = d; });
+  });
+}
+
+/* ---------- Relais (réception directe) ---------- */
+const relayOn = () => !!(vault && vault.relay && vault.token && !demo);
+async function publishCfg(pt) {
+  if (!relayOn()) return null;
+  try { const blob = await sealCfg(pt.code, cfgFor(pt)); const r = await relay(vault.relay, { a: "setcfg", token: vault.token, code: pt.code, blob }); return !!r.ok; }
+  catch (e) { return false; }
+}
+async function importData(data) {
+  const pt = vault.patients[data.c];
+  if (!pt) return { err: "inconnu", code: data.c };
+  const known = new Set(pt.entries.map(e => e.id)); let n = 0;
+  for (const e of data.e) {
+    if (known.has(e.id)) continue;
+    if (e.img) { try { await storePhoto(e.id, e.img); e.photo = "ok"; } catch (x) { e.photo = "perdue"; } delete e.img; }
+    pt.entries.push(e); n++;
+  }
+  pt.entries.sort((a, b) => a.t < b.t ? -1 : 1); pt.lastImport = new Date().toISOString();
+  return { pt, n, dup: data.e.length - n };
+}
+async function fetchInbox() {
+  const r = await relay(vault.relay, { a: "inbox", token: vault.token, since: vault.cursor || 0 }, 120000);
+  if (!r.ok) throw new Error(r.err || "relais");
+  const res = { n: 0, by: {}, bad: 0, unknown: [], seen: r.items.length };
+  vault.failed = (vault.failed || []).filter(f => !r.items.some(it => it.seq === f.seq));
+  for (const it of r.items) {
+    try {
+      const out = await importData(await decryptMessage(vault.priv, it.msg));
+      if (out.err) { res.unknown.push(it.code); vault.failed.push({ seq: it.seq, code: it.code, t: it.t, why: "code absent de cet espace" }); }
+      else { res.n += out.n; if (out.n) res.by[out.pt.code] = (res.by[out.pt.code] || 0) + out.n; }
+    } catch (e) { res.bad++; vault.failed.push({ seq: it.seq, code: it.code, t: it.t, why: "chiffré avec une autre clé que celle de cet espace" }); }
+    vault.cursor = Math.max(vault.cursor || 0, it.seq);
+  }
+  vault.lastFetch = new Date().toISOString();
+  await persist();
+  return res;
+}
+function inboxSummary(res) {
+  const warn = (res.unknown && res.unknown.length ? ` ${res.unknown.length} message(s) d'un code absent de cet espace (${[...new Set(res.unknown)].map(spaced).join(", ")}).` : "") + (res.bad ? ` ${res.bad} message(s) illisible(s) : chiffré(s) pour un autre espace.` : "");
+  if (!res.n) return "Aucune nouvelle réponse." + warn;
+  return warn ? inboxSummary(Object.assign({}, res, { unknown: [], bad: 0 })) + warn : `${res.n} nouvelle${res.n > 1 ? "s" : ""} réponse${res.n > 1 ? "s" : ""} : ` + Object.entries(res.by).map(([c, n]) => `${esc((vault.patients[c] || {}).label || c)} (${n})`).join(", ") + ".";
+}
+async function connectRelay(url) {
+  url = url.trim();
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url) && !/^http:\/\/localhost(:\d+)?\/?$/.test(url)) return "L'adresse doit ressembler à https://script.google.com/macros/s/…/exec";
+  let r;
+  try { r = await relay(url, { a: "ping" }); } catch (e) { return (e.detail || "Le relais ne répond pas.") + " Vérifier l'adresse et que le déploiement est accessible à « Tout le monde »."; }
+  if (!r || !r.ok) return "Le relais ne répond pas correctement.";
+  if (!r.init) {
+    const token = uid() + uid() + uid();
+    r = await relay(url, { a: "init", token, pub: vault.pub });
+    if (!r.ok) return "L'initialisation a échoué.";
+    vault.token = token; vault.cursor = 0;
+  } else {
+    if (!vault.token) return "Ce relais est déjà relié à un autre espace. Restaurer la sauvegarde de cet espace, ou créer un nouveau relais.";
+    r = await relay(url, { a: "check", token: vault.token });
+    if (!r.ok) return "Ce relais est relié à un autre espace.";
+  }
+  vault.relay = url; await persist();
+  for (const pt of Object.values(vault.patients)) await publishCfg(pt);
+  return null;
+}
+
+/* ---------- QR code (bibliothèque qrcode-generator) ---------- */
+function qrSvg(text, px = 220) {
+  if (typeof qrcode === "undefined" || !text) return "";
+  try {
+    const q = qrcode(0, "M"); q.addData(text); q.make();
+    const n = q.getModuleCount(), m = 2, s = n + m * 2; let d = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c + m} ${r + m}h1v1h-1z`;
+    return `<svg class="qr" viewBox="0 0 ${s} ${s}" width="${px}" height="${px}" role="img" aria-label="QR code vers l'application"><rect width="${s}" height="${s}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+  } catch (e) { return ""; }
+}
+
+/* ---------- Graphiques (SVG à l'échelle) ---------- */
+function timeChart({ series, min, max, ticks, from, to, kind = "line", h = 200, unit = "" }) {
+  const W = 640, H = h, L = 36, R = 12, T = 12, B = 28;
+  const t0 = from.getTime(), t1 = Math.max(to.getTime(), t0 + 864e5);
+  const x = t => L + (W - L - R) * ((new Date(t).getTime() - t0) / (t1 - t0));
+  const y = v => T + (H - T - B) * (1 - (v - min) / (max - min));
+  let g = "";
+  ticks.forEach(v => { g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${String(v).replace(".", ",")}${unit}</text>`; });
+  const nT = 4; for (let i = 0; i <= nT; i++) { const t = t0 + (t1 - t0) * i / nT; g += `<text x="${x(t)}" y="${H - 8}" text-anchor="${i === 0 ? "start" : i === nT ? "end" : "middle"}">${fmtD(new Date(t).toISOString())}</text>`; }
+  series.forEach(s => {
+    const pts = s.pts.filter(p => p.v != null && new Date(p.t).getTime() >= t0).sort((a, b) => a.t < b.t ? -1 : 1);
+    if (kind === "bar") {
+      const bw = Math.max(3, Math.min(14, (W - L - R) / ((t1 - t0) / 864e5) * 0.6));
+      pts.forEach(p => { g += `<rect x="${x(p.t) - bw / 2}" y="${y(p.v)}" width="${bw}" height="${Math.max(0, y(min) - y(p.v))}" rx="2" fill="${s.color}" opacity="0.85"><title>${fmtD(p.t)} : ${r1(p.v)}${unit}</title></rect>`; });
+    } else {
+      if (pts.length > 1 && !s.dotsOnly) g += `<polyline fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p => `${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ")}"/>`;
+      pts.forEach((p, i) => { const last = i === pts.length - 1; g += `<circle cx="${x(p.t).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="${last ? 5 : 3.2}" fill="${last ? s.color : "var(--surface)"}" stroke="${s.color}" stroke-width="2"><title>${fmtD(p.t)} : ${r1(p.v)}${unit}</title></circle>`; });
+    }
+  });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+function freqList(items, limit = 6) {
+  const c = {}; items.forEach(i => c[i] = (c[i] || 0) + 1);
+  const arr = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, limit); if (!arr.length) return `<p class="muted small">Aucune donnée.</p>`;
+  const mx = arr[0][1];
+  return `<div class="freq">${arr.map(([k, n]) => `<div class="freq-row"><span>${esc(k)}</span><span class="bar" style="width:${(n / mx) * 100}%"></span><span class="n">${n}</span></div>`).join("")}</div>`;
+}
+
+
+function lockScreen() {
+  const exists = !!lsGet(VKEY);
+  return `<div class="lock">
+    <div class="row">${MARK}<span class="brand-name">Entre-Séances · Espace praticienne</span></div>
+    ${exists ? `<h1>Déverrouiller</h1>
+      <div class="card stack"><label class="lbl" for="pw">Mot de passe</label><input type="password" id="pw" autocomplete="current-password">
+      <p class="hint" id="err" role="alert"></p><button class="btn wide" id="go">Ouvrir mon espace</button></div>`
+    : `<h1>Créer mon espace</h1>
+      <p class="muted">Vos données de suivi et votre clé de déchiffrement sont chiffrées avec ce mot de passe, sur cet appareil uniquement.</p>
+      <div class="card stack">
+        <div><label class="lbl" for="pw">Mot de passe (12 caractères minimum)</label><input type="password" id="pw" autocomplete="new-password"></div>
+        <div><label class="lbl" for="pw2">Confirmer le mot de passe</label><input type="password" id="pw2" autocomplete="new-password"></div>
+        <p class="notice">Ce mot de passe ne peut pas être récupéré. Sans lui, les données sont perdues : faites une sauvegarde régulière depuis l'onglet Réglages.</p>
+        <p class="hint" id="err" role="alert"></p><button class="btn wide" id="create">Créer mon espace</button></div>`}
+    <details class="card"><summary class="lbl" style="cursor:pointer;margin:0">Restaurer une sauvegarde</summary>
+      <div class="stack" style="margin-top:12px"><textarea id="bk" class="mono" placeholder="SAUV1.…" spellcheck="false"></textarea>
+      <p class="hint" id="bkMsg" role="status"></p><button class="btn soft" id="restore">Restaurer</button></div></details>
+    <button class="btn ghost" id="demo">Découvrir en démonstration</button></div>`;
+}
+function mountLock() {
+  const err = document.getElementById("err");
+  const go = document.getElementById("go"), create = document.getElementById("create");
+  if (go) {
+    const run = async () => { go.disabled = true; go.textContent = "Ouverture…"; try { await openVault(document.getElementById("pw").value); afterUnlock(); } catch (e) { err.textContent = "Mot de passe incorrect."; go.disabled = false; go.textContent = "Ouvrir mon espace"; } };
+    go.onclick = run; document.getElementById("pw").onkeydown = e => { if (e.key === "Enter") run(); };
+  }
+  if (create) create.onclick = async () => {
+    const a = document.getElementById("pw").value, b = document.getElementById("pw2").value;
+    if (a.length < 12) { err.textContent = "Le mot de passe doit contenir au moins 12 caractères."; return; }
+    if (a !== b) { err.textContent = "Les deux mots de passe ne sont pas identiques."; return; }
+    create.disabled = true; create.textContent = "Création…"; await createVault(a); afterUnlock();
+  };
+  document.getElementById("restore").onclick = () => {
+    const m = document.getElementById("bkMsg");
+    try {
+      const raw = document.getElementById("bk").value.match(/SAUV1\.([A-Za-z0-9_-]+)/);
+      const rec = JSON.parse(TD.decode(B64.dec(raw[1])));
+      if (!rec.salt || !rec.ct) throw 0;
+      lsSet(VKEY, rec); m.textContent = "Sauvegarde restaurée. Saisissez le mot de passe de cette sauvegarde."; render();
+    } catch (e) { m.textContent = "Cette sauvegarde n'est pas reconnue. Elle doit commencer par SAUV1."; }
+  };
+  document.getElementById("demo").onclick = () => { vault = demoVault(); demo = true; nav("patients"); };
+}
+
+
+/* ---------- Rendu ---------- */
+function render() {
+  const app = document.getElementById("app");
+  if (!vault) { app.innerHTML = lockScreen(); mountLock(); return; }
+  const tabs = [["patients", "Patients"], ["recevoir", "Recevoir"], ["reglages", "Réglages"]];
+  app.innerHTML = `<header class="top"><div class="top-in">
+      <div class="brand">${MARK}<div><div class="brand-name">Entre-Séances</div><div class="brand-sub">Espace praticienne</div></div></div>
+      <nav class="tabs">${tabs.map(([k, l]) => `<button class="tab" data-nav="${k}" ${view.tab === k ? 'aria-current="page"' : ""}>${l}</button>`).join("")}</nav>
+      <button class="lockbtn" id="lockBtn">${demo ? "Quitter la démo" : "Verrouiller"}</button></div></header>
+    ${demo ? `<div class="demo-band"><b>Mode démonstration.</b> Patients et données fictifs, rien n'est enregistré. Les messages de l'application patient en démonstration (code ${spaced(DEMO_CODE)}) se déchiffrent dans l'onglet Recevoir.</div>` : ""}
+    ${flash ? `<div class="result flash" role="status">${flash}</div>` : ""}
+    <main>${(PAGES[view.tab] || PAGES.patients)(view.p)}</main>`;
+  flash = "";
+  document.getElementById("lockBtn").onclick = lock;
+  const m = MOUNTS[view.tab]; if (m) m(view.p);
+  hydratePhotos();
+}
+let polling = false;
+async function poll() {
+  if (polling || !relayOn() || document.visibilityState !== "visible") return;
+  polling = true;
+  try {
+    const res = await fetchInbox();
+    if (res.n || (res.unknown && res.unknown.length) || res.bad) {
+      flash = inboxSummary(res);
+      const safe = view.tab !== "reglages" && !view.p.edit && !view.p.act && view.tab !== "recevoir";
+      if (safe) render();
+    }
+  } catch (e) {} finally { polling = false; }
+}
+setInterval(poll, 120000);
+document.addEventListener("visibilitychange", poll);
+async function afterUnlock() {
+  touch(); nav("patients");
+  if (relayOn()) { try { const res = await fetchInbox(); if (res.n) { flash = inboxSummary(res); if (view.tab === "patients" && !view.p.code) render(); } } catch (e) {} }
+}
+
+const PAGES = {}, MOUNTS = {};
+
+/* Liste des patients */
+function alerts(pt) {
+  const lim = Date.now() - 30 * 864e5, recent = pt.entries.filter(e => new Date(e.t) > lim), out = [];
+  const lastA = recent.filter(e => e.type === "angst").pop(); if (lastA && lastA.total > 10) out.push(`Angst ${lastA.total}/20`);
+  const lastE = recent.filter(e => e.type === "elan").pop(); if (lastE && elanFlag(lastE)) out.push("Élan à explorer");
+  const comp = pt.entries.filter(e => e.type === "repas" && e.comp && e.comp.length && new Date(e.t) > Date.now() - 7 * 864e5).length; if (comp) out.push(`Compensations ×${comp} (7 j)`);
+  const crises = pt.entries.filter(e => e.type === "repas" && e.ctrl === "Oui" && new Date(e.t) > Date.now() - 7 * 864e5).length; if (crises) out.push(`Perte de contrôle ×${crises} (7 j)`);
+  return out;
+}
+PAGES.patients = p => {
+  if (p.edit) return patientForm(p.edit === "new" ? null : vault.patients[p.edit]);
+  if (p.act) return codeView(vault.patients[p.act], p);
+  if (p.code) return patientDetail(vault.patients[p.code], p);
+  const list = Object.values(vault.patients).sort((a, b) => (b.lastImport || b.created) < (a.lastImport || a.created) ? -1 : 1);
+  return `<div class="head-row"><div><h1>Patients</h1><p class="muted">${list.length} suivi${list.length > 1 ? "s" : ""} en cours${relayOn() ? " · réception directe active" : ""}</p></div>
+    <div class="row">${relayOn() ? `<button class="btn soft" id="fetchNow">Relever les réponses</button>` : ""}<button class="btn" data-nav="patients" data-p='{"edit":"new"}'>Nouveau patient</button></div></div>
+    ${!relayOn() && !demo ? `<div class="notice" style="margin-bottom:16px">La réception directe n'est pas encore configurée : les codes courts ne fonctionneront pas. <button class="link" data-nav="reglages" data-p='{"guide":true}'>Configurer (10 minutes)</button></div>` : ""}
+    ${list.length ? `<div class="grid-list">${list.map(pt => {
+      const last = pt.entries.length ? pt.entries[pt.entries.length - 1].t : null, al = alerts(pt);
+      return `<button class="pcard" data-nav="patients" data-p='{"code":"${pt.code}"}'><span class="top-line"><span class="lab">${esc(pt.label || "Sans repère")}</span><span class="code-chip">${spaced(pt.code)}</span></span>
+        <span class="muted small">${pt.entries.length} réponse${pt.entries.length > 1 ? "s" : ""}${last ? ` · dernière le ${fmtD(last, { day: "numeric", month: "long" })}` : " · aucune réponse reçue"}</span>
+        ${al.length ? `<span class="row">${al.map(a => `<span class="pill warn">${a}</span>`).join("")}</span>` : ""}
+        <span class="row">${pt.mods.slice(0, 4).map(m => `<span class="pill">${MOD_INFO[m] ? MOD_INFO[m][0] : m}</span>`).join("")}${pt.mods.length > 4 ? `<span class="pill">+${pt.mods.length - 4}</span>` : ""}</span></button>`;
+    }).join("")}</div>`
+      : `<div class="empty card"><h2>Aucun patient pour l'instant</h2><p>Créez un patient pour obtenir son code à 6 caractères.</p><button class="btn" data-nav="patients" data-p='{"edit":"new"}'>Nouveau patient</button></div>`}`;
+};
+MOUNTS.patients = p => {
+  if (p.edit) mountForm(p.edit === "new" ? null : vault.patients[p.edit]);
+  else if (p.act) mountCode(vault.patients[p.act], p);
+  else if (p.code) mountDetail(vault.patients[p.code], p);
+  else { const f = document.getElementById("fetchNow"); if (f) f.onclick = async () => { f.disabled = true; f.textContent = "Relevé…"; try { flash = inboxSummary(await fetchInbox()); } catch (e) { flash = e.detail || "Le relais ne répond pas. Vérifier la connexion."; } render(); }; }
+};
+
+/* Formulaire patient */
+function patientForm(pt) {
+  const x = pt || { label: "", tv: "tu", mods: DEFAULT_MODS.slice(), hier: [], tca: null };
+  const tca = x.tca || { p: [], r: ["pdj", "dej", "gout", "din"], o: {} };
+  const rows = (x.hier.length ? x.hier : [["", 3]]).map(h => hierRow(h[0], h[1])).join("");
+  const tcaOn = x.mods.includes("repas") || x.mods.includes("envie");
+  return `<button class="link" data-nav="patients" ${pt ? `data-p='{"code":"${pt.code}"}'` : ""}>← Retour</button>
+    <div class="head-row"><h1>${pt ? "Modifier " + esc(pt.label || pt.code) : "Nouveau patient"}</h1></div>
+    <div class="stack">
+      <div class="form-grid">
+        <div class="card"><label class="lbl" for="lab">Repère (pour vous seule)</label><input type="text" id="lab" maxlength="40" value="${esc(x.label)}" placeholder="Ex. : A.B. ou un pseudonyme">
+          <p class="hint">Visible uniquement dans votre espace chiffré. Préférez des initiales au nom complet.</p></div>
+        <div class="card"><span class="lbl">L'application s'adresse au patient avec</span>
+          <div class="chips" data-name="tv"><button class="chip" data-v="tu" aria-pressed="${x.tv === "tu"}">« tu »</button><button class="chip" data-v="vous" aria-pressed="${x.tv === "vous"}">« vous »</button></div>
+          <p class="hint">Le patient peut changer ce choix dans ses réglages.</p></div>
+      </div>
+      <div class="card stack"><span class="lbl">Exercices proposés</span>
+        ${MOD_GROUPS.map(([g, ms]) => `<div><p class="grp">${g}</p><div class="mods">${ms.map(m => `<label class="mod-check"><input type="checkbox" value="${m}" ${x.mods.includes(m) ? "checked" : ""}><span><b>${MOD_INFO[m][0]}</b><br><span class="small muted">${MOD_INFO[m][1]}</span></span></label>`).join("")}</div></div>`).join("")}</div>
+      <div class="card stack" id="tcaBox" ${tcaOn ? "" : "hidden"}><span class="lbl">Réglages TCA</span>
+        <div><p class="grp">Trouble(s) suivi(s) : pré-règle les rubriques</p><div class="chips" data-name="prof" data-multi="1">${Object.entries(TCA_PROFILES).map(([k, l]) => `<button class="chip" data-v="${k}" aria-pressed="${tca.p.includes(k)}">${l}</button>`).join("")}</div></div>
+        <div><p class="grp">Rubriques du carnet alimentaire</p><div class="mods">${Object.entries(TCA_OPTS).map(([k, l]) => `<label class="mod-check"><input type="checkbox" class="topt" value="${k}" ${tca.o[k] ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>
+          <p class="hint">Aucun calcul de calories ni de poids n'est proposé au patient.</p></div>
+        <div><p class="grp">Repas prévus dans la journée</p><div class="mods">${Object.entries(SLOTS).filter(([k]) => k !== "grig").map(([k, l]) => `<label class="mod-check"><input type="checkbox" class="tslot" value="${k}" ${tca.r.includes(k) ? "checked" : ""}><span>${l}</span></label>`).join("")}</div></div></div>
+      <div class="card stack"><span class="lbl">Hiérarchie d'exposition</span>
+        <p class="hint" style="margin-top:-4px">Une marche par ligne, avec le malaise prévu (0 à 10). Laissez vide si l'exposition n'est pas travaillée.</p>
+        <div class="hier" id="hier">${rows}</div>
+        <button class="btn soft" id="addH" style="align-self:flex-start">Ajouter une marche</button></div>
+      <p class="hint" id="ferr" role="alert"></p>
+      <div class="row"><button class="btn" id="saveP">${pt ? "Enregistrer" : "Créer le patient et son code"}</button></div>
+    </div>`;
+}
+function hierRow(label, sud) {
+  return `<div class="hier-row"><input type="text" class="hl" maxlength="90" value="${esc(label)}" placeholder="Ex. : prendre le bus seul(e)" aria-label="Marche"><select class="hs" aria-label="Malaise prévu">${Array.from({ length: 11 }, (_, i) => `<option value="${i}" ${i === Number(sud) ? "selected" : ""}>${i} / 10</option>`).join("")}</select><button class="link hrm" type="button">Retirer</button></div>`;
+}
+function mountForm(pt) {
+  const box = document.getElementById("hier");
+  document.getElementById("addH").onclick = () => { box.insertAdjacentHTML("beforeend", hierRow("", 5)); box.lastElementChild.querySelector("input").focus(); };
+  box.addEventListener("click", e => { if (e.target.classList.contains("hrm")) e.target.closest(".hier-row").remove(); });
+  const modBoxes = [...document.querySelectorAll(".mod-check input:not(.topt):not(.tslot)")];
+  modBoxes.forEach(i => i.onchange = () => { document.getElementById("tcaBox").hidden = !modBoxes.some(b => b.checked && (b.value === "repas" || b.value === "envie")); });
+  document.querySelectorAll('.chips[data-name="prof"] .chip').forEach(b => b.addEventListener("picked", () => {
+    const on = new Set(getChips("prof").flatMap(k => TCA_PRESET[k]));
+    if (getChips("prof").length) document.querySelectorAll(".topt").forEach(i => { i.checked = on.has(i.value); });
+  }));
+  document.getElementById("saveP").onclick = async e => {
+    const mods = modBoxes.filter(i => i.checked).map(i => i.value);
+    if (!mods.length) { document.getElementById("ferr").textContent = "Choisissez au moins un exercice."; return; }
+    const hier = [...document.querySelectorAll(".hier-row")].map(r => [r.querySelector(".hl").value.trim(), Number(r.querySelector(".hs").value)]).filter(h => h[0]);
+    let tca = null;
+    if (mods.includes("repas") || mods.includes("envie")) {
+      const o = {}; document.querySelectorAll(".topt").forEach(i => { o[i.value] = i.checked ? 1 : 0; });
+      const r = [...document.querySelectorAll(".tslot:checked")].map(i => i.value);
+      if (mods.includes("repas") && !r.length) { document.getElementById("ferr").textContent = "Cochez au moins un repas prévu."; return; }
+      tca = { p: getChips("prof"), r, o };
+    }
+    e.currentTarget.disabled = true;
+    const data = { label: document.getElementById("lab").value.trim(), tv: getChips("tv")[0] || "tu", mods, hier, tca, updated: new Date().toISOString() };
+    let code;
+    if (pt) { Object.assign(pt, data); code = pt.code; }
+    else { code = newCode(); vault.patients[code] = Object.assign({ code, created: new Date().toISOString(), entries: [], lastImport: null }, data); }
+    await persist();
+    const pub = await publishCfg(vault.patients[code]);
+    nav("patients", pt ? { code, published: pub } : { act: code, fresh: true, published: pub });
+  };
+}
+
+/* Code patient : code court, QR, message, fiche à remettre */
+function inviteText(pt) {
+  const vous = pt.tv === "vous", url = vault.appUrl || "[lien de l'application]";
+  return vous
+    ? `Bonjour,\n\nPour nos exercices entre les séances :\n1. Ouvrez ce lien sur votre téléphone : ${url}\n2. Installez l'application sur l'écran d'accueil (la page explique comment).\n3. Ouvrez l'application installée et entrez votre code : ${spaced(pt.code)}\n\nAucune information personnelle ne vous sera demandée. Vos réponses me parviennent chiffrées : je suis la seule à pouvoir les lire.\n\nAnne-Sophie Auray, psychologue`
+    : `Bonjour,\n\nPour nos exercices entre les séances :\n1. Ouvre ce lien sur ton téléphone : ${url}\n2. Installe l'application sur l'écran d'accueil (la page explique comment).\n3. Ouvre l'application installée et entre ton code : ${spaced(pt.code)}\n\nAucune information personnelle ne te sera demandée. Tes réponses m'arrivent chiffrées : je suis la seule à pouvoir les lire.\n\nAnne-Sophie Auray, psychologue`;
+}
+function codeView(pt, p) {
+  const url = vault.appUrl, qr = qrSvg(url, 200);
+  const status = demo ? `<p class="notice">En démonstration, le code ${spaced(DEMO_CODE)} fonctionne sans réception directe.</p>`
+    : relayOn() ? `<p class="result" id="pubSt">${p.published === false ? "La publication des exercices a échoué." : "Exercices publiés : le code est actif."}</p>`
+    : `<p class="result err">Réception directe non configurée : ce code ne fonctionnera pas encore. <button class="link" data-nav="reglages" data-p='{"guide":true}'>Configurer</button></p>`;
+  return `<button class="link no-print" data-nav="patients" data-p='{"code":"${pt.code}"}'>← Fiche du patient</button>
+    <div class="head-row no-print"><div><h1>Code patient</h1><p class="muted">${esc(pt.label || "")}</p></div></div>
+    <div class="split">
+      <div class="card stack print-sheet">
+        <div class="ps-head">${MARK}<b>Entre-Séances</b></div>
+        <p class="lbl">1. Ouvrir sur le téléphone</p>
+        ${qr ? `<div class="qr-wrap">${qr}</div><p class="small muted" style="text-align:center">Scanner avec l'appareil photo</p>` : ""}
+        <p class="big-url">${url ? esc(url.replace(/^https?:\/\//, "")) : `<button class="link no-print" data-nav="reglages">Ajouter le lien de l'application dans Réglages</button>`}</p>
+        <p class="lbl">2. Installer l'application</p><p class="small">La page d'accueil explique comment l'ajouter à l'écran d'accueil (iPhone, Android, ordinateur).</p>
+        <p class="lbl">3. Entrer le code</p><p class="big-code">${spaced(pt.code)}</p>
+        <p class="small muted">Aucune information personnelle n'est demandée.</p>
+        ${!inFrame ? `<button class="btn soft no-print" id="print">Imprimer cette fiche</button>` : ""}</div>
+      <div class="stack no-print">
+        ${status}
+        <div class="card stack"><span class="lbl">Message prêt à envoyer</span>
+          <textarea id="inv" readonly style="min-height:240px">${esc(inviteText(pt))}</textarea>
+          <button class="btn" id="cpInv">Copier le message</button></div>
+        <details class="card"><summary class="lbl" style="cursor:pointer;margin:0">Sans réception directe : code long</summary>
+          <div class="stack" style="margin-top:10px"><p class="small">À coller dans le champ du code, si la réception directe n'est pas configurée. Avec ce code, les réponses passent par copier-coller.</p>
+          <textarea id="act" class="mono" readonly spellcheck="false">…</textarea><button class="btn soft" id="cpAct">Copier le code long</button></div></details>
+      </div></div>`;
+}
+async function mountCode(pt, p) {
+  document.getElementById("cpInv").onclick = async e => { const t = document.getElementById("inv"); if (!(await copyText(t.value, e.currentTarget))) selectAll(t); };
+  const pr = document.getElementById("print"); if (pr) pr.onclick = () => window.print();
+  const act = await encodeActivation(activationCfg(pt)), a = document.getElementById("act");
+  if (!a) return; a.value = act;
+  document.getElementById("cpAct").onclick = async e => { if (!(await copyText(act, e.currentTarget))) selectAll(a); };
+  if (p.published === false && relayOn()) { const ok = await publishCfg(pt); const st = document.getElementById("pubSt"); if (st) st.textContent = ok ? "Exercices publiés : le code est actif." : "La publication a échoué. Vérifier la connexion puis rouvrir cette page."; }
+}
+
+/* Fiche patient : graphiques et journal */
+const PERIODS = [["14", "14 jours"], ["30", "30 jours"], ["90", "3 mois"], ["all", "Tout"]];
+function inPeriod(pt, per) {
+  const now = new Date(); let from;
+  if (per === "all") from = pt.entries.length ? new Date(pt.entries[0].t) : new Date(now.getTime() - 14 * 864e5);
+  else from = new Date(now.getTime() - Number(per) * 864e5);
+  from.setHours(0, 0, 0, 0);
+  return { from, to: now, list: pt.entries.filter(e => new Date(e.t) >= from) };
+}
+function entryText(e) {
+  switch (e.type) {
+    case "humeur": return [e.humeur ? MOOD_LABEL[e.humeur] : null, e.energie != null ? `énergie ${e.energie}/10` : null, e.score != null ? `${e.score}/10` : null, e.emotions && e.emotions.length ? e.emotions.join(", ") : null, e.note ? `« ${e.note} »` : null].filter(Boolean).join(" · ");
+    case "sud": return `${e.sud}/10${e.note ? " · « " + e.note + " »" : ""}`;
+    case "sommeil": { const h = sleepHours(e); return `Nuit du ${fmtD(e.nuit)} : ${e.coucher} → ${e.lever} (${r1(h)} h) · endormissement ${e.endormissement || "?"} · réveils ${e.reveils || "?"} · qualité ${e.qualite || "?"}/5 · écran ${e.ecran || "?"} · sieste ${e.sieste || "?"}`; }
+    case "jauge": return `Niveau ${e.niveau}/5${e.sources.length ? " · sources : " + e.sources.join(", ") : ""}${e.aides.length ? " · aides : " + e.aides.join(", ") : ""}${e.note ? " · « " + e.note + " »" : ""}`;
+    case "respi": return `${e.exercice}${e.avant != null ? ` · stress ${e.avant} → ${e.apres}` : ""} · ${Math.round((e.duree || 0) / 60)} min`;
+    case "expo": return `« ${e.label} » (prévu ${e.prevu}) · avant ${e.avant}, pic ${e.pic}, fin ${e.fin} · ${e.duree || "durée ?"} · resté : ${e.reste || "?"}${e.note ? " · « " + e.note + " »" : ""}`;
+    case "taches": return `« ${e.titre || "Tâche"} » · ${e.faites}/${e.etapes} étapes · ${e.ressenti || ""} · ${e.minutes} min`;
+    case "pensees": return `Situation : ${e.situation || "–"} · Pensée : ${e.pensee || "–"} (${e.croyance} %) · Émotions : ${(e.emotions || []).join(", ")} (${e.intensite} %) · Pour : ${e.pour || "–"} · Contre : ${e.contre || "–"} · Alternative : ${e.alternative || "–"} (${e.croyanceAlt} %) · Après : émotion ${e.intensiteApres} %, croyance initiale ${e.croyanceApres} %`;
+    case "repas": {
+      const head = `${SLOTS[e.slot] || e.slot} du ${fmtD(e.jour + "T12:00")}`;
+      if (e.pris === false) return `${head} · non pris${e.raison ? " (" + e.raison + ")" : ""}`;
+      return [head + (e.heure ? " à " + e.heure : ""), e.quoi ? `« ${e.quoi} »` : null, e.lieu, e.avec, e.faim ? `faim : ${e.faim}` : null, e.satiete ? `après : ${e.satiete}` : null, e.ctrl ? `perte de contrôle : ${e.ctrl}` : null, e.comp && e.comp.length ? `compensations : ${e.comp.join(", ")}` : null, e.emotions && e.emotions.length ? `émotions : ${e.emotions.join(", ")}` : null, e.pensees ? `pensées : « ${e.pensees} »` : null, e.photo === "ok" ? "photo" : null].filter(Boolean).join(" · ");
+    }
+    case "envie": return `Envie ${e.avant} → ${e.apres} · ${e.issue || "?"} · ${e.minutes} min${e.activites && e.activites.length ? " · " + e.activites.join(", ") : ""}${e.declencheur ? " · déclencheur : « " + e.declencheur + " »" : ""}`;
+    case "angoisse": return `Pic ${e.pic}/10 → ${e.apres}/10 · ${e.minutes} min${e.declencheur ? " · « " + e.declencheur + " »" : ""}`;
+    case "angst": return `Total ${e.total}/20 « vrai »${e.total > 10 ? " (au-dessus du seuil > 10)" : ""}`;
+    case "elan": return `${e.oui}/10 « oui »${e.oui ? ` · ${e.jours} · difficultés : ${e.diff} · remarqué : ${e.rem}` : ""}${elanFlag(e) ? " · repère « à explorer »" : ""}`;
+  }
+  return "";
+}
+function panel(title, sub, body, wide) { return `<section class="panel"${wide ? ' style="grid-column:1/-1"' : ""}><h3>${title} <small>${sub}</small></h3>${body}</section>`; }
+function patientDetail(pt, p) {
+  if (!pt) return `<p>Patient introuvable.</p>`;
+  const per = p.per || "30";
+  if (p.del) return `<button class="link" data-nav="patients" data-p='{"code":"${pt.code}"}'>← Retour</button>
+    <div class="card stack danger-zone" style="max-width:560px"><h2>Supprimer ${esc(pt.label || pt.code)} ?</h2>
+    <p>Toutes les réponses reçues pour ce code seront effacées de votre espace, et le code sera désactivé. Pensez à copier le compte rendu dans votre dossier avant.</p>
+    <div class="row"><button class="btn help" id="delYes">Supprimer définitivement</button><button class="btn ghost" data-nav="patients" data-p='{"code":"${pt.code}"}'>Annuler</button></div></div>`;
+  const { from, to, list } = inPeriod(pt, per);
+  const by = t => list.filter(e => e.type === t);
+  const P = [];
+  const hum = by("humeur");
+  if (hum.length) {
+    const en = hum.filter(e => e.energie != null), sc = hum.filter(e => e.score != null), md = hum.filter(e => e.humeur);
+    P.push(panel("Humeur du jour", `${pl(hum.length, "saisie")}${en.length ? ` · énergie moyenne ${r1(avg(en.map(e => e.energie)))}/10` : ""}`,
+      (md.length ? `<div class="mood-strip">${md.slice(-28).map(e => `<span class="ms" title="${fmtD(e.t)} : ${MOOD_LABEL[e.humeur]}${e.energie != null ? " · énergie " + e.energie : ""}">${face(e.humeur, 26)}<small>${fmtD(e.t)}</small></span>`).join("")}</div>` : "")
+      + (en.length ? `<span class="lbl small">Jauge d'énergie</span>` + timeChart({ series: [{ pts: en.map(e => ({ t: e.t, v: e.energie })), color: "var(--sun)" }], min: 1, max: 10, ticks: [1, 5, 10], from, to }) : "")
+      + (sc.length ? `<span class="lbl small">Humeur 0-10 (ancienne version)</span>` + timeChart({ series: [{ pts: sc.map(e => ({ t: e.t, v: e.score })), color: "var(--accent)" }], min: 0, max: 10, ticks: [0, 5, 10], from, to }) : "")
+      + (md.length ? `<span class="lbl small">Humeurs les plus choisies</span>${freqList(md.map(e => MOOD_LABEL[e.humeur]))}` : "")));
+  }
+  const el = by("elan"), ag = by("angst");
+  if (el.length || ag.length) {
+    const lastE = el[el.length - 1], lastA = ag[ag.length - 1];
+    P.push(panel("Hypomanie", "questionnaires envoyés par le patient",
+      `<div class="split" style="gap:14px">
+        ${lastA ? `<div class="stack"><div class="score-box ${lastA.total > 10 ? "hi" : ""}"><b>${lastA.total}<small>/20</small></b><span>Angst, le ${fmtD(lastA.t, { day: "numeric", month: "long" })}<br>${lastA.total > 10 ? "Au-dessus du seuil (> 10)" : "Sous le seuil (> 10)"}</span></div>
+          <p class="small"><b>Items « vrai » :</b> ${(lastA.rep || []).map((v, i) => v ? ANGST_ITEMS[i] : null).filter(Boolean).join(" · ") || "aucun"}</p>
+          ${ag.length > 1 ? `<p class="small muted">Précédents : ${ag.slice(0, -1).map(e => `${fmtD(e.t)} : ${e.total}`).join(" · ")}</p>` : ""}</div>` : ""}
+        ${lastE ? `<div class="stack"><div class="score-box ${elanFlag(lastE) ? "hi" : ""}"><b>${lastE.oui}<small>/10</small></b><span>Élan (7 jours), le ${fmtD(lastE.t, { day: "numeric", month: "long" })}<br>${elanFlag(lastE) ? "Repère : à explorer" : "Pas de repère d'alerte"}</span></div>
+          ${lastE.oui ? `<p class="small"><b>Oui :</b> ${(lastE.rep || []).map((v, i) => v ? ELAN_ITEMS[i] : null).filter(Boolean).join(" · ")}<br>Durée : ${esc(lastE.jours)} · Difficultés : ${esc(lastE.diff)} · Remarqué par l'entourage : ${esc(lastE.rem)}</p>` : ""}
+          ${el.length > 1 ? timeChart({ series: [{ pts: el.map(e => ({ t: e.t, v: e.oui })), color: "var(--z4)" }], min: 0, max: 10, ticks: [0, 5, 10], from, to, h: 150 }) : ""}
+          <p class="hint">Le suivi de l'élan est un repère clinique non validé, rédigé pour l'application. Repère « à explorer » : humeur exaltée + au moins 3 autres signes, ou irritabilité + au moins 4.</p></div>` : ""}
+      </div>`, true));
+  }
+  const rep = by("repas");
+  if (rep.length || pt.tca) {
+    const slots = (pt.tca && pt.tca.r) || ["pdj", "dej", "gout", "din"];
+    const days = [...new Set(rep.map(e => e.jour))].sort().reverse().slice(0, 21);
+    const cell = (j, s) => {
+      const es = rep.filter(e => e.jour === j && e.slot === s); if (!es.length) return `<td class="c-none">–</td>`;
+      const e = es[es.length - 1];
+      if (e.pris === false) return `<td class="c-skip" title="${esc(e.raison || "")}">non pris</td>`;
+      const flags = (e.ctrl === "Oui" ? `<i class="f-ctrl" title="Perte de contrôle">PC</i>` : "") + (e.comp && e.comp.length ? `<i class="f-comp" title="${esc(e.comp.join(", "))}">C</i>` : "") + (e.photo === "ok" ? `<i class="f-ph">photo</i>` : "");
+      return `<td class="c-ok">${esc(e.heure || "✓")} ${flags}</td>`;
+    };
+    const grigDay = j => rep.filter(e => e.jour === j && e.slot === "grig");
+    const grigs = rep.filter(e => e.slot === "grig"), ctrlN = rep.filter(e => e.ctrl === "Oui").length, comps = rep.flatMap(e => e.comp || []), skips = rep.filter(e => e.pris === false).length;
+    const photos = rep.filter(e => e.photo === "ok").slice().reverse();
+    P.push(panel("Repas et grignotages", `${pl(rep.length, "saisie")} · ${skips} repas non pris · ${pl(grigs.length, "grignotage")} · perte de contrôle ×${ctrlN}${comps.length ? ` · compensations ×${comps.length}` : ""}`,
+      (pt.tca && pt.tca.p && pt.tca.p.length ? `<p class="small muted">Profil : ${pt.tca.p.map(k => TCA_PROFILES[k]).join(", ")}</p>` : "")
+      + (days.length ? `<div class="tbl-wrap"><table class="meal-grid"><thead><tr><th>Jour</th>${slots.map(s => `<th>${SLOTS[s]}</th>`).join("")}<th>Grignotages</th></tr></thead><tbody>${days.map(j => { const g = grigDay(j); return `<tr><td>${fmtD(j + "T12:00", { weekday: "short", day: "numeric", month: "numeric" })}</td>${slots.map(s => cell(j, s)).join("")}<td class="${g.some(x => x.ctrl === "Oui") ? "c-ctrl" : ""}">${g.length ? g.length + (g.some(x => x.ctrl === "Oui") ? " · PC" : "") : "–"}</td></tr>`; }).join("")}</tbody></table></div>
+        <div class="legend"><span><i class="f-ctrl">PC</i> perte de contrôle</span><span><i class="f-comp">C</i> compensation</span><span>Survoler une case pour le détail ; le journal complet est plus bas.</span></div>` : `<p class="muted small">Aucun repas noté sur la période.</p>`)
+      + (grigs.length ? `<span class="lbl small">Grignotages par jour</span>` + timeChart({ series: [{ pts: Object.entries(grigs.reduce((c, e) => (c[e.jour] = (c[e.jour] || 0) + 1, c), {})).map(([j, n]) => ({ t: j + "T12:00:00", v: n })), color: "var(--z4)" }], min: 0, max: Math.max(3, ...Object.values(grigs.reduce((c, e) => (c[e.jour] = (c[e.jour] || 0) + 1, c), {}))), ticks: [0, 1, 2, 3], from, to, kind: "bar", h: 140 }) : "")
+      + `<div class="split" style="gap:12px"><div><span class="lbl small">Émotions associées</span>${freqList(rep.flatMap(e => e.emotions || []))}</div>${comps.length ? `<div><span class="lbl small">Compensations</span>${freqList(comps)}</div>` : `<div><span class="lbl small">Faim avant</span>${freqList(rep.map(e => e.faim).filter(Boolean))}</div>`}</div>`
+      + (photos.length ? `<span class="lbl small">Photos (${photos.length})</span><div class="ph-grid">${photos.map(e => `<figure class="ph-card"><a data-dl href="#" target="_blank" rel="noopener"><img data-ph="${e.id}" alt="${SLOTS[e.slot]} du ${fmtD(e.jour + "T12:00")}"></a><figcaption>${SLOTS[e.slot]} · ${fmtD(e.jour + "T12:00")}${e.heure ? " · " + e.heure : ""}${!inFrame ? `<br><a data-dl href="#" download="repas-${pt.code}-${e.jour}-${e.slot}.jpg">Enregistrer</a>` : ""}</figcaption></figure>`).join("")}</div>` : ""), true));
+  }
+  const env = by("envie");
+  if (env.length) P.push(panel("Envies de crise", `${env.length} · envie moyenne ${r1(avg(env.map(e => e.avant)))} → ${r1(avg(env.map(e => e.apres)))}`, `<div class="split" style="gap:12px"><div><span class="lbl small">Issue</span>${freqList(env.map(e => e.issue))}</div><div><span class="lbl small">Ce qui a été essayé</span>${freqList(env.flatMap(e => e.activites || []))}</div></div>`));
+  const ang = by("angoisse");
+  if (ang.length) P.push(panel("Crises d'angoisse", `${ang.length} · pic moyen ${r1(avg(ang.map(e => e.pic)))} → ${r1(avg(ang.map(e => e.apres)))} · durée moyenne ${r1(avg(ang.map(e => e.minutes)))} min`,
+    timeChart({ series: [{ pts: ang.map(e => ({ t: e.t, v: e.pic })), color: "var(--z5)", dotsOnly: true }, { pts: ang.map(e => ({ t: e.t, v: e.apres })), color: "var(--z1)", dotsOnly: true }], min: 0, max: 10, ticks: [0, 5, 10], from, to, h: 160 }) + `<div class="legend"><span><i style="background:var(--z5)"></i>Pic</span><span><i style="background:var(--z1)"></i>Après l'exercice</span></div>`));
+  const sud = by("sud"), som = by("sommeil"), jau = by("jauge"), res = by("respi"), exp = by("expo"), pen = by("pensees"), tac = by("taches");
+  if (sud.length) P.push(panel("Malaise (SUD)", `moyenne ${r1(avg(sud.map(e => e.sud)))}/10 · ${pl(sud.length, "saisie")}`, timeChart({ series: [{ pts: sud.map(e => ({ t: e.t, v: e.sud })), color: "var(--z5)" }], min: 0, max: 10, ticks: [0, 5, 10], from, to })));
+  if (som.length) { const hrs = som.map(sleepHours).filter(x => x != null);
+    P.push(panel("Sommeil", `durée moyenne ${r1(avg(hrs))} h · qualité ${r1(avg(som.map(e => e.qualite).filter(Boolean)))}/5`, timeChart({ series: [{ pts: som.map(e => ({ t: e.nuit + "T12:00:00", v: sleepHours(e) })), color: "var(--s0)" }], min: 0, max: 12, ticks: [0, 4, 8, 12], from, to, kind: "bar", unit: " h" })
+      + `<div class="legend"><span>Endormissement &gt; 30 min : ${som.filter(e => /30 min à 1 h|Plus d'1 h/.test(e.endormissement)).length} nuits</span><span>Écran avant le coucher : ${som.filter(e => e.ecran === "Oui").length}/${som.length}</span></div>`)); }
+  if (jau.length) P.push(panel("Jauge sensorielle", `${pl(jau.length, "saisie")} · niveau 4-5 : ${jau.filter(e => e.niveau >= 4).length}`, timeChart({ series: [{ pts: jau.map(e => ({ t: e.t, v: e.niveau })), color: "var(--z4)" }], min: 1, max: 5, ticks: [1, 3, 5], from, to })
+    + `<div class="split" style="gap:12px"><div><span class="lbl small">Sources</span>${freqList(jau.flatMap(e => e.sources))}</div><div><span class="lbl small">Ce qui aide</span>${freqList(jau.flatMap(e => e.aides))}</div></div>`));
+  if (res.length) { const sc = res.filter(e => e.avant != null);
+    P.push(panel("Respiration et ancrage", `${res.length} exercices${sc.length ? ` · stress ${r1(avg(sc.map(e => e.avant)))} → ${r1(avg(sc.map(e => e.apres)))}` : ""}`, freqList(res.map(e => e.exercice)))); }
+  if ((pt.hier && pt.hier.length) || exp.length) {
+    const rows = (pt.hier || []).map((h, i) => { const ex = exp.filter(e => e.marche === i); const last = ex[ex.length - 1];
+      return `<tr><td>${esc(h[0])}</td><td class="num">${h[1]}</td><td class="num">${ex.length}</td><td class="num">${ex.map(e => e.pic).join(" → ") || "–"}</td><td class="num">${last ? last.fin : "–"}</td><td>${last ? esc(last.reste) : "–"}</td></tr>`; }).join("");
+    P.push(panel("Exposition", `${exp.length} exposition${exp.length > 1 ? "s" : ""} sur la période`, `<div class="tbl-wrap"><table><thead><tr><th>Marche</th><th>Prévu</th><th>Fois</th><th>Pics successifs</th><th>Dernière fin</th><th>Resté jusqu'au bout</th></tr></thead><tbody>${rows}</tbody></table></div>`, true));
+  }
+  if (tac.length) P.push(panel("Tâches découpées", `${tac.length} tâches · ${tac.filter(e => e.faites === e.etapes).length} terminées`, `<div class="journal">${tac.map(e => `<div class="jrow"><span class="when">${fmtDT(e.t)}</span><span class="what">${esc(entryText(e))}</span></div>`).join("")}</div>`));
+  if (pen.length) P.push(panel("Tableaux des pensées", `${pen.length}`, pen.slice().reverse().map(e => `<dl class="tr-card"><dt>Date</dt><dd>${fmtDT(e.t)}</dd><dt>Situation</dt><dd>${esc(e.situation)}</dd><dt>Pensée automatique</dt><dd>${esc(e.pensee)} <b>(${e.croyance} %)</b></dd><dt>Émotions</dt><dd>${esc((e.emotions || []).join(", "))} <b>(${e.intensite} %)</b></dd><dt>Pour</dt><dd>${esc(e.pour) || "–"}</dd><dt>Contre</dt><dd>${esc(e.contre) || "–"}</dd><dt>Pensée alternative</dt><dd>${esc(e.alternative) || "–"} <b>(${e.croyanceAlt} %)</b></dd><dt>Réévaluation</dt><dd>Émotion ${e.intensiteApres} % · croyance initiale ${e.croyanceApres} %</dd></dl>`).join(""), true));
+  return `<button class="link" data-nav="patients">← Tous les patients</button>
+    <div class="detail-head"><div class="row"><div><h1>${esc(pt.label || "Sans repère")}</h1><p class="muted"><span class="code-chip">${spaced(pt.code)}</span> · « ${pt.tv} » · suivi depuis le ${fmtD(pt.created, { day: "numeric", month: "long", year: "numeric" })}${pt.lastImport ? ` · dernière réception ${fmtDT(pt.lastImport)}` : ""}</p></div>
+      <div class="row"><button class="btn" id="cr">Copier le compte rendu</button><button class="btn soft" data-nav="patients" data-p='{"edit":"${pt.code}"}'>Modifier les exercices</button><button class="btn ghost" data-nav="patients" data-p='{"act":"${pt.code}"}'>Code et fiche à remettre</button></div></div>
+      ${p.published === true ? `<p class="result">Modifications publiées : le patient les recevra à la prochaine ouverture de l'application.</p>` : p.published === false ? `<p class="result err">Modifications enregistrées, mais pas publiées (relais injoignable). Rouvrir « Code et fiche à remettre » pour réessayer.</p>` : ""}
+      <div class="chips" data-name="per">${PERIODS.map(([k, l]) => `<button class="chip" data-v="${k}" aria-pressed="${k === per}">${l}</button>`).join("")}</div></div>
+    ${list.length ? `<div class="kpis"><div class="kpi"><b>${list.length}</b><span>réponses sur la période</span></div>${Object.entries(list.reduce((c, e) => (c[e.type] = (c[e.type] || 0) + 1, c), {})).map(([k, n]) => `<div class="kpi"><b>${n}</b><span>${TYPE_LABEL[k] || k}</span></div>`).join("")}</div>
+    <div class="panels">${P.join("")}
+      <details class="panel" style="grid-column:1/-1"><summary class="lbl" style="cursor:pointer;margin:0">Journal complet (${list.length} réponses, du plus récent au plus ancien)</summary><div class="journal">${list.slice().reverse().map(e => `<div class="jrow"><span class="when">${fmtDT(e.t)}</span><span class="what"><span class="kind">${TYPE_LABEL[e.type] || e.type}</span> · ${esc(entryText(e))}</span></div>`).join("")}</div></details></div>`
+    : `<div class="empty card"><h2>Aucune réponse sur cette période</h2><p>${relayOn() ? "Les réponses arrivent automatiquement quand le patient les envoie : utilisez « Relever les réponses »." : "Les réponses apparaissent après avoir collé les messages chiffrés dans l'onglet Recevoir."}</p><button class="btn soft" data-nav="recevoir">Recevoir des réponses</button></div>`}
+    <p style="margin-top:24px"><button class="link" data-nav="patients" data-p='{"code":"${pt.code}","del":true}'>Supprimer ce patient</button></p>`;
+}
+function report(pt, per) {
+  const { from, to, list } = inPeriod(pt, per);
+  const lines = [`Entre-Séances · ${spaced(pt.code)}${pt.label ? " (" + pt.label + ")" : ""}`, `Période du ${fmtD(from.toISOString(), { day: "numeric", month: "long", year: "numeric" })} au ${fmtD(to.toISOString(), { day: "numeric", month: "long", year: "numeric" })} · ${list.length} réponses`, ""];
+  const by = t => list.filter(e => e.type === t);
+  const hum = by("humeur"), en = hum.filter(e => e.energie != null), md = hum.filter(e => e.humeur);
+  if (hum.length) lines.push(`Humeur du jour : ${pl(hum.length, "saisie")}${en.length ? `, énergie moyenne ${r1(avg(en.map(e => e.energie)))}/10` : ""}${md.length ? `, humeurs : ${Object.entries(md.reduce((c, e) => (c[MOOD_LABEL[e.humeur]] = (c[MOOD_LABEL[e.humeur]] || 0) + 1, c), {})).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ×${n}`).join(", ")}` : ""}.`);
+  const ag = by("angst"); if (ag.length) lines.push(`Questionnaire d'Angst : ${ag.map(e => `${fmtD(e.t)} ${e.total}/20`).join(", ")} (seuil > 10).`);
+  const el = by("elan"); if (el.length) lines.push(`Suivi de l'élan : ${el.map(e => `${fmtD(e.t)} ${e.oui}/10${elanFlag(e) ? " à explorer" : ""}`).join(", ")}.`);
+  const rep = by("repas"); if (rep.length) lines.push(`Repas : ${rep.filter(e => e.slot !== "grig").length} repas notés dont ${rep.filter(e => e.pris === false).length} non pris, ${rep.filter(e => e.slot === "grig").length} grignotages, perte de contrôle ×${rep.filter(e => e.ctrl === "Oui").length}, compensations ×${rep.flatMap(e => e.comp || []).length}.`);
+  const env = by("envie"); if (env.length) lines.push(`Envies de crise : ${env.length} (${env.filter(e => e.issue === "J'ai fait une crise").length} avec crise).`);
+  const ang = by("angoisse"); if (ang.length) lines.push(`Crises d'angoisse : ${ang.length}, pic moyen ${r1(avg(ang.map(e => e.pic)))}/10.`);
+  const sud = by("sud"); if (sud.length) lines.push(`Malaise (SUD) : ${pl(sud.length, "saisie")}, moyenne ${r1(avg(sud.map(e => e.sud)))}/10.`);
+  const som = by("sommeil"); if (som.length) lines.push(`Sommeil : ${som.length} nuits, durée moyenne ${r1(avg(som.map(sleepHours).filter(x => x != null)))} h, qualité moyenne ${r1(avg(som.map(e => e.qualite).filter(Boolean)))}/5.`);
+  const jau = by("jauge"); if (jau.length) lines.push(`Jauge sensorielle : ${pl(jau.length, "saisie")}, ${jau.filter(e => e.niveau >= 4).length} au niveau 4 ou 5.`);
+  lines.push("", "Détail :");
+  list.forEach(e => lines.push(`- ${fmtDT(e.t)} · ${TYPE_LABEL[e.type] || e.type} · ${entryText(e)}`));
+  return lines.join("\n");
+}
+function mountDetail(pt, p) {
+  if (!pt) return;
+  if (p.del) { document.getElementById("delYes").onclick = async () => { if (relayOn()) { try { await relay(vault.relay, { a: "delcfg", token: vault.token, code: pt.code }); } catch (e) {} } delete vault.patients[pt.code]; await persist(); nav("patients"); }; return; }
+  document.querySelectorAll('.chips[data-name="per"] .chip').forEach(b => b.addEventListener("picked", () => nav("patients", { code: pt.code, per: b.dataset.v })));
+  const cr = document.getElementById("cr");
+  cr.onclick = async () => {
+    const txt = report(pt, p.per || "30");
+    if (!(await copyText(txt, cr))) { cr.insertAdjacentHTML("afterend", `<textarea id="crTxt" style="min-height:200px;margin-top:8px">${esc(txt)}</textarea>`); selectAll(document.getElementById("crTxt")); }
+  };
+}
+
+/* Recevoir */
+PAGES.recevoir = () => `<div class="head-row"><div><h1>Recevoir des réponses</h1></div></div>
+  <div class="split">
+    <div class="card stack"><h3>Réception directe</h3>
+      ${relayOn() ? `<p class="small">Les réponses envoyées par vos patients attendent, chiffrées, dans votre relais Google. Elles sont relevées automatiquement à chaque ouverture de votre espace.${vault.lastFetch ? ` Dernier relevé : ${fmtDT(vault.lastFetch)}.` : ""}</p>
+        <button class="btn" id="fetch">Relever maintenant</button><div id="fres"></div>`
+      : `<p class="small">${demo ? "Non disponible en démonstration." : "Pas encore configurée."}</p>${demo ? "" : `<button class="btn soft" data-nav="reglages" data-p='{"guide":true}'>Configurer la réception directe</button>`}`}</div>
+    <div class="card stack"><h3>Coller un message</h3>
+      <p class="small">Pour un message reçu par mail ou SMS (il commence par PSY1.). Vous pouvez coller le mail entier.</p>
+      <textarea id="inbox" class="mono" style="min-height:160px" placeholder="PSY1.…" spellcheck="false"></textarea>
+      <button class="btn soft" id="dec">Déchiffrer et ajouter</button><div class="stack" id="results"></div></div></div>`;
+MOUNTS.recevoir = () => {
+  const f = document.getElementById("fetch");
+  if (f) f.onclick = async () => { f.disabled = true; f.textContent = "Relevé…"; const out = document.getElementById("fres");
+    try { const res = await fetchInbox(); out.innerHTML = `<p class="result">${inboxSummary(res)}</p>`; }
+    catch (e) { out.innerHTML = `<p class="result err">${esc(e.detail || "Le relais ne répond pas. Vérifier la connexion.")}</p>`; }
+    f.disabled = false; f.textContent = "Relever maintenant"; };
+  document.getElementById("dec").onclick = async () => {
+    const msgs = document.getElementById("inbox").value.match(/PSY1\.[A-Za-z0-9_-]+/g) || [], out = [];
+    if (!msgs.length) out.push(`<div class="result err">Aucun message PSY1 trouvé dans le texte collé.</div>`);
+    for (const m of msgs) {
+      try {
+        const r = await importData(await decryptMessage(vault.priv, m));
+        if (r.err) { out.push(`<div class="result err">Message du code <b>${esc(spaced(r.code))}</b> : ce patient n'existe pas dans votre espace.</div>`); continue; }
+        out.push(`<div class="result"><b>${esc(r.pt.label || r.pt.code)}</b> : ${r.n} nouvelle${r.n > 1 ? "s" : ""} réponse${r.n > 1 ? "s" : ""}${r.dup ? `, ${r.dup} déjà reçue${r.dup > 1 ? "s" : ""}` : ""}. <button class="link" data-nav="patients" data-p='{"code":"${r.pt.code}"}'>Voir la fiche</button></div>`);
+      } catch (e) { out.push(`<div class="result err">Un message n'a pas pu être déchiffré : il est incomplet, ou il a été chiffré pour un autre espace.</div>`); }
+    }
+    await persist();
+    document.getElementById("results").innerHTML = out.join("");
+    if (msgs.length) document.getElementById("inbox").value = "";
+  };
+};
+
+/* Réglages et guide du relais */
+const GUIDE = [
+  ["Créer la feuille Google", "Avec votre compte Gmail, ouvrir <b>sheets.google.com</b> et créer une feuille vierge. La renommer « Entre-Séances relais »."],
+  ["Ouvrir l'éditeur de script", "Dans la feuille : menu <b>Extensions</b>, puis <b>Apps Script</b>. Un nouvel onglet s'ouvre."],
+  ["Coller le code", "Effacer tout le texte présent, coller le code (bouton « Copier le code » ci-dessous), puis cliquer sur l'icône <b>Enregistrer</b> (disquette)."],
+  ["Accorder les autorisations", "En haut, choisir la fonction <b>autoriser</b> puis cliquer <b>Exécuter</b>. Accepter avec votre compte. Si Google affiche « Google n'a pas validé cette application » : <b>Paramètres avancés</b>, puis <b>Accéder à Entre-Séances relais</b>. C'est votre propre script."],
+  ["Déployer", "Bouton bleu <b>Déployer</b> → <b>Nouveau déploiement</b> → roue dentée → <b>Application Web</b>. Exécuter en tant que : <b>Moi</b>. Qui a accès : <b>Tout le monde</b>. Cliquer <b>Déployer</b>."],
+  ["Connecter votre espace", "Copier l'<b>URL de l'application Web</b> (elle finit par /exec), la coller dans le champ ci-dessous et cliquer <b>Connecter</b>."],
+  ["Relier l'application patient", "Sur GitHub, ouvrir le fichier <b>config.js</b>, cliquer sur le crayon, coller la même adresse entre les guillemets, puis <b>Commit changes</b>."]
+];
+PAGES.reglages = p => {
+  if (p.wipe) return `<div class="card stack danger-zone" style="max-width:560px"><h2>Supprimer tout l'espace ?</h2>
+    <p>Patients, réponses, photos et clé de déchiffrement seront effacés de cet appareil. Les messages déjà envoyés par vos patients ne pourront plus être lus, sauf si vous restaurez une sauvegarde.</p>
+    <div class="row"><button class="btn help" id="wipeYes">Tout supprimer</button><button class="btn ghost" data-nav="reglages">Annuler</button></div></div>`;
+  const relayCard = `<div class="card stack"><h3>Réception directe</h3>
+      ${relayOn() ? `<p class="result">Connectée. Les patients entrent un code à 6 caractères et leurs réponses arrivent ici automatiquement.</p>` : `<p class="small">Permet les codes courts et l'envoi direct des réponses. Gratuit, avec votre compte Gmail. Google ne stocke que des messages chiffrés, illisibles sans votre clé.</p>`}
+      ${demo ? `<p class="notice">Indisponible en démonstration.</p>` : `<div><label class="lbl" for="rurl">Adresse du relais (Apps Script)</label><input type="text" id="rurl" value="${esc(vault.relay || "")}" placeholder="https://script.google.com/macros/s/…/exec"></div>
+      <button class="btn ${relayOn() ? "soft" : ""}" id="conn" style="align-self:flex-start">${relayOn() ? "Reconnecter" : "Connecter"}</button><p class="hint" id="cMsg" role="status"></p>
+      <button class="link" data-nav="reglages" data-p='{"guide":true}'>Guide pas à pas</button>`}</div>`;
+  if (p.guide) return `<button class="link" data-nav="reglages">← Réglages</button><div class="head-row"><div><h1>Configurer la réception directe</h1><p class="muted">Une seule fois, environ 10 minutes, depuis un ordinateur.</p></div></div>
+    <div class="split"><ol class="guide">${GUIDE.map(([t, d]) => `<li><b>${t}</b><p>${d}</p></li>`).join("")}</ol>
+    <div class="stack"><div class="card stack"><h3>Code du relais</h3><textarea id="gs" class="mono" readonly style="min-height:200px">${esc(RELAIS_GS)}</textarea><button class="btn" id="cpGs">Copier le code</button></div>${relayCard}</div></div>`;
+  const cfgLine = `window.ES_RELAIS = "${vault.relay || ""}";`;
+  const diagCard = relayOn() ? `<div class="card stack"><h3>Vérifier la liaison</h3>
+      <p class="small">Le fichier <b>config.js</b> du site doit contenir exactement cette ligne (copiez-la et remplacez toute la ligne existante sur GitHub) :</p>
+      <textarea id="cfgl" class="mono" readonly style="min-height:70px">${esc(cfgLine)}</textarea>
+      <div class="row"><button class="btn soft" id="cpCfg">Copier la ligne</button><button class="btn" id="diag">Lancer la vérification</button></div>
+      <div id="diagOut" class="stack"></div>
+      ${(vault.failed || []).length ? `<p class="notice small">${vault.failed.length} message(s) n'ont pas pu être ajoutés : ${vault.failed.slice(-5).map(f => `${spaced(f.code)} (${f.why})`).join(" ; ")}.</p>` : ""}
+      <button class="link" id="reread">Relire tous les messages du relais depuis le début</button></div>` : "";
+  return `<div class="head-row"><h1>Réglages</h1></div>
+  <div class="split">
+    ${relayCard}${diagCard}
+    <div class="card stack"><h3>Informations transmises aux patients</h3>
+      <div><label class="lbl" for="url">Lien de l'application patient</label><input type="text" id="url" value="${esc(vault.appUrl || "")}" placeholder="https://…"><p class="hint">Sert au QR code et au message d'invitation.</p></div>
+      <div><label class="lbl" for="em">Adresse mail (envoi manuel de secours)</label><input type="text" id="em" value="${esc(vault.email)}"></div>
+      <button class="btn soft" id="saveS" style="align-self:flex-start">Enregistrer</button><p class="hint" id="sMsg" role="status"></p></div>
+    <div class="card stack"><h3>Sauvegarde</h3>
+      <p class="small">Copie chiffrée de tout votre espace (patients, réponses, connexion au relais), protégée par votre mot de passe. Les photos ne sont pas incluses : enregistrez celles à garder dans le dossier du patient. Refaites la sauvegarde après chaque relevé important.</p>
+      ${demo ? `<p class="notice">Indisponible en démonstration.</p>` : `<button class="btn" id="bk">Générer la sauvegarde</button><textarea id="bkTxt" class="mono" readonly hidden style="min-height:120px"></textarea>`}
+      <h3 style="margin-top:8px">Sécurité</h3>
+      <p class="small">L'espace se verrouille après ${LOCK_MIN} minutes sans activité. Empreinte de votre clé publique : <span class="mono">${esc(vault.pub.slice(0, 16))}…</span></p>
+      ${demo ? "" : `<button class="link" data-nav="reglages" data-p='{"wipe":true}'>Supprimer tout l'espace de cet appareil</button>`}</div>
+  </div>`;
+};
+MOUNTS.reglages = p => {
+  if (p.wipe) { document.getElementById("wipeYes").onclick = () => { lsDel(VKEY); try { indexedDB.deleteDatabase("es_pro_photos"); } catch (e) {} lock(); }; return; }
+  const gs = document.getElementById("cpGs"); if (gs) gs.onclick = async e => { const t = document.getElementById("gs"); if (!(await copyText(RELAIS_GS, e.currentTarget))) selectAll(t); };
+  const conn = document.getElementById("conn");
+  if (conn) conn.onclick = async () => {
+    const m = document.getElementById("cMsg"); conn.disabled = true; m.textContent = "Connexion…";
+    const err = await connectRelay(document.getElementById("rurl").value);
+    conn.disabled = false;
+    if (err) { m.textContent = err; return; }
+    flash = "Réception directe connectée. Les exercices de vos patients ont été publiés. Dernière étape : coller la même adresse dans config.js sur GitHub."; nav("reglages");
+  };
+  const cc = document.getElementById("cpCfg"); if (cc) cc.onclick = async e => { const t = document.getElementById("cfgl"); if (!(await copyText(t.value, e.currentTarget))) selectAll(t); };
+  const rr = document.getElementById("reread");
+  if (rr) rr.onclick = async () => { rr.textContent = "Relecture…"; vault.cursor = 0; try { flash = inboxSummary(await fetchInbox()); } catch (e) { flash = e.detail || "Le relais ne répond pas."; } nav("reglages"); };
+  const dg = document.getElementById("diag");
+  if (dg) dg.onclick = async () => {
+    const out = document.getElementById("diagOut"), line = (ok, t) => `<p class="small">${ok ? "✔" : "✖"} ${t}</p>`;
+    dg.disabled = true; out.innerHTML = `<p class="small">Vérification…</p>`; let h = "";
+    try {
+      const pg = await relay(vault.relay, { a: "ping" }); h += line(!!pg.ok, "Le relais répond.");
+      const ck = await relay(vault.relay, { a: "check", token: vault.token }); h += line(!!ck.ok, ck.ok ? "Votre espace est bien le propriétaire du relais." : "Ce relais appartient à un autre espace (clé différente).");
+      let pubOk = 0, pubKo = [];
+      for (const pt of Object.values(vault.patients)) { (await publishCfg(pt)) ? pubOk++ : pubKo.push(spaced(pt.code)); }
+      h += line(!pubKo.length, `Exercices publiés pour ${pubOk} patient(s)${pubKo.length ? ", échec pour " + pubKo.join(", ") : ""}.`);
+      const ib = await relay(vault.relay, { a: "inbox", token: vault.token, since: 0 }, 120000);
+      if (ib.ok) {
+        const codes = {}; ib.items.forEach(it => codes[it.code] = (codes[it.code] || 0) + 1);
+        h += line(true, `${ib.items.length} message(s) stocké(s) dans le relais${ib.items.length ? " : " + Object.entries(codes).map(([c, n]) => `${spaced(c)} ×${n}${vault.patients[c] ? "" : " (code inconnu ici)"}`).join(", ") : ""}.`);
+        if (!ib.items.length) h += `<p class="notice small">Aucun message n'est arrivé au relais : le problème se situe côté application patient. Vérifiez le fichier config.js (ligne ci-dessus), puis sur le téléphone du patient : Réglages → Liaison avec la psychologue → Vérifier la liaison.</p>`;
+        const pending = ib.items.filter(it => it.seq > (vault.cursor || 0)).length;
+        if (pending) h += line(false, `${pending} message(s) pas encore relevé(s) : utiliser « Relever les réponses ».`);
+      }
+    } catch (e) { h += line(false, esc(e.detail || "Relais injoignable.")); }
+    out.innerHTML = h; dg.disabled = false;
+  };
+  const ss = document.getElementById("saveS");
+  if (ss) ss.onclick = async () => { vault.email = document.getElementById("em").value.trim(); vault.appUrl = document.getElementById("url").value.trim().replace(/\/+$/, ""); await persist(); for (const pt of Object.values(vault.patients)) await publishCfg(pt); document.getElementById("sMsg").textContent = demo ? "Enregistré pour cette démonstration." : "Enregistré."; };
+  const bk = document.getElementById("bk");
+  if (bk) bk.onclick = async () => { await persist(); const t = document.getElementById("bkTxt"); t.hidden = false; t.value = "SAUV1." + B64.enc(TE.encode(JSON.stringify(lsGet(VKEY)))); if (!(await copyText(t.value, bk))) selectAll(t); };
+};
+
+render();
+</script>
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
+</body></html>
