@@ -1,5 +1,5 @@
 /* Hors connexion : l'application reste utilisable sans réseau. Aucune donnée patient ne transite ici. */
-const CACHE = "es-202611031014";
+const CACHE = "es-202611041013";
 const SHELL = ["./", "./index.html", "./praticienne.html", "./config.js", "./manifest.json", "./manifest-pro.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(n => n !== CACHE).map(n => caches.delete(n)))).then(() => self.clients.claim())); });
