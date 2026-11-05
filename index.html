@@ -254,6 +254,26 @@ ol.how { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; 
 .ph-prev { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .ph-prev img { border-radius: 12px; max-height: 260px; object-fit: cover; width: 100%; }
 .rassure { text-align: center; font-size: 1.1em; min-height: 3.2em; max-width: 26em; }
+.msgs-home { margin-bottom: 18px; }
+.msg-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.msg-card.unread { border: 2px solid var(--accent); background: var(--accent-soft); }
+.msg-head { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; color: var(--accent); }
+.msg-head b { color: var(--ink); font-family: var(--f-display); }
+.msg-head .small { grid-column: 2; }
+.msg-text { overflow-wrap: anywhere; }
+.msgs-link { display: inline-flex; align-items: center; gap: 6px; margin: -6px 0 14px; }
+.sync-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); }
+.small-btn { min-height: 44px; padding: 8px 16px; font-size: 0.92em; }
+.msg-card .link { align-self: flex-start; }
+.pill-s { display: inline-block; margin-top: 6px; font-size: 0.74em; padding: 2px 10px; border-radius: 999px; background: var(--sun-soft); color: var(--ink); }
+.seg3 { grid-template-columns: repeat(3, 1fr); }
+.seg3 .segb { font-size: 0.86em; padding: 4px; }
+.fiche { display: flex; flex-direction: column; gap: 12px; }
+.fiche-bloc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.fiche-bloc h3 { margin-bottom: 4px; }
+.fiche-bloc ul { margin: 8px 0 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+.pin-card { display: flex; flex-direction: column; gap: 12px; }
+.pin-card p { overflow-wrap: anywhere; }
 </style>
 <div class="shell" id="app"></div>
 <script>
@@ -553,6 +573,259 @@ function face(key, size = 48) {
 }
 const ENERGIE_DESC = ["", "Épuisé·e", "Épuisé·e", "Très peu d'énergie", "Peu d'énergie", "Énergie moyenne", "Énergie correcte", "Bonne énergie", "Beaucoup d'énergie", "Énormément d'énergie", "Énergie débordante"];
 
+/* =====================================================================
+   Exercices TCC : thérapie des schémas, besoins et valeurs
+   Contenus reformulés et condensés à partir des fiches de travail
+   de la praticienne (programme de thérapie des schémas de J. Young).
+   Formulations à la première personne : valables en « tu » comme en « vous ».
+   ===================================================================== */
+const TCC_LISTS = {
+  emo: ["Tristesse", "Peur / anxiété", "Colère", "Honte", "Culpabilité", "Frustration", "Solitude", "Déception", "Jalousie", "Dégoût", "Vide", "Joie", "Soulagement", "Fierté"],
+  modes: ["Enfant vulnérable", "Enfant en colère", "Enfant impulsif", "Enfant heureux"],
+  strat: ["Soumission : je fais ce que dit mon schéma", "Évitement : je fuis, je me coupe de ce que je ressens", "Compensation : je contre-attaque, je fais l'inverse à l'excès"],
+  corps: ["Tête", "Mâchoire", "Gorge", "Poitrine", "Ventre", "Épaules / nuque", "Dos", "Mains", "Jambes", "Tout le corps"],
+  ton: ["Exigeant", "Sévère, punitif", "Moqueur", "Moralisateur", "Méprisant", "Catastrophiste", "Autoritaire"],
+  apaiser: ["Respiration lente", "Lieu sûr imaginé", "Objet rassurant dans la main", "Main sur le cœur", "Musique", "Dessin, écriture", "Marche, sport", "Bain, douche chaude", "Appeler quelqu'un"],
+  qualites: ["Calme", "Confiance", "Chaleur", "Clarté", "Patience", "Fermeté douce", "Humour", "Sagesse", "Courage", "Tendresse"],
+  domaines: ["Famille", "Amitiés", "Amour", "École / travail", "Loisirs", "Santé", "Moi-même"],
+  valeurs: ["Entraide", "Loyauté", "Authenticité", "Indulgence", "Générosité", "Égalité", "Respect des différences", "Protection de la nature", "Harmonie", "Justice", "Autodiscipline", "Humilité", "Respect des règles", "Transmission", "Famille", "Spiritualité", "Dignité", "Ambition", "Réalisation de soi", "Engagement", "Courage", "Plaisir", "Savourer les choses simples", "Gratitude", "Curiosité", "Audace", "Créativité", "Liberté", "Indépendance", "Sagesse", "Sécurité", "Reconnaissance", "Amitié", "Humour", "Apprendre", "Santé"]
+};
+/* Les 18 schémas, regroupés en 5 domaines (formulations courtes, à la première personne) */
+const TCC_DOMAINES = [
+  { t: "Séparation et rejet", b: "Besoin de sécurité, d'attachement fiable", s: [
+    ["aban", "Abandon / instabilité", "J'ai peur que les personnes qui comptent finissent par partir."],
+    ["mef", "Méfiance / abus", "Je m'attends à être blessé·e, trompé·e ou utilisé·e."],
+    ["caren", "Carence affective", "J'ai le sentiment que personne ne pourra vraiment me comprendre ni prendre soin de moi."],
+    ["honte", "Imperfection / honte", "Je me sens « pas comme il faut » et j'ai peur que les autres finissent par le voir."],
+    ["isol", "Isolement social", "Je me sens différent·e, pas à ma place dans les groupes."]] },
+  { t: "Autonomie et réussite", b: "Besoin d'autonomie et de compétence", s: [
+    ["dep", "Dépendance / incompétence", "Je me sens incapable de gérer seul·e les choses du quotidien."],
+    ["vuln", "Peur du danger", "Je crains souvent qu'une catastrophe arrive (santé, argent, accident…)."],
+    ["fus", "Fusion", "Je me sens perdu·e sans l'autre, je ne sais pas bien qui je suis."],
+    ["echec", "Échec", "Je suis persuadé·e que j'échouerai, que je suis moins capable que les autres."]] },
+  { t: "Limites", b: "Besoin d'un cadre et de limites réalistes", s: [
+    ["droit", "Tout m'est dû", "J'ai du mal à accepter les règles ou les limites quand elles me gênent."],
+    ["ctrl", "Manque de contrôle de soi", "J'ai du mal à supporter la frustration et à retenir mes impulsions."]] },
+  { t: "Tourné vers les autres", b: "Besoin d'exprimer ses besoins et ses émotions", s: [
+    ["assuj", "Assujettissement", "Je fais passer les envies des autres avant les miennes pour éviter le conflit."],
+    ["abneg", "Abnégation", "Je me sacrifie pour les autres et je culpabilise quand je pense à moi."],
+    ["appro", "Recherche d'approbation", "J'ai besoin d'être approuvé·e ou admiré·e pour me sentir valable."]] },
+  { t: "Contrôle et vigilance", b: "Besoin de spontanéité et de plaisir", s: [
+    ["pess", "Pessimisme", "Je vois surtout ce qui pourrait mal tourner."],
+    ["inhib", "Inhibition émotionnelle", "Je retiens mes émotions par peur de perdre le contrôle ou d'être jugé·e."],
+    ["exig", "Exigences élevées", "Ce que je fais n'est jamais assez bien, je dois toujours en faire plus."],
+    ["puni", "Punition", "Les erreurs méritent d'être punies, chez moi comme chez les autres."]] }
+];
+TCC_LISTS.schemas = TCC_DOMAINES.flatMap(d => d.s.map(s => s[1])).concat(["Je ne sais pas"]);
+const TCC_BESOINS = [
+  ["Sécurité", ["Stabilité", "Réconfort", "Appartenance", "Prévisibilité", "Protection", "Affection", "Présence des autres", "Réciprocité"]],
+  ["Compétence et autonomie", ["Indépendance", "Autonomie", "Savoir qui je suis", "Réussir des choses", "Conseils", "Valorisation", "Avoir prise sur ma vie"]],
+  ["Expression de soi", ["Empathie", "Écoute", "Acceptation", "Respect", "Légitimité", "Tolérance"]],
+  ["Limites", ["Maîtrise de soi", "Discipline", "Cadre", "Règles claires", "Explications"]],
+  ["Spontanéité", ["Créativité", "Souplesse", "Détente", "Plaisir", "Amusement"]]
+];
+TCC_LISTS.besoins = TCC_BESOINS.flatMap(f => f[1]);
+
+const TCC_GROUPS = [
+  ["comprendre", "Comprendre"], ["reperer", "Repérer mes schémas"], ["critique", "Ma voix critique"], ["enfant", "Mon enfant intérieur"],
+  ["adulte", "Mon Adulte sain"], ["changer", "Changer mes réactions"], ["besoins", "Mes besoins"], ["valeurs", "Mes valeurs"]
+];
+const TCC_TAGS = { dep: "Dépression / estime de soi", anx: "Anxiété", trauma: "Psychotraumatisme", rel: "Relations / attachement", tca: "TCA", tnd: "TDAH / TSA (format court)" };
+
+/* u = utilité (1 à 3), dur = minutes, seance = à introduire en séance d'abord, pin = réponses relisibles par le patient
+   Types de champs : info, texte, lignes (n), chips (o, m = multiple), echelle (0-10), pct (0-100), oui, minuteur (m min), rate (o items, l niveaux), fiche (psychoéducation) */
+const TCC_EX = [
+  /* ---------- Comprendre ---------- */
+  { id: "pe-schemas", g: "comprendre", t: "Les schémas, c'est quoi ?", d: "Les 18 schémas et ceux qui me parlent", u: 3, dur: 10, tags: ["dep", "anx", "trauma", "rel", "tca", "tnd"],
+    intro: "Un schéma est comme une paire de lunettes posée tôt dans la vie : un filtre qui colore la façon de se voir, de voir les autres et le monde. Il se forme quand des besoins importants de l'enfance n'ont pas été assez comblés. Quand une situation ressemble à ces anciennes blessures, le schéma « s'active » : les émotions sont fortes, les réactions automatiques.",
+    steps: [{ h: "Les 5 grandes familles", f: [{ k: "fiche", v: "domaines" }] },
+      { h: "Ceux qui me parlent", f: [{ k: "info", q: "Pour chaque phrase, indiquer à quel point elle me ressemble. Il n'y a pas de bonne réponse : c'est un point de départ pour en parler en séance." }, { k: "rate", q: "Ça me ressemble…", o: "@schemaphrases", l: ["Pas du tout", "Un peu", "Beaucoup"] }] }] },
+  { id: "pe-modes", g: "comprendre", t: "Les modes et l'Adulte sain", d: "Mes différentes « parts » quand un schéma s'active", u: 3, dur: 5, tags: ["dep", "anx", "trauma", "rel", "tca", "tnd"],
+    intro: "Quand un schéma s'active, plusieurs « parts » de moi peuvent prendre la parole. Les reconnaître aide à ne plus se laisser déborder.",
+    steps: [{ h: "Mes parts", f: [{ k: "fiche", v: "modes" }] }, { h: "Et moi ?", f: [{ k: "chips", q: "La part qui prend le plus souvent le dessus chez moi", o: ["Enfant vulnérable", "Enfant en colère", "Enfant impulsif", "Voix critique exigeante", "Voix critique punitive", "Soumission", "Évitement", "Compensation", "Je ne sais pas encore"], m: 1 }, { k: "texte", q: "Ce que j'ai compris (facultatif)", opt: 1 }] }] },
+  { id: "pe-bv", g: "comprendre", t: "Besoins et valeurs", d: "La différence entre ce qui me manque et ce qui compte pour moi", u: 2, dur: 4, tags: ["dep", "anx", "trauma", "rel", "tca", "tnd"],
+    steps: [{ h: "Deux boussoles", f: [{ k: "fiche", v: "bv" }] }, { h: "Pour moi", f: [{ k: "chips", q: "Un besoin important pour moi en ce moment", o: "@besoins", m: 1 }, { k: "chips", q: "Une valeur qui compte pour moi", o: "@valeurs", m: 1 }] }] },
+
+  /* ---------- Repérer ---------- */
+  { id: "enreg", g: "reperer", t: "Noter un moment où mon schéma s'active", d: "La fiche à remplir dès qu'une émotion forte arrive", u: 3, dur: 8, tags: ["dep", "anx", "trauma", "rel", "tca", "tnd"],
+    intro: "À remplir le jour même si possible, quand c'est encore frais.",
+    steps: [{ h: "Ce qui s'est passé", f: [{ k: "texte", q: "La situation", h: "Où, quand, ce qui s'est passé. Sans donner de noms." }, { k: "chips", q: "Mes émotions", o: "@emo", m: 1 }, { k: "pct", q: "Leur intensité" }] },
+      { h: "Dans ma tête", f: [{ k: "texte", q: "Mes pensées ou images à ce moment-là" }, { k: "chips", q: "Le schéma qui s'est activé", o: "@schemas", m: 1 }, { k: "chips", q: "Le besoin qui n'était pas comblé", o: "@besoins", m: 1 }] },
+      { h: "Ce que j'ai fait", f: [{ k: "texte", q: "Ma réaction (ce que j'ai fait ou dit)" }, { k: "chips", q: "Ça ressemble à", o: "@strat" }] },
+      { h: "Avec du recul", f: [{ k: "texte", q: "Une façon plus juste de voir la situation" }, { k: "texte", q: "Ce qui aurait été plus adapté" }, { k: "texte", q: "Comment je peux vraiment répondre à mon besoin" }] }] },
+  { id: "declencheurs", g: "reperer", t: "Mes déclencheurs", d: "Les personnes, situations et lieux qui réveillent mon schéma", u: 3, dur: 7, tags: ["anx", "trauma", "rel", "tca", "tnd"],
+    intro: "Un déclencheur est ce qui réveille un schéma : souvent parce que ça ressemble à une ancienne blessure. Le repérer permet de l'anticiper.",
+    steps: [{ h: "Une situation récente", f: [{ k: "texte", q: "Ce qui s'est passé" }, { k: "texte", q: "Qui était impliqué (sans noms : « un prof », « un ami »…)", opt: 1 }, { k: "chips", q: "Mes émotions", o: "@emo", m: 1 }, { k: "chips", q: "Le schéma activé", o: "@schemas", m: 1 }] },
+      { h: "Mes déclencheurs habituels", f: [{ k: "texte", q: "Des personnes ou types de personnes", h: "Ex. : quelqu'un qui hausse le ton", opt: 1 }, { k: "texte", q: "Des situations", h: "Ex. : être mis·e de côté dans une conversation", opt: 1 }, { k: "texte", q: "Des lieux ou contextes", h: "Ex. : un groupe que je ne connais pas", opt: 1 }] }] },
+  { id: "besoin-cache", g: "reperer", t: "Le besoin caché derrière mon schéma", d: "Comprendre ce que je cherchais vraiment", u: 2, dur: 8, tags: ["dep", "rel", "tca", "trauma"],
+    steps: [{ h: "La situation", f: [{ k: "texte", q: "Ce qui s'est passé" }, { k: "texte", q: "Ce que j'ai pensé et ressenti" }, { k: "texte", q: "Ma réaction" }] },
+      { h: "Le besoin", f: [{ k: "texte", q: "Ce que je cherchais à éviter ou à obtenir", h: "Ex. : éviter d'être mis·e de côté" }, { k: "chips", q: "Le besoin en jeu", o: "@besoins", m: 1 }, { k: "texte", q: "Le lien possible avec mon histoire (facultatif)", opt: 1 }] },
+      { h: "Y répondre autrement", f: [{ k: "texte", q: "Ce que je pourrais faire pour répondre à ce besoin" }, { k: "texte", q: "Qui pourrait m'aider", opt: 1 }, { k: "chips", q: "Ce qui m'apaise", o: "@apaiser", m: 1 }] }] },
+  { id: "analyse", g: "reperer", t: "Comment fonctionne mon schéma", d: "Vue d'ensemble : déclencheurs, parts, croyances, conséquences", u: 2, dur: 15, seance: 1, tags: ["rel", "dep", "trauma"],
+    steps: [{ h: "Mon schéma", f: [{ k: "chips", q: "Le ou les schémas en jeu", o: "@schemas", m: 1 }, { k: "texte", q: "Ce qui me pose problème en général" }, { k: "texte", q: "Les situations qui l'activent" }] },
+      { h: "Mes parts", f: [{ k: "chips", q: "Ce que ressent mon enfant intérieur", o: "@modes", m: 1 }, { k: "texte", q: "Ce que me dit ma voix critique" }, { k: "chips", q: "Ce que je fais alors", o: "@strat", m: 1 }] },
+      { h: "Croyances et besoin", f: [{ k: "texte", q: "La croyance négative qui se trouve renforcée" }, { k: "chips", q: "Mon besoin dans ces moments", o: "@besoins", m: 1 }, { k: "oui", q: "Ma réaction répond-elle à ce besoin ?" }] },
+      { h: "Conséquences", f: [{ k: "texte", q: "À court terme" }, { k: "texte", q: "À long terme" }] }] },
+  { id: "strategies", g: "reperer", t: "Mes réactions automatiques", d: "Soumission, évitement, compensation : ce qu'elles me coûtent", u: 2, dur: 10, tags: ["tca", "anx", "rel", "dep"],
+    steps: [{ h: "La situation", f: [{ k: "texte", q: "Ce qui s'est passé" }, { k: "texte", q: "Ce que j'ai pensé et ressenti" }, { k: "texte", q: "Comment j'ai réagi" }, { k: "chips", q: "La réaction qui domine", o: "@strat" }] },
+      { h: "Pourquoi je réagis ainsi", f: [{ k: "texte", q: "Ce que j'essaie d'éviter ou de contrôler" }, { k: "texte", q: "Ce que ça m'apporte sur le moment", h: "Ex. : moins d'angoisse tout de suite" }, { k: "chips", q: "Le besoin que j'essaie de combler", o: "@besoins", m: 1 }] },
+      { h: "Ce que ça me coûte", f: [{ k: "texte", q: "La croyance que ça entretient" }, { k: "texte", q: "L'effet sur mes émotions, mes relations, mon bien-être" }, { k: "oui", q: "Cette réaction répond-elle vraiment à mon besoin ?" }] }] },
+
+  /* ---------- Voix critique ---------- */
+  { id: "critique-id", g: "critique", t: "Je repère ma voix critique", d: "Ce qu'elle me dit, sur quel ton, et ce que ça me fait", u: 3, dur: 10, tags: ["dep", "anx", "tca", "rel"],
+    intro: "La voix critique, c'est ce discours intérieur dur, souvent hérité de remarques entendues plus jeune. On l'appelle parfois le « dictateur intérieur ».",
+    steps: [{ h: "Quand elle parle", f: [{ k: "texte", q: "Les situations où elle s'active", h: "Ex. : quand je me trompe, quand on me fait une remarque" }, { k: "chips", q: "Ce que je ressens alors", o: "@emo", m: 1 }] },
+      { h: "Ce qu'elle dit", f: [{ k: "lignes", q: "Ses phrases habituelles", n: 3, h: "Ex. : « Tu n'y arriveras jamais »" }, { k: "chips", q: "Son ton", o: "@ton", m: 1 }, { k: "texte", q: "Si elle avait un visage, une voix (facultatif)", opt: 1 }] },
+      { h: "Son effet", f: [{ k: "chips", q: "Dans mon corps", o: "@corps", m: 1 }, { k: "texte", q: "Sur ce que je fais", h: "Ex. : je n'ose plus essayer" }, { k: "texte", q: "D'où elle pourrait venir (facultatif)", opt: 1 }, { k: "oui", q: "M'aide-t-elle vraiment ?" }] }] },
+  { id: "critique-adoucir", g: "critique", t: "J'adoucis ma voix critique", d: "Comprendre son intention et lui donner un nouveau rôle", u: 2, dur: 10, tags: ["dep", "anx", "tca"],
+    steps: [{ h: "Son intention", f: [{ k: "info", q: "Même dure, la voix critique essaie souvent de protéger : éviter un échec, un rejet, une honte. Mais sa façon de faire décourage plus qu'elle n'aide." }, { k: "texte", q: "Ce qu'elle essaie de m'apporter" }, { k: "texte", q: "Ce qu'elle essaie de m'éviter" }, { k: "texte", q: "Si elle s'expliquait, elle dirait…", opt: 1 }] },
+      { h: "Un nouveau contrat", f: [{ k: "texte", q: "Son nouveau rôle", h: "Ex. : m'encourager à progresser, à mon rythme" }, { k: "texte", q: "Ce que j'accepte d'elle" }, { k: "texte", q: "Ce que je n'accepte plus" }, { k: "chips", q: "Les qualités qu'elle doit avoir", o: "@qualites", m: 1 }] }] },
+  { id: "dialogue", g: "critique", t: "Dialogue : voix critique et Adulte sain", d: "Répondre à la critique avec une voix bienveillante", u: 3, dur: 8, tags: ["dep", "anx", "tca", "trauma", "rel"],
+    steps: [{ h: "Les deux voix", f: [{ k: "lignes", q: "Trois phrases de ma voix critique", n: 3 }, { k: "lignes", q: "Trois phrases de mon Adulte sain", n: 3, h: "Ex. : « Tu fais de ton mieux, et c'est assez »" }] },
+      { h: "Le dialogue", f: [{ k: "texte", q: "Une situation difficile en ce moment" }, { k: "texte", q: "La critique dit…" }, { k: "texte", q: "Mon Adulte sain répond…" }, { k: "texte", q: "La critique insiste…", opt: 1 }, { k: "texte", q: "Mon Adulte sain répond…", opt: 1 }] },
+      { h: "Ancrer", f: [{ k: "info", q: "Relire les réponses de l'Adulte sain à voix haute ou dans sa tête. Plus on s'entraîne, plus cette voix devient naturelle." }] }] },
+
+  /* ---------- Enfant intérieur ---------- */
+  { id: "enfant-id", g: "enfant", t: "Je repère mon enfant intérieur", d: "Quand une part très jeune de moi réagit", u: 2, dur: 10, tags: ["trauma", "rel", "tca", "dep"],
+    steps: [{ h: "Quand il s'active", f: [{ k: "texte", q: "La situation" }, { k: "chips", q: "Le schéma activé", o: "@schemas", m: 1 }, { k: "chips", q: "La part qui prend le dessus", o: "@modes" }] },
+      { h: "Mes réactions", f: [{ k: "chips", q: "Mes émotions", o: "@emo", m: 1 }, { k: "chips", q: "Dans mon corps", o: "@corps", m: 1 }, { k: "texte", q: "Ce que j'ai fait" }] },
+      { h: "Comprendre", f: [{ k: "oui", q: "Mes émotions étaient-elles à la mesure de la situation ?" }, { k: "texte", q: "Un souvenir ancien qui y fait écho (facultatif)", opt: 1 }, { k: "chips", q: "Ce dont il avait besoin", o: "@besoins", m: 1 }, { k: "oui", q: "Ma réaction l'a-t-elle aidé ?" }] }] },
+  { id: "enfant-visu", g: "enfant", t: "Je visualise mon enfant intérieur", d: "Lui donner une image pour mieux le comprendre", u: 1, dur: 12, seance: 1, tags: ["trauma", "rel"],
+    steps: [{ h: "Se préparer", f: [{ k: "info", q: "S'installer au calme, fermer les yeux, respirer lentement. Laisser venir une image, sans forcer. On peut s'arrêter à tout moment." }, { k: "minuteur", q: "Deux minutes pour se poser", m: 2 }] },
+      { h: "Le décrire", f: [{ k: "texte", q: "À quoi il ressemble (âge, posture, visage)" }, { k: "chips", q: "Ce qu'il ressent", o: "@emo", m: 1 }, { k: "texte", q: "Ce qu'il dit ou voudrait dire" }] },
+      { h: "Ses besoins", f: [{ k: "chips", q: "De quoi il a besoin", o: "@besoins", m: 1 }, { k: "texte", q: "Ce qui pourrait l'apaiser" }, { k: "texte", q: "Une image qui le représente (objet, animal, météo, paysage)", opt: 1 }] }] },
+  { id: "enfant-apaiser", g: "enfant", t: "J'apaise mon enfant vulnérable", d: "Des gestes simples pour retrouver un sentiment de sécurité", u: 3, dur: 8, tags: ["trauma", "anx", "tca", "dep", "rel", "tnd"],
+    steps: [{ h: "Avant", f: [{ k: "echelle", q: "Ma détresse maintenant", a: "Aucune", b: "Maximum" }, { k: "chips", q: "Ce que je choisis aujourd'hui", o: ["Respiration lente (5 s / 5 s)", "Mon lieu sûr", "Un objet rassurant", "Main sur le cœur", "Une activité douce", "Des phrases réconfortantes"], m: 1 }] },
+      { h: "Pratiquer", f: [{ k: "info", q: "Respiration : inspirer 5 secondes par le nez, expirer 5 secondes par la bouche. Lieu sûr : imaginer un endroit rassurant avec ses couleurs, sons, odeurs. Objet : sentir sa texture, son poids, sa température. Main sur le cœur : sentir sa chaleur et se dire « je suis là »." }, { k: "minuteur", q: "Cinq minutes", m: 5 }] },
+      { h: "Après", f: [{ k: "echelle", q: "Ma détresse maintenant", a: "Aucune", b: "Maximum" }, { k: "texte", q: "Mon lieu, mon objet ou ma phrase rassurante", h: "Ex. : « Je suis en sécurité ici et maintenant »", opt: 1 }] }] },
+  { id: "lettre-enfant", g: "enfant", t: "Lettre à mon enfant vulnérable", d: "Lui offrir le soutien qui lui a manqué", u: 2, dur: 20, seance: 1, tags: ["trauma", "rel", "dep"],
+    steps: [{ h: "Le rencontrer", f: [{ k: "info", q: "S'installer au calme et imaginer l'enfant que j'étais, ou une image de ma part sensible." }, { k: "texte", q: "Son âge, où il est, ce qu'il fait" }, { k: "chips", q: "Ce qu'il ressent", o: "@emo", m: 1 }, { k: "chips", q: "Ce qui lui manquait", o: "@besoins", m: 1 }] },
+      { h: "La lettre", f: [{ k: "texte", q: "Je vois ce que tu ressens…", h: "Reconnaître ses émotions" }, { k: "texte", q: "Tu avais besoin de…", h: "Valider ses besoins, ce n'était pas ta faute" }, { k: "texte", q: "Je veux te dire que…", h: "Réconforter" }, { k: "texte", q: "Aujourd'hui, je suis là pour…", h: "Protéger, encourager" }] }] },
+
+  /* ---------- Adulte sain ---------- */
+  { id: "adulte-id", g: "adulte", t: "Je rencontre mon Adulte sain", d: "Imaginer la version calme et solide de moi-même", u: 2, dur: 12, tags: ["dep", "anx", "trauma", "rel", "tca"],
+    intro: "L'Adulte sain est la part de moi qui est calme, bienveillante et capable de faire face. Elle prend soin de l'enfant intérieur et pose des limites à la voix critique.",
+    steps: [{ h: "Se poser", f: [{ k: "info", q: "S'installer, respirer lentement (inspirer par le nez, souffler doucement par la bouche). Imaginer un lieu sûr avec ses couleurs, ses sons, ses odeurs." }, { k: "minuteur", q: "Trois minutes de calme", m: 3 }] },
+      { h: "Le décrire", f: [{ k: "texte", q: "Son apparence, sa posture, sa voix" }, { k: "chips", q: "Ses qualités", o: "@qualites", m: 1 }, { k: "texte", q: "Une couleur ou un symbole qui le représente", opt: 1 }] },
+      { h: "Lui parler", f: [{ k: "texte", q: "Ce qui me préoccupe en ce moment" }, { k: "texte", q: "Ce qu'il me répond" }] }] },
+  { id: "antidotes", g: "adulte", t: "Mes antidotes", d: "Penser autrement, agir autrement, m'apaiser, suivre mes valeurs", u: 2, dur: 10, tags: ["dep", "anx", "rel", "tca"],
+    steps: [{ h: "Penser autrement", f: [{ k: "texte", q: "La pensée de mon schéma" }, { k: "texte", q: "Les preuves du contraire, dans mon passé ou mon présent" }, { k: "texte", q: "Ce que je dirais à un ami à ma place" }] },
+      { h: "Agir et m'apaiser", f: [{ k: "texte", q: "Un comportement à changer en priorité" }, { k: "texte", q: "Ce que je ferais à la place" }, { k: "chips", q: "Ce qui m'apaise", o: "@apaiser", m: 1 }] },
+      { h: "Mes valeurs", f: [{ k: "chips", q: "Les valeurs qui comptent pour moi (5 au plus)", o: "@valeurs", m: 1 }] }] },
+  { id: "compassion", g: "adulte", t: "Je développe ma compassion", d: "Me parler avec la douceur que j'aurais pour un ami", u: 3, dur: 8, tags: ["dep", "trauma", "tca", "anx", "rel"],
+    steps: [{ h: "Un moment dur", f: [{ k: "texte", q: "Une situation où j'ai été dur·e avec moi-même" }, { k: "chips", q: "Ce que j'ai ressenti", o: "@emo", m: 1 }, { k: "texte", q: "Ce que je me suis dit" }] },
+      { h: "La voix bienveillante", f: [{ k: "texte", q: "Ce que mon Adulte sain me dirait", h: "Ex. : « Tu as fait ce que tu pouvais avec ce que tu avais »" }, { k: "lignes", q: "Mes phrases d'encouragement", n: 3, h: "Ex. : « J'ai le droit d'apprendre à mon rythme »" }] }] },
+  { id: "croyances", g: "adulte", t: "Je questionne une croyance", d: "Peser les preuves, comme au tribunal", u: 3, dur: 8, tags: ["dep", "anx", "tca", "rel", "tnd"],
+    steps: [{ h: "La croyance", f: [{ k: "texte", q: "La croyance de mon schéma", h: "Ex. : « Je ne suis pas à la hauteur »" }, { k: "pct", q: "À quel point j'y crois" }] },
+      { h: "Le tribunal", f: [{ k: "texte", q: "Les faits qui vont dans son sens" }, { k: "texte", q: "Les faits qui vont contre elle" }, { k: "oui", q: "Un juge serait-il convaincu par les preuves pour ?" }] },
+      { h: "Le verdict", f: [{ k: "texte", q: "Une croyance plus juste et plus douce", h: "Ex. : « Je progresse, et j'ai le droit à l'erreur »" }, { k: "pct", q: "À quel point je crois maintenant à l'ancienne croyance" }] }] },
+
+  /* ---------- Changer ---------- */
+  { id: "plan", g: "changer", t: "Mon plan face à mon schéma", d: "Savoir quoi faire la prochaine fois qu'il s'active", u: 3, dur: 10, pin: 1, tags: ["dep", "anx", "trauma", "rel", "tca", "tnd"],
+    steps: [{ h: "Mes automatismes", f: [{ k: "chips", q: "Quand ce schéma s'active", o: "@schemas", m: 1 }, { k: "texte", q: "Je pense…" }, { k: "texte", q: "Je fais…" }, { k: "texte", q: "Je ressens…" }, { k: "chips", q: "Ça m'éloigne de mon besoin de", o: "@besoins", m: 1 }] },
+      { h: "Mes alternatives", f: [{ k: "texte", q: "Pour gérer l'émotion, je peux…" }, { k: "texte", q: "Je peux me dire…" }, { k: "texte", q: "Je peux agir ainsi…" }] },
+      { h: "Le plan", f: [{ k: "texte", q: "La prochaine situation où l'essayer" }, { k: "texte", q: "Ma première petite étape" }, { k: "texte", q: "Mon soutien (personne, outil, exercice)", opt: 1 }] }] },
+  { id: "alternatif", g: "changer", t: "J'essaie un comportement nouveau", d: "Une petite expérience, puis le bilan", u: 2, dur: 10, tags: ["anx", "rel", "dep", "tca"],
+    steps: [{ h: "Mon habitude", f: [{ k: "texte", q: "La situation" }, { k: "texte", q: "Ce que je fais d'habitude" }, { k: "chips", q: "Ça ressemble à", o: "@strat" }] },
+      { h: "Autre chose", f: [{ k: "info", q: "Questions pour trouver : sans peur ni jugement, que ferais-je ? Que conseillerais-je à un ami ? Qu'est-ce qui respecterait mes besoins et ceux des autres ?" }, { k: "texte", q: "Le comportement nouveau que je vais essayer" }, { k: "texte", q: "La pensée qui m'accompagne", h: "Ex. : « J'ai le droit de dire ce que je ressens »" }, { k: "texte", q: "Les étapes concrètes" }] },
+      { h: "Le bilan (après l'essai)", f: [{ k: "texte", q: "Comment je me suis senti·e", opt: 1 }, { k: "oui", q: "Cela a-t-il mieux répondu à mon besoin ?" }] }] },
+  { id: "memo", g: "changer", t: "Ma fiche mémo", d: "Une carte à relire quand le schéma s'active", u: 3, dur: 6, pin: 1, tags: ["dep", "anx", "trauma", "rel", "tca", "tnd"],
+    intro: "Je la remplis une fois au calme. Ensuite, je peux la relire à tout moment depuis la liste des exercices.",
+    steps: [{ h: "Ce qui se passe", f: [{ k: "chips", q: "En ce moment, je me sens", o: "@emo", m: 1 }, { k: "chips", q: "car cette part de moi s'est réveillée", o: ["Enfant vulnérable", "Enfant en colère", "Enfant impulsif", "Voix critique"] }, { k: "texte", q: "quand…" }, { k: "chips", q: "C'est sûrement mon schéma", o: "@schemas", m: 1 }] },
+      { h: "La réalité", f: [{ k: "texte", q: "Même si je crois que…" }, { k: "texte", q: "la réalité, c'est que…" }, { k: "texte", q: "Les preuves de mon Adulte sain" }] },
+      { h: "Mon choix", f: [{ k: "texte", q: "Même si j'ai envie de…" }, { k: "texte", q: "je choisis plutôt de…" }] }] },
+  { id: "lettre-futur", g: "changer", t: "Lettre à mon moi du futur", d: "Imaginer la vie libérée de mes schémas", u: 1, dur: 20, tags: ["dep", "rel"],
+    steps: [{ h: "Ce que je veux dépasser", f: [{ k: "chips", q: "Les schémas à surmonter", o: "@schemas", m: 1 }, { k: "texte", q: "Ce que j'aimerais vivre ou développer" }] },
+      { h: "Dans 5 ou 10 ans", f: [{ k: "info", q: "Fermer les yeux et m'imaginer plus tard, serein·e, en accord avec mes besoins." }, { k: "texte", q: "Où je suis, comment je vis, ce que je ressens" }, { k: "chips", q: "Les qualités que j'incarne", o: "@qualites", m: 1 }] },
+      { h: "La lettre", f: [{ k: "texte", q: "Je suis fier·e de toi pour…" }, { k: "texte", q: "Ce qui a changé…" }, { k: "texte", q: "Merci de…" }] }] },
+
+  /* ---------- Besoins ---------- */
+  { id: "b-equilibre", g: "besoins", t: "L'équilibre de mes besoins", d: "Faire le point sur ce qui est comblé ou non", u: 3, dur: 8, tags: ["dep", "anx", "trauma", "rel", "tca"],
+    steps: [{ h: "Le bilan", f: [{ k: "info", q: "Pour chaque besoin, indiquer à quel point il est comblé en ce moment." }, { k: "rate", q: "En ce moment, ce besoin est…", o: "@besoins", l: ["Peu comblé", "Moyennement", "Bien comblé"] }] },
+      { h: "Rééquilibrer", f: [{ k: "chips", q: "Les besoins à soigner en priorité (3 au plus)", o: "@besoins", m: 1 }, { k: "texte", q: "Une ou deux actions concrètes" }] }] },
+  { id: "b-signaux", g: "besoins", t: "Les signaux de mes besoins", d: "Mes émotions et mon corps m'indiquent un besoin", u: 2, dur: 6, tags: ["anx", "tca", "tnd", "trauma"],
+    steps: [{ h: "Observer", f: [{ k: "texte", q: "Un moment récent avec une émotion forte (agréable ou non)" }, { k: "chips", q: "L'émotion", o: "@emo", m: 1 }, { k: "chips", q: "Où je l'ai sentie dans mon corps", o: "@corps", m: 1 }] },
+      { h: "Le besoin", f: [{ k: "chips", q: "Le besoin en jeu", o: "@besoins", m: 1 }, { k: "chips", q: "Ce besoin était", o: ["Comblé", "Pas comblé"] }] }] },
+  { id: "b-cnv", g: "besoins", t: "J'exprime un besoin", d: "Le dire clairement et sans agresser (CNV)", u: 3, dur: 8, tags: ["rel", "anx", "dep", "tnd"],
+    steps: [{ h: "Préparer", f: [{ k: "texte", q: "Les faits, sans jugement", h: "Ex. : « Hier, tu as regardé ton téléphone pendant que je parlais »" }, { k: "texte", q: "Ce que je ressens (en disant « je »)", h: "Ex. : « Je me suis senti·e mis·e de côté »" }, { k: "chips", q: "Mon besoin", o: "@besoins", m: 1 }, { k: "texte", q: "Ma demande, concrète et positive", h: "Ex. : « Est-ce qu'on peut se parler sans écran ce soir ? »" }] },
+      { h: "Après (facultatif)", f: [{ k: "oui", q: "J'ai pu le dire" }, { k: "texte", q: "Comment ça s'est passé", opt: 1 }] }] },
+  { id: "b-journal", g: "besoins", t: "Le journal de mes besoins", d: "Un moment de ma journée où un besoin a été comblé ou non", u: 2, dur: 3, tags: ["dep", "anx", "rel", "tca", "tnd"],
+    steps: [{ h: "Aujourd'hui", f: [{ k: "texte", q: "Le moment" }, { k: "chips", q: "Le besoin présent", o: "@besoins", m: 1 }, { k: "oui", q: "Était-il comblé ?" }, { k: "texte", q: "Ce qui a aidé ou empêché", opt: 1 }] }] },
+  { id: "b-repondre", g: "besoins", t: "Je réponds à mes besoins", d: "Obstacles et actions réalistes pour un besoin important", u: 2, dur: 10, tags: ["dep", "rel", "tca", "anx"],
+    steps: [{ h: "Mon besoin", f: [{ k: "chips", q: "Le besoin le plus important en ce moment", o: "@besoins" }, { k: "echelle", q: "À quel point il est comblé aujourd'hui", a: "Pas du tout", b: "Totalement" }] },
+      { h: "Les obstacles", f: [{ k: "texte", q: "Une croyance qui m'en éloigne", h: "Ex. : « Je vais déranger »" }, { k: "texte", q: "Un comportement qui m'en éloigne", h: "Ex. : je me tais et je m'isole" }, { k: "texte", q: "Ce qui prouve que cette peur est exagérée", opt: 1 }] },
+      { h: "Mon action", f: [{ k: "texte", q: "Une action concrète et réaliste" }, { k: "chips", q: "À quelle fréquence", o: ["Chaque jour", "Plusieurs fois par semaine", "Chaque semaine", "Une fois pour commencer"] }, { k: "texte", q: "Ce dont j'ai besoin pour y arriver", opt: 1 }] }] },
+  { id: "b-secours", g: "besoins", t: "Mon plan et ma boîte de secours", d: "Quoi faire quand un besoin n'est pas comblé et que ça monte", u: 3, dur: 8, pin: 1, tags: ["anx", "trauma", "tca", "dep", "tnd", "rel"],
+    steps: [{ h: "Mes signaux", f: [{ k: "chips", q: "Quand mon besoin de … n'est pas comblé", o: "@besoins", m: 1 }, { k: "chips", q: "Mes signaux dans le corps", o: "@corps", m: 1 }, { k: "chips", q: "Mes émotions", o: "@emo", m: 1 }, { k: "texte", q: "J'ai tendance à…" }] },
+      { h: "Ma boîte de secours", f: [{ k: "lignes", q: "Ce qui m'aide (objets, activités, personnes à appeler)", n: 4, h: "Ex. : écouteurs et ma playlist calme" }, { k: "texte", q: "Ce que je peux me dire", h: "Ex. : « J'ai le droit de ressentir ça et de le dire »" }] }] },
+  { id: "b-enfance", g: "besoins", t: "Les besoins de mon enfance", d: "Ce qui a manqué, et ce que ça change aujourd'hui", u: 1, dur: 12, seance: 1, tags: ["trauma", "rel", "dep"],
+    steps: [{ h: "Se souvenir", f: [{ k: "info", q: "Penser aux adultes qui prenaient soin de moi. On peut s'arrêter si c'est trop difficile." }, { k: "texte", q: "Un souvenir marquant", opt: 1 }, { k: "chips", q: "Les besoins qui n'étaient pas assez comblés", o: "@besoins", m: 1 }] },
+      { h: "Aujourd'hui", f: [{ k: "texte", q: "Comment ça influence encore ma vie" }, { k: "texte", q: "Ce que je peux m'offrir maintenant" }] }] },
+
+  /* ---------- Valeurs ---------- */
+  { id: "v-priorites", g: "valeurs", t: "Mes valeurs prioritaires", d: "Ce qui compte vraiment pour moi", u: 3, dur: 8, tags: ["dep", "rel", "tca", "anx", "tnd"],
+    steps: [{ h: "Trier", f: [{ k: "chips", q: "Les valeurs très importantes pour moi", o: "@valeurs", m: 1 }] },
+      { h: "Mon podium", f: [{ k: "lignes", q: "Mes 3 valeurs essentielles, dans l'ordre", n: 3 }, { k: "texte", q: "Pourquoi elles comptent", opt: 1 }] }] },
+  { id: "v-actions", g: "valeurs", t: "Mes valeurs en actions", d: "Une petite action par valeur, cette semaine", u: 3, dur: 8, tags: ["dep", "anx", "tca", "rel"],
+    steps: [{ h: "Mes sommets", f: [{ k: "texte", q: "Valeur 1 et une action concrète" }, { k: "texte", q: "Valeur 2 et une action concrète", opt: 1 }, { k: "texte", q: "Valeur 3 et une action concrète", opt: 1 }] },
+      { h: "Ce qui m'en éloigne", f: [{ k: "texte", q: "Les pensées ou émotions qui m'éloignent de mes valeurs", h: "Ex. : quand je suis débordé·e, je deviens impatient·e" }, { k: "info", q: "Les émotions désagréables font partie de la vie : le but n'est pas de les faire disparaître, mais d'agir quand même selon ce qui compte." }, { k: "texte", q: "Un petit ajustement au quotidien" }] }] },
+  { id: "v-emotion", g: "valeurs", t: "Une émotion forte et mes valeurs", d: "Quelle valeur était touchée ?", u: 2, dur: 6, tags: ["rel", "anx", "dep", "tnd"],
+    steps: [{ h: "L'émotion", f: [{ k: "texte", q: "La situation" }, { k: "chips", q: "L'émotion", o: "@emo", m: 1 }, { k: "chips", q: "La valeur respectée ou blessée", o: "@valeurs", m: 1 }] },
+      { h: "Ma réponse", f: [{ k: "texte", q: "Comment j'ai réagi" }, { k: "oui", q: "Ma réaction a-t-elle respecté mes valeurs ?" }, { k: "texte", q: "La prochaine fois, je pourrais…" }] }] },
+  { id: "v-journal", g: "valeurs", t: "Le journal de mes valeurs", d: "Un moment de la journée en accord ou non avec mes valeurs", u: 2, dur: 3, tags: ["dep", "rel", "tca", "tnd"],
+    steps: [{ h: "Aujourd'hui", f: [{ k: "texte", q: "Le moment" }, { k: "chips", q: "Les valeurs en jeu", o: "@valeurs", m: 1 }, { k: "chips", q: "J'ai été", o: ["En accord avec mes valeurs", "En décalage"] }, { k: "texte", q: "Pourquoi", opt: 1 }] }] },
+  { id: "v-obstacles", g: "valeurs", t: "Les obstacles à mes valeurs", d: "Peurs, croyances et contraintes qui m'empêchent de les vivre", u: 2, dur: 8, tags: ["anx", "dep", "rel"],
+    steps: [{ h: "Les obstacles", f: [{ k: "chips", q: "La valeur", o: "@valeurs" }, { k: "texte", q: "Un obstacle en moi (peur, croyance)", h: "Ex. : « Je n'ai pas le droit de décider sans l'accord des autres »" }, { k: "texte", q: "Un obstacle extérieur", opt: 1 }] },
+      { h: "Les dépasser", f: [{ k: "texte", q: "Cette croyance est-elle justifiée ou exagérée ? Mes preuves" }, { k: "texte", q: "Une action concrète pour avancer quand même" }] }] },
+  { id: "v-discours", g: "valeurs", t: "Le discours de mes proches", d: "Ce que j'aimerais qu'on dise de moi", u: 1, dur: 8, tags: ["dep", "rel"],
+    steps: [{ h: "Imaginer", f: [{ k: "info", q: "Imaginer une fête en mon honneur. Les personnes qui comptent prennent la parole pour dire sincèrement qui je suis pour elles." }, { k: "texte", q: "Ce que j'aimerais qu'elles disent" }, { k: "chips", q: "Les valeurs que ça montre", o: "@valeurs", m: 1 }] }] }
+];
+const TCC_BY_ID = Object.fromEntries(TCC_EX.map(x => [x.id, x]));
+/* Sélections recommandées par profil (ordre = utilité) */
+const TCC_PRESETS = {
+  dep: ["pe-schemas", "pe-modes", "enreg", "critique-id", "dialogue", "compassion", "croyances", "v-priorites", "v-actions", "b-equilibre", "memo"],
+  anx: ["pe-schemas", "enreg", "declencheurs", "croyances", "enfant-apaiser", "b-signaux", "b-secours", "alternatif", "memo"],
+  trauma: ["pe-schemas", "pe-modes", "declencheurs", "enfant-apaiser", "b-secours", "compassion", "dialogue", "enreg", "memo"],
+  rel: ["pe-schemas", "pe-modes", "enreg", "besoin-cache", "b-cnv", "strategies", "v-emotion", "plan", "memo"],
+  tca: ["pe-schemas", "enreg", "declencheurs", "strategies", "critique-id", "dialogue", "compassion", "b-secours", "b-equilibre", "memo"],
+  tnd: ["enreg", "croyances", "b-journal", "b-cnv", "b-secours", "v-journal", "memo"]
+};
+function tccList(name) {
+  if (name === "@schemaphrases") return TCC_DOMAINES.flatMap(d => d.s.map(s => s[2]));
+  return TCC_LISTS[String(name).slice(1)] || [];
+}
+function tccOpts(o) { return Array.isArray(o) ? o : tccList(o); }
+/* Fiches de psychoéducation (HTML) */
+function tccFiche(v) {
+  if (v === "domaines") return TCC_DOMAINES.map(d => `<div class="fiche-bloc"><h3>${d.t}</h3><p class="small muted">${d.b}</p><ul>${d.s.map(s => `<li><b>${s[1]}</b> : ${s[2]}</li>`).join("")}</ul></div>`).join("");
+  if (v === "modes") return `<div class="fiche-bloc"><h3>Mon enfant intérieur</h3><ul>
+      <li><b>Vulnérable</b> : je me sens seul·e, triste, perdu·e, comme quand j'étais petit·e.</li>
+      <li><b>En colère</b> : je suis furieux·se parce qu'un besoin important n'est pas respecté.</li>
+      <li><b>Impulsif</b> : j'agis tout de suite, sans pouvoir attendre ni penser aux conséquences.</li>
+      <li><b>Heureux</b> : je me sens en sécurité, spontané·e, curieux·se. C'est la part à nourrir.</li></ul></div>
+    <div class="fiche-bloc"><h3>Ma voix critique</h3><ul>
+      <li><b>Exigeante</b> : « Ce n'est jamais assez, tu dois faire mieux. »</li>
+      <li><b>Punitive</b> : « Tu as fait une erreur, tu mérites d'être puni·e. »</li></ul></div>
+    <div class="fiche-bloc"><h3>Mes réactions automatiques</h3><ul>
+      <li><b>Soumission</b> : je fais ce que dit mon schéma, comme si c'était une fatalité.</li>
+      <li><b>Évitement</b> : je fuis, je me distrais, je me coupe de ce que je ressens.</li>
+      <li><b>Compensation</b> : je fais l'inverse à l'excès, ce qui finit souvent par renforcer le schéma.</li></ul>
+      <p class="small muted">Ces réactions m'ont protégé·e autrefois. Aujourd'hui, elles m'empêchent souvent de répondre à mes vrais besoins.</p></div>
+    <div class="fiche-bloc"><h3>Mon Adulte sain</h3><p>La part calme et bienveillante de moi. Elle console l'enfant vulnérable, pose des limites à l'enfant en colère ou impulsif, encourage l'enfant heureux et adoucit la voix critique. Les exercices servent à la renforcer.</p></div>`;
+  if (v === "bv") return `<div class="fiche-bloc"><h3>Un besoin</h3><p>Ce qui m'est nécessaire pour aller bien : sécurité, affection, autonomie, expression de soi, limites, plaisir… Quand il manque, je le sens par des émotions désagréables et des signaux dans le corps.</p></div>
+    <div class="fiche-bloc"><h3>Une valeur</h3><p>Ce qui donne du sens à ma vie et guide mes choix : honnêteté, entraide, liberté, créativité… Elle ne « manque » pas : c'est une direction à suivre.</p></div>
+    <div class="fiche-bloc"><h3>Ensemble</h3><p>Les besoins m'aident à garder l'équilibre au jour le jour, les valeurs m'orientent sur le long terme. Quand mes actions respectent les deux, je me sens en accord avec moi-même.</p></div>`;
+  return "";
+}
+/* Texte lisible d'une réponse (pour la praticienne et les fiches à relire) */
+function tccValText(r) {
+  if (r.v == null || r.v === "") return "–";
+  if (Array.isArray(r.v)) return r.v.filter(Boolean).join(" · ") || "–";
+  if (typeof r.v === "object") return Object.entries(r.v).map(([k, n]) => `${k} : ${n}`).join(" · ");
+  if (r.k === "pct") return r.v + " %";
+  if (r.k === "echelle") return r.v + "/10";
+  return String(r.v);
+}
 /* ===== Entre-Séances — application patient ===== */
 const KEY = "es_patient_v1";
 let S = lsGet(KEY);
@@ -579,6 +852,8 @@ const I = {
   angoisse: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.5" opacity=".6"/><circle cx="12" cy="12" r="10" opacity=".3"/></svg>',
   elan: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 8-9"/><path d="M15 6h5v5"/></svg>',
   angst: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8l1.5 1.5L13 7M9 14l1.5 1.5L13 13M15 8h1M15 14h1"/></svg>',
+  tcc: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18" opacity=".35"/><circle cx="12" cy="12" r="3.2"/></svg>',
+  perso: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.4 6.7 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>',
   send: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>',
   gear: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>',
   life: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/></svg>',
@@ -600,12 +875,13 @@ const MODS = {
   respi:   { t: "Respirer et se poser", d: () => "La vague, la balle, 5-4-3-2-1" },
   taches:  { t: "Découper une tâche", d: () => "Une étape à la fois, avec un minuteur" },
   jauge:   { t: "Ma jauge", d: () => T("Bruit, lumière, fatigue : où en es-tu ?", "Bruit, lumière, fatigue : où en êtes-vous ?") },
+  tcc:     { t: "Exercices TCC", d: () => "Schémas, besoins et valeurs" },
   fiches:  { t: "Fiches pratiques", d: () => "Astuces pour l'attention, les sens, les émotions" },
   elan:    { t: "Mon élan ces 7 derniers jours", d: () => "10 questions, réponses en un clic", q: true },
   angst:   { t: "Mes périodes d'énergie", d: () => "Questionnaire en 20 questions (vrai / faux)", q: true }
 };
 const ALL_MODS = Object.keys(MODS);
-const TYPE_LABEL = { humeur: "humeur du jour", pensees: "tableau des pensées", sud: "échelle de malaise", expo: "exposition", sommeil: "journal du sommeil", respi: "exercice de respiration", taches: "tâche découpée", jauge: "jauge", repas: "repas noté", envie: "envie de crise", angoisse: "crise d'angoisse", angst: "questionnaire", elan: "questionnaire" };
+const TYPE_LABEL = { humeur: "humeur du jour", pensees: "tableau des pensées", sud: "échelle de malaise", expo: "exposition", sommeil: "journal du sommeil", respi: "exercice de respiration", taches: "tâche découpée", jauge: "jauge", repas: "repas noté", envie: "envie de crise", angoisse: "crise d'angoisse", angst: "questionnaire", elan: "questionnaire", perso: "exercice personnalisé", msglu: "message lu", tcc: "exercice TCC" };
 const RELAIS = (typeof window !== "undefined" && window.ES_RELAIS ? String(window.ES_RELAIS) : "").trim();
 const spacedCode = c => String(c).replace("-", " ");
 const canDirect = () => !!(RELAIS && S && S.cfg && S.cfg.c !== DEMO_CODE);
@@ -613,10 +889,10 @@ const SLOTS = { pdj: "Petit-déjeuner", cm: "Collation du matin", dej: "Déjeune
 function demoCfg() {
   return { v: 1, c: DEMO_CODE, k: DEMO_PUB, m: ALL_MODS.slice(), t: "tu", e: PSY_EMAIL_DEFAULT,
     h: [["Demander l'heure à quelqu'un dans la rue", 3], ["Commander seul(e) au comptoir d'un café", 5], ["Poser une question en classe", 7], ["Passer un appel pour prendre un rendez-vous", 8]],
-    a: { p: ["HP"], r: ["pdj", "dej", "gout", "din"], o: { photo: 1, faim: 1, ctrl: 1, comp: 0, emo: 1, pens: 0, saute: 1, grig: 1 } } };
+    a: { p: ["HP"], r: ["pdj", "dej", "gout", "din"], o: { photo: 1, faim: 1, ctrl: 1, comp: 0, emo: 1, pens: 0, saute: 1, grig: 1 } }, cx: demoCx(), tx: TCC_EX.map(x => x.id) };
 }
 function newState(cfg) {
-  return { cfg, prefs: { done: false, dys: false, syl: false, muet: false, size: 1, tv: cfg.t === "vous" ? "vous" : "tu" }, entries: [], task: null };
+  return { msgs: cfg.c === DEMO_CODE ? demoMsgs() : [], read: {}, cfg, prefs: { done: false, dys: false, syl: false, muet: false, size: 1, tv: cfg.t === "vous" ? "vous" : "tu" }, entries: [], task: null };
 }
 function applyPrefs() {
   const p = S && S.prefs; const root = document.documentElement;
@@ -766,7 +1042,11 @@ SCREENS.activation = {
       try {
         const r = await relay(RELAIS, { a: "cfg", code });
         if (!r.ok) { err.textContent = "Ce code n'est pas reconnu. Vérifier les 6 caractères."; }
-        else { const cfg = await openCfg(code, r.blob); S = newState(Object.assign({}, cfg, { c: code, k: r.pub })); save(); go("accueil"); return; }
+        else {
+          const cfg = await openCfg(code, r.blob); S = newState(Object.assign({}, cfg, { c: code, k: r.pub }));
+          if (r.msgs) { try { S.msgs = (await openCfg(code, r.msgs)).l || []; } catch (x) {} }
+          S.lastSync = new Date().toISOString(); save(); go("accueil"); return;
+        }
       } catch (e) { err.textContent = e.detail || "Pas de connexion internet. Réessayer une fois connecté·e."; }
       btn.disabled = false; btn.textContent = "Valider";
     };
@@ -779,8 +1059,11 @@ async function refreshCfg() {
     const r = await relay(RELAIS, { a: "cfg", code: S.cfg.c });
     if (!r.ok) return false;
     const cfg = await openCfg(S.cfg.c, r.blob);
-    S.cfg = Object.assign({}, S.cfg, cfg, { c: S.cfg.c, k: r.pub }); save();
-    if (view.name === "home") render();
+    S.cfg = Object.assign({}, S.cfg, cfg, { c: S.cfg.c, k: r.pub });
+    if (r.msgs) { try { const m = await openCfg(S.cfg.c, r.msgs); S.msgs = m.l || []; } catch (e) {} } else S.msgs = [];
+    S.lastSync = new Date().toISOString(); save();
+    if (S.prefs.notif && !r.sub && typeof Notification !== "undefined" && Notification.permission === "granted") setNotif(true, true);
+    if (["home", "messages"].includes(view.name)) render();
     return true;
   } catch (e) { return false; }
 }
@@ -816,22 +1099,39 @@ async function saved(type, extra = {}) {
 
 SCREENS.home = {
   html() {
-    const mods = (S.cfg.m || ALL_MODS).filter(m => MODS[m] && (m !== "expo" || (S.cfg.h && S.cfg.h.length)) && (!["repas", "envie"].includes(m) || S.cfg.a));
+    const mods = (S.cfg.m || ALL_MODS).filter(m => MODS[m] && (m !== "expo" || (S.cfg.h && S.cfg.h.length)) && (!["repas", "envie"].includes(m) || S.cfg.a) && (m !== "tcc" || (S.cfg.tx && S.cfg.tx.length)));
     const ex = mods.filter(m => !MODS[m].q), qs = mods.filter(m => MODS[m].q);
     const n = unsent().length;
     let today = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }); today = today.charAt(0).toUpperCase() + today.slice(1);
     const tile = m => {
       let d = MODS[m].d();
+      if (m === "tcc") d = `${S.cfg.tx.length} exercice${S.cfg.tx.length > 1 ? "s" : ""} proposé${S.cfg.tx.length > 1 ? "s" : ""}`;
       if (m === "repas") { const r = (S.cfg.a.r || []), done = r.filter(s => mealOf(todayISO(), s)).length; d = `${done} sur ${r.length} repas notés aujourd'hui`; }
       return `<button class="tile" data-go="${m}"><span class="tile-ico">${I[m]}</span><span><span class="tile-t">${MODS[m].t}</span><span class="tile-d">${d}</span></span></button>`;
     };
     const unlinked = !canDirect() && S.cfg.c !== DEMO_CODE;
+    const um = unreadMsgs(), nMsg = (S.msgs || []).length;
+    const cxTiles = (S.cfg.cx || []).map(d => `<button class="tile" data-go="perso" data-p='${JSON.stringify({ id: d.id })}'><span class="tile-ico">${I.perso}</span><span><span class="tile-t">${esc(d.t)}</span><span class="tile-d">${esc(d.d || "Exercice proposé par la psychologue")}</span></span></button>`).join("");
+    const syncLine = canDirect() ? `<div class="sync-row"><span class="small muted">${S.lastSync ? "Mis à jour " + fmtMsgDate(S.lastSync) : "Pas encore mis à jour"}</span><button class="btn soft small-btn" id="refreshNow">Mettre à jour l'application</button></div>` : "";
     return `${unlinked ? `<div class="notice" style="margin-bottom:14px"><b>Envoi automatique désactivé.</b> L'application n'est pas reliée à la psychologue. <button class="link" data-go="reglages" data-p='{"diag":true}'>Voir le détail</button></div>` : ""}<div class="greet"><span class="date">${today}</span><h1>Bonjour</h1>
       <p class="muted">${T("Que veux-tu faire aujourd'hui ?", "Que souhaitez-vous faire aujourd'hui ?")}</p></div>
+      ${um.length ? `<div class="stack msgs-home">${um.map(m => msgCard(m, true)).join("")}</div>` : ""}
+      ${nMsg ? `<button class="link msgs-link" data-go="messages">${MAIL_ICO} Mes messages (${nMsg})</button>` : ""}
       ${n ? `<button class="send-banner" data-go="envoi"><span><b>${n} ${n > 1 ? "réponses" : "réponse"} à envoyer</b><br><span class="small">${canDirect() ? "Pas encore parties. Toucher pour réessayer." : T("Envoie-les à ta psychologue quand tu veux.", "Envoyez-les à votre psychologue quand vous le souhaitez.")}</span></span>${I.send}</button>` : ""}
-      <div class="tiles">${ex.map(tile).join("")}
+      <div class="tiles">${ex.map(tile).join("")}${cxTiles}
       <button class="tile" data-go="envoi"><span class="tile-ico">${I.send}</span><span><span class="tile-t">Envoyer à ma psychologue</span><span class="tile-d">${canDirect() ? "Envoi automatique, chiffré" : "Message chiffré, lisible par elle seule"}</span></span></button></div>
-      ${qs.length ? `<h2 class="sec-title">Questionnaires</h2><div class="tiles">${qs.map(tile).join("")}</div>` : ""}`;
+      ${qs.length ? `<h2 class="sec-title">Questionnaires</h2><div class="tiles">${qs.map(tile).join("")}</div>` : ""}
+      ${syncLine}`;
+  },
+  mount() {
+    const b = document.getElementById("refreshNow");
+    if (b) b.onclick = async () => {
+      b.disabled = true; b.textContent = "Mise à jour…";
+      const ok = await refreshCfg();
+      if (ok && unsent().length) await sendEntries(unsent());
+      if (!ok) { b.disabled = false; b.textContent = "Pas de connexion, réessayer"; return; }
+      render();
+    };
   }
 };
 
@@ -1658,6 +1958,10 @@ SCREENS.reglages = {
       <div class="card"><h3>L'application ${T("me dit", "me dit")}</h3>
         <div class="chips" data-name="tv" data-multi="0" style="margin-top:10px">
           <button class="chip" data-v="tu" aria-pressed="${pr.tv === "tu"}">« tu »</button><button class="chip" data-v="vous" aria-pressed="${pr.tv === "vous"}">« vous »</button></div></div>
+      <div class="card stack"><h3>Notifications</h3>
+        <div class="toggle"><span>${T("Me prévenir quand ma psychologue m'envoie un message", "Me prévenir quand ma psychologue m'envoie un message")}</span><input type="checkbox" class="switch" id="oNotif" ${pr.notif ? "checked" : ""}></div>
+        <p class="hint">Les messages s'affichent toujours sur l'écran d'accueil, même sans notification. La notification ne dit rien du contenu : « Nouveau message dans Entre-Séances ».</p>
+        <p class="hint" id="nMsg" role="status"></p></div>
       <div class="card stack" id="diagCard"><h3>Liaison avec la psychologue</h3>
         <p class="small">${S.cfg.c === DEMO_CODE ? "Mode démonstration : aucun envoi." : RELAIS ? "Application reliée au relais. " + (S.lastOk ? "Dernier envoi réussi : " + new Date(S.lastOk).toLocaleString("fr-FR") + "." : "Aucun envoi réussi pour l'instant.") : "<b>Non reliée</b> : l'adresse du relais est absente du fichier config.js du site."}</p>
         ${S.lastErr ? `<p class="notice small">Dernière erreur (${new Date(S.lastErr.t).toLocaleString("fr-FR")}) : ${esc(S.lastErr.m)}</p>` : ""}
@@ -1681,6 +1985,13 @@ SCREENS.reglages = {
     document.getElementById("sMinus").onclick = () => set(-0.1);
     document.getElementById("sPlus").onclick = () => set(0.1);
     document.querySelectorAll('.chips[data-name="tv"] .chip').forEach(b => b.addEventListener("picked", () => { pr.tv = b.dataset.v; save(); render(); }));
+    const on = document.getElementById("oNotif");
+    if (on) on.onchange = async () => {
+      const m = document.getElementById("nMsg"); on.disabled = true; m.textContent = on.checked ? "Activation…" : "Désactivation…";
+      const err = await setNotif(on.checked);
+      on.disabled = false;
+      if (err) { on.checked = !!S.prefs.notif; m.textContent = err; } else m.textContent = on.checked ? "Notifications activées." : "Notifications désactivées. Les messages restent visibles sur l'écran d'accueil.";
+    };
     const dg = document.getElementById("diag");
     if (dg) dg.onclick = async () => {
       const out = document.getElementById("diagOut"), line = (ok, t) => `<p class="small">${ok ? "✔" : "✖"} ${t}</p>`;
@@ -1699,10 +2010,235 @@ SCREENS.reglages = {
   }
 };
 
+/* ---------- Messages de la psychologue ---------- */
+const MAIL_ICO = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 13h5"/></svg>';
+const nl2br = t => esc(t).replace(/\n/g, "<br>");
+const fmtMsgDate = iso => { const d = new Date(iso), today = new Date(); const same = d.toDateString() === today.toDateString(); return same ? "aujourd'hui à " + d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }); };
+function exTarget(ex) {
+  if (!ex) return null;
+  const [k, id] = [ex.slice(0, 1), ex.slice(2)];
+  if (k === "m" && MODS[id] && (S.cfg.m || []).includes(id)) return { go: id, p: {}, label: MODS[id].t };
+  if (k === "x") { const d = (S.cfg.cx || []).find(x => x.id === id); if (d) return { go: "perso", p: { id }, label: d.t }; }
+  if (k === "t" && TCC_BY_ID[id] && (S.cfg.tx || []).includes(id)) return { go: "tccx", p: { id }, label: TCC_BY_ID[id].t };
+  return null;
+}
+function msgCard(m, unread) {
+  const tg = exTarget(m.ex);
+  return `<article class="msg-card${unread ? " unread" : ""}">
+    <div class="msg-head">${MAIL_ICO}<b>${T("Message de ta psychologue", "Message de votre psychologue")}</b><span class="small muted">${fmtMsgDate(m.t)}</span></div>
+    <p class="msg-text">${nl2br(m.x)}</p>
+    ${tg ? `<button class="btn" data-go="${tg.go}" data-p='${JSON.stringify(tg.p)}' data-readon="${m.id}">Faire : ${esc(tg.label)}</button>` : ""}
+    ${unread ? `<button class="link" data-read="${m.id}">J'ai lu</button>` : ""}</article>`;
+}
+function markRead(id) {
+  S.read = S.read || {};
+  if (S.read[id]) return;
+  S.read[id] = new Date().toISOString();
+  addEntry("msglu", { mid: id });
+  if (canDirect()) sendEntries(unsent());
+}
+document.addEventListener("click", e => {
+  const r = e.target.closest("[data-read]");
+  if (r) { markRead(r.dataset.read); render(); return; }
+  const ro = e.target.closest("[data-readon]");
+  if (ro) markRead(ro.dataset.readon);
+}, true);
+const unreadMsgs = () => (S && S.msgs ? S.msgs : []).filter(m => !(S.read && S.read[m.id])).slice().reverse();
+SCREENS.messages = {
+  html: () => {
+    const all = (S.msgs || []).slice().reverse();
+    return `${back()}<div class="stack"><div class="screen-head"><h1>Mes messages</h1><p>${T("Les messages envoyés par ta psychologue.", "Les messages envoyés par votre psychologue.")}</p></div>
+      ${all.length ? all.map(m => msgCard(m, !(S.read && S.read[m.id]))).join("") : `<div class="notice">Aucun message pour l'instant.</div>`}</div>`;
+  }
+};
+function demoMsgs() {
+  const d = n => { const x = new Date(); x.setDate(x.getDate() - n); x.setHours(18, 30, 0, 0); return x.toISOString(); };
+  return [
+    { id: "dm1", t: d(3), x: "Bravo pour tes notes de la semaine. Continue le journal du sommeil, c'est très utile pour la prochaine séance.", ex: "m:sommeil" },
+    { id: "dm2", t: d(0), x: "J'ai vu que ta jauge d'énergie était très haute ces derniers jours. Peux-tu remplir le questionnaire « Mon élan » avant notre rendez-vous ? Et ce soir, essaie l'exercice des activités agréables.", ex: "x:demo-act" }
+  ];
+}
+function demoCx() {
+  return [{ id: "demo-act", t: "Activités agréables", d: "Prévoir et noter une activité qui fait du bien", c: "Choisis une petite activité agréable pour aujourd'hui. Après l'avoir faite, note ce que tu as ressenti.",
+    f: [{ k: "texte", q: "L'activité prévue" }, { k: "oui", q: "Je l'ai faite" }, { k: "echelle", q: "Plaisir ressenti", a: "Aucun", b: "Énorme" }, { k: "echelle", q: "Sentiment d'avoir réussi", a: "Pas du tout", b: "Complètement" }] }];
+}
+
+/* ---------- Exercices personnalisés ---------- */
+SCREENS.perso = {
+  html(p) {
+    const d = (S.cfg.cx || []).find(x => x.id === p.id);
+    if (!d) return `${back()}<div class="notice">Cet exercice n'est plus disponible.</div>`;
+    const fld = (f, i) => {
+      switch (f.k) {
+        case "info": return `<div class="notice">${nl2br(f.q)}</div>`;
+        case "texte": return field(esc(f.q), `<textarea id="f${i}" maxlength="800"></textarea>`, noPerso());
+        case "echelle": return field(esc(f.q), range("f" + i, 0, 10, 5) + `<div class="scale-ends"><span>0${f.a ? " : " + esc(f.a) : ""}</span><span>10${f.b ? " : " + esc(f.b) : ""}</span></div>`);
+        case "choix": return field(esc(f.q), chips("f" + i, f.o || [], false));
+        case "multi": return field(esc(f.q), chips("f" + i, f.o || [], true), "Plusieurs choix possibles");
+        case "oui": return field(esc(f.q), chips("f" + i, ["Oui", "Non"], false));
+        case "minuteur": return `<div class="card stack"><span class="lbl">${esc(f.q || "Minuteur")}</span><p class="big-num no-lis" id="t${i}">${f.m || 5}:00</p><button class="btn soft" data-timer="${i}" data-min="${f.m || 5}">Lancer ${f.m || 5} min</button></div>`;
+      }
+      return "";
+    };
+    return `${back()}<div class="stack"><div class="screen-head"><h1>${esc(d.t)}</h1>${d.c ? `<p>${nl2br(d.c)}</p>` : ""}</div>
+      ${(d.f || []).map(fld).join("")}
+      <button class="btn wide" id="ok">Enregistrer</button></div>`;
+  },
+  mount(p) {
+    const d = (S.cfg.cx || []).find(x => x.id === p.id); if (!d) return;
+    const done = {}; let timers = [];
+    document.querySelectorAll("[data-timer]").forEach(b => b.onclick = () => {
+      const i = b.dataset.timer, end = Date.now() + Number(b.dataset.min) * 60000, out = document.getElementById("t" + i);
+      b.disabled = true; const release = wakeLock();
+      const tick = () => { const s = Math.max(0, Math.ceil((end - Date.now()) / 1000)); out.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; if (s <= 0) { clearInterval(h); release(); done[i] = true; b.textContent = "Terminé"; bip(); } };
+      const h = setInterval(tick, 250); timers.push(() => { clearInterval(h); release(); }); tick();
+    });
+    cleanup = () => timers.forEach(f => f());
+    document.getElementById("ok").onclick = () => {
+      const rep = [];
+      (d.f || []).forEach((f, i) => {
+        if (f.k === "info") return;
+        let v = "";
+        if (f.k === "texte") v = val("f" + i).trim();
+        else if (f.k === "echelle") v = num("f" + i);
+        else if (f.k === "multi") v = getChips("f" + i);
+        else if (f.k === "choix" || f.k === "oui") v = getChips("f" + i)[0] || "";
+        else if (f.k === "minuteur") v = done[i] ? "Fait" : "Non fait";
+        rep.push({ q: f.q, k: f.k, v });
+      });
+      addEntry("perso", { xid: d.id, titre: d.t, rep });
+      saved("perso");
+    };
+  }
+};
+
+/* ---------- Exercices TCC (schémas, besoins, valeurs) ---------- */
+const tccAssigned = () => (S.cfg.tx || []).map(id => TCC_BY_ID[id]).filter(Boolean);
+const lastDone = id => { const e = S.entries.filter(x => x.type === "tcc" && x.xid === id).pop(); return e ? new Date(e.t) : null; };
+SCREENS.tcc = {
+  html() {
+    const ex = tccAssigned(), pins = S.pins || {};
+    const pinned = ex.filter(x => x.pin && pins[x.id]);
+    return `${back()}<div class="stack"><div class="screen-head"><h1>Exercices TCC</h1>
+      <p>${T("Les exercices choisis pour toi par ta psychologue. Fais-les à ton rythme : une étape à la fois.", "Les exercices choisis pour vous par votre psychologue. À faire à votre rythme : une étape à la fois.")}</p></div>
+      ${pinned.length ? `<div class="stack"><h2 class="sec-title">Mes fiches à relire</h2>${pinned.map(x => `<button class="tile pin-tile" data-go="tccpin" data-p='${JSON.stringify({ id: x.id })}'><span class="tile-ico">${I.fiches}</span><span><span class="tile-t">${esc(x.t)}</span><span class="tile-d">Relire mes réponses</span></span></button>`).join("")}</div>` : ""}
+      ${TCC_GROUPS.map(([g, gl]) => { const xs = ex.filter(x => x.g === g); if (!xs.length) return "";
+        return `<div class="stack"><h2 class="sec-title">${gl}</h2>${xs.map(x => { const ld = lastDone(x.id);
+          return `<button class="tile" data-go="tccx" data-p='${JSON.stringify({ id: x.id })}'><span class="tile-ico">${I.angst}</span><span><span class="tile-t">${esc(x.t)}</span><span class="tile-d">${esc(x.d)} · ${x.dur} min${ld ? " · fait le " + ld.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : ""}</span>${x.seance ? `<span class="pill-s">Après en avoir parlé en séance</span>` : ""}</span></button>`; }).join("")}</div>`; }).join("")}
+      ${!ex.length ? `<div class="notice">Aucun exercice pour l'instant.</div>` : ""}</div>`;
+  }
+};
+SCREENS.tccpin = {
+  html(p) {
+    const x = TCC_BY_ID[p.id], rep = (S.pins || {})[p.id] || [];
+    return `${back("tcc", "Exercices TCC")}<div class="stack"><div class="screen-head"><h1>${esc(x.t)}</h1><p class="small muted">Mes réponses, à relire quand j'en ai besoin.</p></div>
+      <div class="card pin-card">${rep.filter(r => r.v != null && r.v !== "" && !(Array.isArray(r.v) && !r.v.length)).map(r => `<p><span class="small muted">${esc(r.q)}</span><br><b>${esc(tccValText(r))}</b></p>`).join("")}</div>
+      <button class="btn ghost" data-go="tccx" data-p='${JSON.stringify({ id: x.id })}'>La remplir à nouveau</button></div>`;
+  }
+};
+function tccField(f, key, d) {
+  const id = "q" + key, prev = d[key];
+  switch (f.k) {
+    case "fiche": return `<div class="fiche">${tccFiche(f.v)}</div>`;
+    case "info": return `<div class="notice">${esc(f.q)}</div>`;
+    case "texte": return field(esc(f.q) + (f.opt ? "" : ""), `<textarea id="${id}" maxlength="1200" placeholder="${esc(f.h || "")}">${esc(prev || "")}</textarea>`, f.opt ? "Facultatif" : "");
+    case "lignes": return field(esc(f.q), `<div class="stack" style="gap:8px">${Array.from({ length: f.n || 3 }, (_, i) => `<input type="text" id="${id}_${i}" maxlength="200" placeholder="${i === 0 ? esc(f.h || "") : ""}" value="${esc((prev || [])[i] || "")}">`).join("")}</div>`);
+    case "chips": return field(esc(f.q), chips(id, tccOpts(f.o), !!f.m, prev ? [].concat(prev) : []), f.m ? "Plusieurs choix possibles" : "");
+    case "echelle": return field(esc(f.q), range(id, 0, 10, prev ?? 5) + `<div class="scale-ends"><span>0${f.a ? " : " + esc(f.a) : ""}</span><span>10${f.b ? " : " + esc(f.b) : ""}</span></div>`);
+    case "pct": return field(esc(f.q), range(id, 0, 100, prev ?? 50, 5, " %"));
+    case "oui": return field(esc(f.q), chips(id, ["Oui", "Non", "Je ne sais pas"], false, prev ? [prev] : []));
+    case "minuteur": return `<div class="card stack"><span class="lbl">${esc(f.q)}</span><p class="big-num no-lis" id="t${id}">${f.m}:00</p><button class="btn soft" data-ttimer="${id}" data-min="${f.m}">Lancer ${f.m} min</button></div>`;
+    case "rate": {
+      const items = f.o === "@schemaphrases" ? TCC_DOMAINES.flatMap(dd => dd.s.map(s => [s[1], s[2]])) : tccOpts(f.o).map(x => [x, x]);
+      return `<div><span class="lbl">${esc(f.q)}</span><ol class="qlist">${items.map(([k, l], i) => `<li class="qitem"><p class="qtext">${esc(l)}</p><div class="seg seg3" data-group-box data-rate="${id}" data-k="${esc(k)}">${f.l.map((lv, j) => `<button type="button" class="segb" data-v="${j}" aria-pressed="${prev && prev[k] === lv}">${esc(lv)}</button>`).join("")}</div></li>`).join("")}</ol></div>`;
+    }
+  }
+  return "";
+}
+function tccCollect(f, key, d) {
+  const id = "q" + key;
+  switch (f.k) {
+    case "texte": d[key] = val(id).trim(); break;
+    case "lignes": d[key] = Array.from({ length: f.n || 3 }, (_, i) => val(id + "_" + i).trim()); break;
+    case "chips": { const c = getChips(id); d[key] = f.m ? c : (c[0] || ""); break; }
+    case "oui": d[key] = getChips(id)[0] || ""; break;
+    case "echelle": case "pct": d[key] = num(id); break;
+    case "rate": { const o = {}; document.querySelectorAll(`[data-rate="${id}"]`).forEach(box => { const b = box.querySelector('.segb[aria-pressed="true"]'); if (b) o[box.dataset.k] = f.l[Number(b.dataset.v)]; }); d[key] = o; break; }
+  }
+}
+SCREENS.tccx = {
+  html(p) {
+    const x = TCC_BY_ID[p.id]; if (!x) return `${back("tcc", "Exercices TCC")}<div class="notice">Exercice indisponible.</div>`;
+    const s = p.s || 0, n = x.steps.length, st = x.steps[s], d = p.d || {};
+    const dots = n > 1 ? `<div class="steps-dots" aria-label="Étape ${s + 1} sur ${n}">${x.steps.map((_, i) => `<span class="${i <= s ? "on" : ""}"></span>`).join("")}</div><p class="small">Étape ${s + 1} sur ${n} · ${esc(st.h)}</p>` : "";
+    return `${back("tcc", "Exercices TCC")}<div class="stack"><div class="screen-head"><h1>${esc(x.t)}</h1>${dots}</div>
+      ${s === 0 && x.seance ? `<div class="notice">${T("Cet exercice peut réveiller des émotions fortes. Fais-le de préférence après en avoir parlé en séance. Si c'est trop, arrête-toi : tu peux respirer ou utiliser le bouton Aide.", "Cet exercice peut réveiller des émotions fortes. Faites-le de préférence après en avoir parlé en séance. Si c'est trop, arrêtez-vous : vous pouvez respirer ou utiliser le bouton Aide.")} <button class="link" data-go="respi">Respirer</button></div>` : ""}
+      ${s === 0 && x.intro ? `<p>${esc(x.intro)}</p>` : ""}
+      ${n > 1 ? `<h2>${esc(st.h)}</h2>` : ""}
+      ${st.f.map((f, i) => tccField(f, s + "_" + i, d)).join("")}
+      <p class="hint">${noPerso()}</p>
+      <div class="wiz-nav">${s > 0 ? `<button class="btn ghost" id="prevS">Précédent</button>` : `<span></span>`}<button class="btn" id="nextS">${s === n - 1 ? "Enregistrer" : "Suivant"}</button></div></div>`;
+  },
+  mount(p) {
+    const x = TCC_BY_ID[p.id]; if (!x) return;
+    const s = p.s || 0, d = p.d || (p.d = {}), st = x.steps[s];
+    const timers = [];
+    document.querySelectorAll("[data-ttimer]").forEach(b => b.onclick = () => {
+      const out = document.getElementById("t" + b.dataset.ttimer), end = Date.now() + Number(b.dataset.min) * 60000; b.disabled = true; const release = wakeLock();
+      const h = setInterval(() => { const r = Math.max(0, Math.ceil((end - Date.now()) / 1000)); out.textContent = `${Math.floor(r / 60)}:${String(r % 60).padStart(2, "0")}`; if (r <= 0) { clearInterval(h); release(); b.textContent = "Terminé"; bip(); } }, 250);
+      timers.push(() => { clearInterval(h); release(); });
+    });
+    cleanup = () => timers.forEach(f => f());
+    const collect = () => st.f.forEach((f, i) => tccCollect(f, s + "_" + i, d));
+    const pv = document.getElementById("prevS");
+    if (pv) pv.onclick = () => { collect(); go("tccx", { id: x.id, s: s - 1, d }); };
+    document.getElementById("nextS").onclick = () => {
+      collect();
+      if (s < x.steps.length - 1) { go("tccx", { id: x.id, s: s + 1, d }); return; }
+      const rep = [];
+      x.steps.forEach((stp, si) => stp.f.forEach((f, fi) => { if (["fiche", "info", "minuteur"].includes(f.k)) return; rep.push({ q: f.q, k: f.k, v: d[si + "_" + fi] }); }));
+      addEntry("tcc", { xid: x.id, titre: x.t, rep });
+      if (x.pin) { S.pins = S.pins || {}; S.pins[x.id] = rep; save(); }
+      saved("tcc", { then: "tcc" });
+    };
+  }
+};
+
+/* ---------- Notifications ---------- */
+const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const withTimeout = (pr, ms) => Promise.race([pr, new Promise((_, rej) => setTimeout(() => rej(new Error("delai")), ms))]);
+async function setNotif(on, silent) {
+  if (!canDirect()) return "Indisponible en démonstration.";
+  if (on && !S.cfg.vp) return T("Ta psychologue n'a pas encore activé les notifications. Réessaie plus tard.", "Votre psychologue n'a pas encore activé les notifications. Réessayez plus tard.");
+  if (!pushSupported()) return detectOS() === "ios" && !isStandalone()
+    ? "Sur iPhone, installer d'abord l'application sur l'écran d'accueil, puis l'ouvrir depuis son icône pour activer les notifications."
+    : "Ce navigateur ne permet pas les notifications. Essayer avec Chrome (Android) ou l'application installée (iPhone).";
+  let reg;
+  try { reg = await withTimeout(navigator.serviceWorker.ready, 6000); } catch (e) { return "L'application doit être ouverte depuis son adresse internet (ou son icône) pour les notifications."; }
+  try {
+    if (on) {
+      const perm = silent ? Notification.permission : await Notification.requestPermission();
+      if (perm !== "granted") return "Les notifications sont bloquées pour cette application dans les réglages du téléphone. Les autoriser là, puis réessayer.";
+      let sub = await reg.pushManager.getSubscription();
+      const key = B64.dec(S.cfg.vp);
+      if (sub && sub.options && sub.options.applicationServerKey && B64.enc(new Uint8Array(sub.options.applicationServerKey)) !== S.cfg.vp) { await sub.unsubscribe(); sub = null; }
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+      const r = await relay(RELAIS, { a: "psub", code: S.cfg.c, sub: JSON.stringify(sub) });
+      if (!r.ok) return "L'inscription aux notifications a échoué (" + (r.err || "?") + ").";
+      S.prefs.notif = true; save(); return null;
+    }
+    const sub = await reg.pushManager.getSubscription(); if (sub) { try { await sub.unsubscribe(); } catch (e) {} }
+    try { await relay(RELAIS, { a: "punsub", code: S.cfg.c }); } catch (e) {}
+    S.prefs.notif = false; save(); return null;
+  } catch (e) { return e.detail || "Les notifications n'ont pas pu être activées sur cet appareil (" + (e.message || e.name) + ")."; }
+}
+
 /* Démarrage */
 purgeOld(); if (S) save();
 render();
 refreshCfg().then(() => { if (S && canDirect() && unsent().length) sendEntries(unsent()).then(() => { if (view.name === "home") render(); }); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S && canDirect()) refreshCfg(); });
+navigator.serviceWorker && navigator.serviceWorker.addEventListener && navigator.serviceWorker.addEventListener("message", ev => { if (ev.data === "es-refresh") refreshCfg(); });
 window.addEventListener("online", () => { refreshCfg(); if (S && canDirect() && unsent().length) sendEntries(unsent()); });
 </script>
 <script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
