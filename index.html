@@ -274,6 +274,7 @@ ol.how { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; 
 .fiche-bloc ul { margin: 8px 0 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
 .pin-card { display: flex; flex-direction: column; gap: 12px; }
 .pin-card p { overflow-wrap: anywhere; }
+.chips.days .chip { min-width: 3.4em; padding: 8px 10px; }
 </style>
 <div class="shell" id="app"></div>
 <script>
@@ -855,7 +856,7 @@ const I = {
   tcc: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18" opacity=".35"/><circle cx="12" cy="12" r="3.2"/></svg>',
   perso: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.4 6.7 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>',
   send: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>',
-  gear: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10.3 2.6h3.4l.5 2.6c.6.2 1.1.5 1.6.9l2.5-.9 1.7 2.9-2 1.7c.1.6.1 1.2 0 1.8l2 1.7-1.7 2.9-2.5-.9c-.5.4-1 .7-1.6.9l-.5 2.6h-3.4l-.5-2.6c-.6-.2-1.1-.5-1.6-.9l-2.5.9-1.7-2.9 2-1.7c-.1-.6-.1-1.2 0-1.8l-2-1.7 1.7-2.9 2.5.9c.5-.4 1-.7 1.6-.9z"/><circle cx="12" cy="12" r="3"/></svg>',
   life: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/></svg>',
   back: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>',
@@ -1059,10 +1060,12 @@ async function refreshCfg() {
     const r = await relay(RELAIS, { a: "cfg", code: S.cfg.c });
     if (!r.ok) return false;
     const cfg = await openCfg(S.cfg.c, r.blob);
+    const oldVp = S.cfg.vp;
     S.cfg = Object.assign({}, S.cfg, cfg, { c: S.cfg.c, k: r.pub });
+    if ((S.prefs.notif || (S.prefs.rem && S.prefs.rem.on)) && cfg.vp && oldVp && oldVp !== cfg.vp && typeof Notification !== "undefined" && Notification.permission === "granted") syncSub(true);
     if (r.msgs) { try { const m = await openCfg(S.cfg.c, r.msgs); S.msgs = m.l || []; } catch (e) {} } else S.msgs = [];
     S.lastSync = new Date().toISOString(); save();
-    if (S.prefs.notif && !r.sub && typeof Notification !== "undefined" && Notification.permission === "granted") setNotif(true, true);
+    if ((S.prefs.notif || (S.prefs.rem && S.prefs.rem.on)) && !r.sub && typeof Notification !== "undefined" && Notification.permission === "granted") syncSub(true);
     if (["home", "messages"].includes(view.name)) render();
     return true;
   } catch (e) { return false; }
@@ -1130,7 +1133,9 @@ SCREENS.home = {
       const ok = await refreshCfg();
       if (ok && unsent().length) await sendEntries(unsent());
       if (!ok) { b.disabled = false; b.textContent = "Pas de connexion, réessayer"; return; }
-      render();
+      b.textContent = "Chargement de la dernière version…";
+      try { const reg = navigator.serviceWorker && await withTimeout(navigator.serviceWorker.getRegistration(), 3000); if (reg) await withTimeout(reg.update(), 5000); } catch (e) {}
+      setTimeout(() => location.reload(), 300);
     };
   }
 };
@@ -1961,7 +1966,14 @@ SCREENS.reglages = {
       <div class="card stack"><h3>Notifications</h3>
         <div class="toggle"><span>${T("Me prévenir quand ma psychologue m'envoie un message", "Me prévenir quand ma psychologue m'envoie un message")}</span><input type="checkbox" class="switch" id="oNotif" ${pr.notif ? "checked" : ""}></div>
         <p class="hint">Les messages s'affichent toujours sur l'écran d'accueil, même sans notification. La notification ne dit rien du contenu : « Nouveau message dans Entre-Séances ».</p>
-        <p class="hint" id="nMsg" role="status"></p></div>
+        <p class="hint" id="nMsg" role="status"></p>
+        <div class="toggle"><span>${T("Me rappeler de faire mes exercices", "Me rappeler de faire mes exercices")}</span><input type="checkbox" class="switch" id="oRem" ${pr.rem && pr.rem.on ? "checked" : ""}></div>
+        <div id="remBox" class="stack" ${pr.rem && pr.rem.on ? "" : "hidden"}>
+          <div><span class="lbl">Les jours</span><div class="chips days" data-name="rdays" data-multi="1">${[["1", "Lun"], ["2", "Mar"], ["3", "Mer"], ["4", "Jeu"], ["5", "Ven"], ["6", "Sam"], ["7", "Dim"]].map(([v, l]) => `<button type="button" class="chip" data-v="${v}" aria-pressed="${(pr.rem ? pr.rem.days : [1, 2, 3, 4, 5, 6, 7]).includes(Number(v))}">${l}</button>`).join("")}</div></div>
+          <div><label class="lbl" for="rtime">L'heure</label><input type="time" id="rtime" value="${pr.rem ? pr.rem.time : "19:00"}" style="max-width:10em"></div>
+          <button class="btn soft" id="remSave" style="align-self:flex-start">Enregistrer le rappel</button>
+          <p class="hint">La notification arrive à l'heure choisie, à quelques minutes près : « Petit rappel : un moment pour ${T("tes", "vos")} exercices ? »</p></div>
+        <p class="hint" id="rMsg" role="status"></p></div>
       <div class="card stack" id="diagCard"><h3>Liaison avec la psychologue</h3>
         <p class="small">${S.cfg.c === DEMO_CODE ? "Mode démonstration : aucun envoi." : RELAIS ? "Application reliée au relais. " + (S.lastOk ? "Dernier envoi réussi : " + new Date(S.lastOk).toLocaleString("fr-FR") + "." : "Aucun envoi réussi pour l'instant.") : "<b>Non reliée</b> : l'adresse du relais est absente du fichier config.js du site."}</p>
         ${S.lastErr ? `<p class="notice small">Dernière erreur (${new Date(S.lastErr.t).toLocaleString("fr-FR")}) : ${esc(S.lastErr.m)}</p>` : ""}
@@ -1973,7 +1985,8 @@ SCREENS.reglages = {
         <button class="link" data-go="installer">Installer l'application sur l'écran d'accueil</button></div>
       <div class="card stack"><h3>Mon code</h3><p><span class="code-chip no-lis">${esc(S.cfg.c)}</span></p>
         <p class="small muted">Ce code ne permet pas ${T("de te reconnaître", "de vous reconnaître")}. Les réponses envoyées depuis plus de 60 jours sont effacées automatiquement de cet appareil.</p>
-        <button class="btn ghost" data-go="reglages" data-p='{"confirm":true}'>Effacer toutes mes données</button></div></div>`;
+        <button class="btn ghost" data-go="reglages" data-p='{"confirm":true}'>Effacer toutes mes données</button>
+        <p class="hint">Version de l'application : 2026.11.11</p></div></div>`;
   },
   mount(p) {
     if (p.diag) { const dc = document.getElementById("diagCard"); if (dc) setTimeout(() => dc.scrollIntoView(), 0); }
@@ -1992,6 +2005,22 @@ SCREENS.reglages = {
       on.disabled = false;
       if (err) { on.checked = !!S.prefs.notif; m.textContent = err; } else m.textContent = on.checked ? "Notifications activées." : "Notifications désactivées. Les messages restent visibles sur l'écran d'accueil.";
     };
+    const oRem = document.getElementById("oRem"), remBox = document.getElementById("remBox");
+    const remVal = on => ({ on, days: getChips("rdays").map(Number).sort(), time: val("rtime") || "19:00" });
+    const remApply = async on => {
+      const m = document.getElementById("rMsg"), rv = remVal(on);
+      if (on && !rv.days.length) { m.textContent = "Choisir au moins un jour."; return; }
+      m.textContent = "Enregistrement…"; oRem.disabled = true;
+      const err = await setReminder(rv);
+      oRem.disabled = false;
+      if (err) { oRem.checked = !!(S.prefs.rem && S.prefs.rem.on); remBox.hidden = !oRem.checked; m.textContent = err; return; }
+      const names = ["", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+      m.textContent = on ? `Rappel enregistré : ${rv.days.length === 7 ? "tous les jours" : rv.days.map(d => names[d]).join(", ")} à ${rv.time.replace(":", " h ")}.` : "Rappel désactivé.";
+    };
+    if (oRem) {
+      oRem.onchange = () => { remBox.hidden = !oRem.checked; if (!oRem.checked) remApply(false); else remApply(true); };
+      document.getElementById("remSave").onclick = () => remApply(true);
+    }
     const dg = document.getElementById("diag");
     if (dg) dg.onclick = async () => {
       const out = document.getElementById("diagOut"), line = (ok, t) => `<p class="small">${ok ? "✔" : "✖"} ${t}</p>`;
@@ -2207,35 +2236,62 @@ SCREENS.tccx = {
 /* ---------- Notifications ---------- */
 const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 const withTimeout = (pr, ms) => Promise.race([pr, new Promise((_, rej) => setTimeout(() => rej(new Error("delai")), ms))]);
-async function setNotif(on, silent) {
-  if (!canDirect()) return "Indisponible en démonstration.";
-  if (on && !S.cfg.vp) return T("Ta psychologue n'a pas encore activé les notifications. Réessaie plus tard.", "Votre psychologue n'a pas encore activé les notifications. Réessayez plus tard.");
-  if (!pushSupported()) return detectOS() === "ios" && !isStandalone()
+async function pushReady(needVp) {
+  if (!canDirect()) return { err: "Indisponible en démonstration." };
+  if (needVp && !S.cfg.vp) return { err: T("Ta psychologue n'a pas encore activé les notifications. Réessaie plus tard.", "Votre psychologue n'a pas encore activé les notifications. Réessayez plus tard.") };
+  if (!pushSupported()) return { err: detectOS() === "ios" && !isStandalone()
     ? "Sur iPhone, installer d'abord l'application sur l'écran d'accueil, puis l'ouvrir depuis son icône pour activer les notifications."
-    : "Ce navigateur ne permet pas les notifications. Essayer avec Chrome (Android) ou l'application installée (iPhone).";
-  let reg;
-  try { reg = await withTimeout(navigator.serviceWorker.ready, 6000); } catch (e) { return "L'application doit être ouverte depuis son adresse internet (ou son icône) pour les notifications."; }
+    : "Ce navigateur ne permet pas les notifications. Essayer avec Chrome (Android) ou l'application installée (iPhone)." };
+  try { return { reg: await withTimeout(navigator.serviceWorker.ready, 6000) }; } catch (e) { return { err: "L'application doit être ouverte depuis son adresse internet (ou son icône) pour les notifications." }; }
+}
+/* Abonne l'appareil (si besoin) et indique au relais si les messages doivent notifier */
+async function syncSub(silent) {
+  const wantMsg = !!S.prefs.notif, wantRem = !!(S.prefs.rem && S.prefs.rem.on);
+  const ready = await pushReady(wantMsg || wantRem); if (ready.err) return ready.err;
+  const reg = ready.reg;
   try {
-    if (on) {
-      const perm = silent ? Notification.permission : await Notification.requestPermission();
-      if (perm !== "granted") return "Les notifications sont bloquées pour cette application dans les réglages du téléphone. Les autoriser là, puis réessayer.";
-      let sub = await reg.pushManager.getSubscription();
-      const key = B64.dec(S.cfg.vp);
-      if (sub && sub.options && sub.options.applicationServerKey && B64.enc(new Uint8Array(sub.options.applicationServerKey)) !== S.cfg.vp) { await sub.unsubscribe(); sub = null; }
-      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
-      const r = await relay(RELAIS, { a: "psub", code: S.cfg.c, sub: JSON.stringify(sub) });
-      if (!r.ok) return "L'inscription aux notifications a échoué (" + (r.err || "?") + ").";
-      S.prefs.notif = true; save(); return null;
+    if (!wantMsg && !wantRem) {
+      const sub = await reg.pushManager.getSubscription(); if (sub) { try { await sub.unsubscribe(); } catch (e) {} }
+      try { await relay(RELAIS, { a: "punsub", code: S.cfg.c }); } catch (e) {}
+      return null;
     }
-    const sub = await reg.pushManager.getSubscription(); if (sub) { try { await sub.unsubscribe(); } catch (e) {} }
-    try { await relay(RELAIS, { a: "punsub", code: S.cfg.c }); } catch (e) {}
-    S.prefs.notif = false; save(); return null;
+    const perm = silent ? Notification.permission : await Notification.requestPermission();
+    if (perm !== "granted") return "Les notifications sont bloquées pour cette application dans les réglages du téléphone. Les autoriser là, puis réessayer.";
+    let sub = await reg.pushManager.getSubscription();
+    if (sub && sub.options && sub.options.applicationServerKey && B64.enc(new Uint8Array(sub.options.applicationServerKey)) !== S.cfg.vp) { await sub.unsubscribe(); sub = null; }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: B64.dec(S.cfg.vp) });
+    const r = await relay(RELAIS, { a: "psub", code: S.cfg.c, sub: JSON.stringify(sub), msg: wantMsg });
+    if (!r.ok) return "L'inscription aux notifications a échoué (" + (r.err || "?") + ").";
+    return null;
   } catch (e) { return e.detail || "Les notifications n'ont pas pu être activées sur cet appareil (" + (e.message || e.name) + ")."; }
+}
+async function setNotif(on, silent) {
+  const prev = S.prefs.notif; S.prefs.notif = !!on;
+  const err = await syncSub(silent);
+  if (err) { S.prefs.notif = prev; save(); return err; }
+  save(); writeMeta(); return null;
+}
+/* Rappel quotidien : jours (1 = lundi … 7 = dimanche) et heure */
+async function setReminder(rem) {
+  const prev = S.prefs.rem; S.prefs.rem = rem;
+  const err = await syncSub(false);
+  if (err) { S.prefs.rem = prev; save(); return err; }
+  let tz = "Europe/Paris"; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; } catch (e) {}
+  try {
+    const r = await relay(RELAIS, { a: "prem", code: S.cfg.c, on: !!rem.on, days: rem.days, time: rem.time, tz });
+    if (!r.ok) { S.prefs.rem = prev; save(); return r.err === "action" ? "Les rappels ne sont pas encore disponibles : prévenir la psychologue." : "Le rappel n'a pas pu être enregistré (" + (r.err || "?") + ")."; }
+  } catch (e) { S.prefs.rem = prev; save(); return e.detail || "Pas de connexion internet."; }
+  save(); writeMeta(); return null;
+}
+/* Informations lues par le service de notification pour choisir le texte affiché */
+function writeMeta() {
+  try { if (!("caches" in window)) return; caches.open("es-meta").then(c => c.put("meta", new Response(JSON.stringify({ rem: S.prefs.rem || null, tv: S.prefs.tv })))).catch(() => {}); } catch (e) {}
 }
 
 /* Démarrage */
 purgeOld(); if (S) save();
 render();
+if (S && S.prefs) writeMeta();
 refreshCfg().then(() => { if (S && canDirect() && unsent().length) sendEntries(unsent()).then(() => { if (view.name === "home") render(); }); });
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S && canDirect()) refreshCfg(); });
 navigator.serviceWorker && navigator.serviceWorker.addEventListener && navigator.serviceWorker.addEventListener("message", ev => { if (ev.data === "es-refresh") refreshCfg(); });

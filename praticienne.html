@@ -250,6 +250,8 @@ ol.guide li p { margin-top: 4px; font-size: 0.94em; }
 .tcc-entry summary { cursor: pointer; color: var(--accent); font-size: 0.9em; }
 .tcc-entry .tr-card { margin-top: 8px; }
 .lib td.num { white-space: nowrap; }
+.tab { display: inline-flex; align-items: center; gap: 6px; }
+.tab-ico { flex: none; }
 </style>
 <div class="shell" id="app"></div>
 <script>
@@ -804,8 +806,9 @@ function tccValText(r) {
 }
 /* ===== Entre-Séances — espace praticienne ===== */
 const VKEY = "es_praticienne_v1";
+const APP_VERSION = "2026.11.11";
 const DEMO_PRIV = {"key_ops":["deriveKey"],"ext":true,"kty":"EC","x":"FXufJrgrxbSPIYmrbG2IrkTmdroIAHbeo0AjlEmFV-E","y":"iQbRRt_g9vrYtbJ0Jnm7yGxny1celneAbJEpW6XDQBg","crv":"P-256","d":"xW4H5AUxJv1XbmZ8CzsbV1qiQHsZUI6ERusujKccI2s"};
-const RELAIS_GS = "/* =====================================================================\n   Entre-Séances : relais de réception (Google Apps Script) — version 4\n   - Reçoit uniquement des messages CHIFFRÉS : Google ne peut pas les lire.\n   - Transmet aux patients leurs exercices et vos messages (chiffrés eux aussi).\n   - Envoie aux patients qui l'ont accepté une notification sans contenu.\n   - Garde les réponses 60 jours, puis les efface.\n   - Vous prévient par mail (sans aucun contenu) quand un patient envoie.\n   Ne rien modifier ci-dessous, sauf les deux réglages.\n   ===================================================================== */\nconst RETENTION_DAYS = 60;   // durée de conservation des réponses chiffrées\nconst NOTIFY = true;         // false pour ne pas recevoir de mail de notification\n\nfunction doGet() { return out_({ ok: true, app: \"entre-seances\", v: 4 }); }\n\nfunction doPost(e) {\n  let p = {};\n  try { p = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, err: \"format\" }); }\n  const lock = LockService.getScriptLock();\n  try { lock.waitLock(20000); return out_(route_(p)); }\n  catch (err) { return out_({ ok: false, err: String(err) }); }\n  finally { try { lock.releaseLock(); } catch (x) {} }\n}\n\nfunction out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }\nfunction book_() {\n  // Fonctionne que le script soit rattaché à une feuille Google ou créé seul sur script.google.com\n  let ss = null;\n  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}\n  if (!ss) {\n    const props = PropertiesService.getScriptProperties(), id = props.getProperty(\"SHEET_ID\");\n    if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) {} }\n    if (!ss) { ss = SpreadsheetApp.create(\"Entre-Séances relais (messages chiffrés)\"); props.setProperty(\"SHEET_ID\", ss.getId()); }\n  }\n  return ss;\n}\nfunction sheet_() { const ss = book_(); return ss.getSheetByName(\"Messages\") || ss.insertSheet(\"Messages\"); }\nfunction data_() { const ss = book_(); return ss.getSheetByName(\"Données\") || ss.insertSheet(\"Données\"); }\nfunction folder_() {\n  const it = DriveApp.getFoldersByName(\"Entre-Séances (messages chiffrés)\");\n  return it.hasNext() ? it.next() : DriveApp.createFolder(\"Entre-Séances (messages chiffrés)\");\n}\nfunction okCode_(c) { return typeof c === \"string\" && /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(c); }\n\n/* Petit stockage clé → valeur dans l'onglet « Données » (valeurs jusqu'à 45 000 caractères) */\nfunction find_(sh, k) { return sh.getRange(\"A:A\").createTextFinder(k).matchEntireCell(true).findNext(); }\nfunction kvGet_(k) {\n  const sh = data_(), f = find_(sh, k);\n  if (!f) return null;\n  const v = String(sh.getRange(f.getRow(), 2).getValue());\n  return v.indexOf(\"v:\") === 0 ? v.slice(2) : v;\n}\nfunction kvSet_(k, v) {\n  const sh = data_(), f = find_(sh, k);\n  if (v === null) { if (f) sh.deleteRow(f.getRow()); return; }\n  if (f) sh.getRange(f.getRow(), 2).setValue(\"v:\" + v); else sh.appendRow([k, \"v:\" + v]);\n}\nfunction cfgOf_(props, code) { return kvGet_(\"C_\" + code) || props.getProperty(\"C_\" + code); }\n\nfunction route_(p) {\n  const props = PropertiesService.getScriptProperties();\n  const token = props.getProperty(\"TOKEN\");\n  switch (p.a) {\n    case \"ping\": {\n      let sheet = true, why = \"\";\n      try { sheet_(); data_(); } catch (e) { sheet = false; why = String(e); }\n      return { ok: true, init: !!token, sheet: sheet, why: why, v: 4 };\n    }\n    case \"init\":\n      if (token) return { ok: false, err: \"deja\" };\n      if (typeof p.token !== \"string\" || p.token.length < 24 || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ TOKEN: p.token, PUB: p.pub, SEQ: \"0\" });\n      return { ok: true };\n    case \"cfg\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"inconnu\" };\n      const blob = cfgOf_(props, p.code);\n      return blob ? { ok: true, pub: props.getProperty(\"PUB\"), blob: blob, msgs: kvGet_(\"M_\" + p.code), sub: !!kvGet_(\"S_\" + p.code) } : { ok: false, err: \"inconnu\" };\n    }\n    case \"send\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (typeof p.msg !== \"string\" || !/^PSY1\\.[A-Za-z0-9_-]+$/.test(p.msg) || p.msg.length > 20000000) return { ok: false, err: \"format\" };\n      const seq = Number(props.getProperty(\"SEQ\") || \"0\") + 1;\n      props.setProperty(\"SEQ\", String(seq));\n      let cell = p.msg;\n      if (p.msg.length > 45000) cell = \"DRIVE:\" + folder_().createFile(\"m\" + seq + \".txt\", p.msg, \"text/plain\").getId();\n      sheet_().appendRow([seq, new Date(), p.code, cell]);\n      try { notify_(); } catch (e) {}\n      return { ok: true, seq: seq };\n    }\n    case \"psub\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      let sub;\n      try { sub = JSON.parse(p.sub); } catch (e) { return { ok: false, err: \"format\" }; }\n      if (!sub || typeof sub.endpoint !== \"string\" || sub.endpoint.indexOf(\"https://\") !== 0 || p.sub.length > 4000) return { ok: false, err: \"format\" };\n      kvSet_(\"S_\" + p.code, JSON.stringify({ endpoint: sub.endpoint }));\n      return { ok: true };\n    }\n    case \"punsub\":\n      if (okCode_(p.code) && cfgOf_(props, p.code)) kvSet_(\"S_\" + p.code, null);\n      return { ok: true };\n  }\n  if (!token || p.token !== token) return { ok: false, err: \"auth\" };\n  switch (p.a) {\n    case \"check\": return { ok: true, v: 4 };\n    case \"setcfg\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"C_\" + p.code, p.blob); props.deleteProperty(\"C_\" + p.code);\n      return { ok: true };\n    case \"setmsgs\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"M_\" + p.code, p.blob);\n      return { ok: true };\n    case \"delcfg\":\n      if (okCode_(p.code)) { props.deleteProperty(\"C_\" + p.code); kvSet_(\"C_\" + p.code, null); kvSet_(\"M_\" + p.code, null); kvSet_(\"S_\" + p.code, null); }\n      return { ok: true };\n    case \"getsub\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      return { ok: true, endpoint: s ? JSON.parse(s).endpoint : null };\n    }\n    case \"push\": {\n      if (!okCode_(p.code) || typeof p.jwt !== \"string\" || typeof p.k !== \"string\") return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      if (!s) return { ok: false, err: \"nosub\" };\n      const res = UrlFetchApp.fetch(JSON.parse(s).endpoint, { method: \"post\", headers: { Authorization: \"vapid t=\" + p.jwt + \", k=\" + p.k, TTL: \"86400\", Urgency: \"normal\" }, payload: \"\", muteHttpExceptions: true });\n      const st = res.getResponseCode();\n      if (st === 404 || st === 410) kvSet_(\"S_\" + p.code, null);\n      return { ok: st >= 200 && st < 300, status: st, why: st >= 300 ? String(res.getContentText()).slice(0, 200) : \"\" };\n    }\n    case \"inbox\": {\n      purge_();\n      const since = Number(p.since || 0), sh = sheet_(), n = sh.getLastRow();\n      if (n < 1) return { ok: true, items: [] };\n      const rows = sh.getRange(1, 1, n, 4).getValues();\n      const items = [];\n      rows.forEach(function (r) {\n        if (Number(r[0]) <= since) return;\n        let msg = String(r[3]);\n        if (msg.indexOf(\"DRIVE:\") === 0) { try { msg = DriveApp.getFileById(msg.slice(6)).getBlob().getDataAsString(); } catch (e) { return; } }\n        items.push({ seq: Number(r[0]), t: new Date(r[1]).toISOString(), code: String(r[2]), msg: msg });\n      });\n      return { ok: true, items: items };\n    }\n  }\n  return { ok: false, err: \"action\" };\n}\n\nfunction purge_() {\n  const sh = sheet_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const lim = Date.now() - RETENTION_DAYS * 864e5;\n  const rows = sh.getRange(1, 1, n, 4).getValues();\n  let k = 0;\n  while (k < rows.length && new Date(rows[k][1]).getTime() < lim) {\n    const cell = String(rows[k][3]);\n    if (cell.indexOf(\"DRIVE:\") === 0) { try { DriveApp.getFileById(cell.slice(6)).setTrashed(true); } catch (e) {} }\n    k++;\n  }\n  if (k > 0) sh.deleteRows(1, k);\n}\n\nfunction notify_() {\n  if (!NOTIFY) return;\n  const cache = CacheService.getScriptCache();\n  if (cache.get(\"notif\")) return;\n  cache.put(\"notif\", \"1\", 1800);\n  MailApp.sendEmail(Session.getEffectiveUser().getEmail(), \"Entre-Séances : nouvelles réponses\",\n    \"Un patient vient d'envoyer des réponses.\\nOuvrez votre espace praticienne pour les relever.\\n\\nCe mail ne contient aucune donnée de patient.\");\n}\n\n/* À lancer une fois depuis l'éditeur (bouton Exécuter) pour accorder les autorisations. */\nfunction autoriser() {\n  sheet_(); data_(); folder_();\n  try { MailApp.getRemainingDailyQuota(); } catch (e) {}\n  try { UrlFetchApp.fetch(\"https://www.google.com\", { muteHttpExceptions: true }); } catch (e) {}\n  Logger.log(\"Autorisations accordées. Vous pouvez déployer une nouvelle version.\");\n}\n";
+const RELAIS_GS = "/* =====================================================================\n   Entre-Séances : relais de réception (Google Apps Script) — version 6.1\n   - Reçoit uniquement des messages CHIFFRÉS : Google ne peut pas les lire.\n   - Transmet aux patients leurs exercices et vos messages (chiffrés eux aussi).\n   - Envoie aux patients qui l'ont accepté une notification sans contenu.\n   - Synchronise votre espace entre vos appareils (copie chiffrée, illisible par Google).\n   - Envoie aux patients qui l'ont demandé un rappel quotidien, aux jours et à l'heure choisis.\n   - Garde les réponses 60 jours, puis les efface.\n   - Vous prévient par mail (sans aucun contenu) quand un patient envoie.\n   Ne rien modifier ci-dessous, sauf les deux réglages.\n   ===================================================================== */\nconst RETENTION_DAYS = 60;   // durée de conservation des réponses chiffrées\nconst NOTIFY = true;         // false pour ne pas recevoir de mail de notification\n\nfunction doGet() { return out_({ ok: true, app: \"entre-seances\", v: 6 }); }\n\nfunction doPost(e) {\n  let p = {};\n  try { p = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, err: \"format\" }); }\n  const lock = LockService.getScriptLock();\n  try { lock.waitLock(20000); return out_(route_(p)); }\n  catch (err) { return out_({ ok: false, err: String(err) }); }\n  finally { try { lock.releaseLock(); } catch (x) {} }\n}\n\nfunction out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }\nfunction book_() {\n  // Fonctionne que le script soit rattaché à une feuille Google ou créé seul sur script.google.com\n  let ss = null;\n  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}\n  if (!ss) {\n    const props = PropertiesService.getScriptProperties(), id = props.getProperty(\"SHEET_ID\");\n    if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) {} }\n    if (!ss) { ss = SpreadsheetApp.create(\"Entre-Séances relais (messages chiffrés)\"); props.setProperty(\"SHEET_ID\", ss.getId()); }\n  }\n  return ss;\n}\nfunction sheet_() { const ss = book_(); return ss.getSheetByName(\"Messages\") || ss.insertSheet(\"Messages\"); }\nfunction data_() { const ss = book_(); return ss.getSheetByName(\"Données\") || ss.insertSheet(\"Données\"); }\nfunction folder_() {\n  const it = DriveApp.getFoldersByName(\"Entre-Séances (messages chiffrés)\");\n  return it.hasNext() ? it.next() : DriveApp.createFolder(\"Entre-Séances (messages chiffrés)\");\n}\nfunction okCode_(c) { return typeof c === \"string\" && /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(c); }\n\n/* Petit stockage clé → valeur dans l'onglet « Données » (valeurs jusqu'à 45 000 caractères) */\nfunction find_(sh, k) { return sh.getRange(\"A:A\").createTextFinder(k).matchEntireCell(true).findNext(); }\nfunction kvGet_(k) {\n  const sh = data_(), f = find_(sh, k);\n  if (!f) return null;\n  const v = String(sh.getRange(f.getRow(), 2).getValue());\n  return v.indexOf(\"v:\") === 0 ? v.slice(2) : v;\n}\nfunction kvSet_(k, v) {\n  const sh = data_(), f = find_(sh, k);\n  if (v === null) { if (f) sh.deleteRow(f.getRow()); return; }\n  if (f) sh.getRange(f.getRow(), 2).setValue(\"v:\" + v); else sh.appendRow([k, \"v:\" + v]);\n}\nfunction cfgOf_(props, code) { return kvGet_(\"C_\" + code) || props.getProperty(\"C_\" + code); }\n\nfunction route_(p) {\n  const props = PropertiesService.getScriptProperties();\n  const token = props.getProperty(\"TOKEN\");\n  switch (p.a) {\n    case \"ping\": {\n      let sheet = true, why = \"\";\n      try { sheet_(); data_(); } catch (e) { sheet = false; why = String(e); }\n      return { ok: true, init: !!token, sheet: sheet, why: why, v: 6, trig: props.getProperty(\"TRIG\") === \"1\", vapid: !!props.getProperty(\"VAPID_D\") };\n    }\n    case \"init\":\n      if (token) return { ok: false, err: \"deja\" };\n      if (typeof p.token !== \"string\" || p.token.length < 24 || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ TOKEN: p.token, PUB: p.pub, SEQ: \"0\" });\n      return { ok: true };\n    case \"cfg\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"inconnu\" };\n      const blob = cfgOf_(props, p.code);\n      return blob ? { ok: true, pub: props.getProperty(\"PUB\"), blob: blob, msgs: kvGet_(\"M_\" + p.code), sub: !!kvGet_(\"S_\" + p.code) } : { ok: false, err: \"inconnu\" };\n    }\n    case \"send\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (typeof p.msg !== \"string\" || !/^PSY1\\.[A-Za-z0-9_-]+$/.test(p.msg) || p.msg.length > 20000000) return { ok: false, err: \"format\" };\n      const seq = Number(props.getProperty(\"SEQ\") || \"0\") + 1;\n      props.setProperty(\"SEQ\", String(seq));\n      let cell = p.msg;\n      if (p.msg.length > 45000) cell = \"DRIVE:\" + folder_().createFile(\"m\" + seq + \".txt\", p.msg, \"text/plain\").getId();\n      sheet_().appendRow([seq, new Date(), p.code, cell]);\n      try { notify_(); } catch (e) {}\n      return { ok: true, seq: seq };\n    }\n    case \"psub\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      let sub;\n      try { sub = JSON.parse(p.sub); } catch (e) { return { ok: false, err: \"format\" }; }\n      if (!sub || typeof sub.endpoint !== \"string\" || sub.endpoint.indexOf(\"https://\") !== 0 || p.sub.length > 4000) return { ok: false, err: \"format\" };\n      kvSet_(\"S_\" + p.code, JSON.stringify({ endpoint: sub.endpoint, msg: p.msg !== false }));\n      return { ok: true };\n    }\n    case \"punsub\":\n      if (okCode_(p.code) && cfgOf_(props, p.code)) { kvSet_(\"S_\" + p.code, null); kvSet_(\"R_\" + p.code, null); }\n      return { ok: true };\n    case \"prem\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (!p.on) { kvSet_(\"R_\" + p.code, null); return { ok: true }; }\n      const days = (p.days || []).filter(d => d >= 1 && d <= 7);\n      if (!days.length || !/^\\d{2}:\\d{2}$/.test(p.time || \"\") || typeof p.tz !== \"string\" || p.tz.length > 60) return { ok: false, err: \"format\" };\n      kvSet_(\"R_\" + p.code, JSON.stringify({ days: days, time: p.time, tz: p.tz, last: \"\" }));\n      return { ok: true, trig: props.getProperty(\"TRIG\") === \"1\" };\n    }\n  }\n  if (!token || p.token !== token) return { ok: false, err: \"auth\" };\n  switch (p.a) {\n    case \"check\": return { ok: true, v: 6 };\n    case \"setcfg\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"C_\" + p.code, p.blob); props.deleteProperty(\"C_\" + p.code);\n      return { ok: true };\n    case \"setmsgs\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"M_\" + p.code, p.blob);\n      return { ok: true };\n    case \"delcfg\":\n      if (okCode_(p.code)) { props.deleteProperty(\"C_\" + p.code); kvSet_(\"C_\" + p.code, null); kvSet_(\"M_\" + p.code, null); kvSet_(\"S_\" + p.code, null); }\n      return { ok: true };\n    case \"getsub\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      const o = s ? JSON.parse(s) : null;\n      return { ok: true, endpoint: o && o.msg !== false ? o.endpoint : null };\n    }\n    case \"setvapid\":\n      if (typeof p.d !== \"string\" || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ VAPID_D: p.d, VAPID_PUB: p.pub });\n      return { ok: true };\n    case \"push\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      if (!s || JSON.parse(s).msg === false) return { ok: false, err: \"nosub\" };\n      return pushTo_(p.code, JSON.parse(s).endpoint, p.jwt, p.k);\n    }\n    case \"vget\": {\n      const id = props.getProperty(\"VFILE\");\n      if (!id) return { ok: true, v: 0, blob: null };\n      try { return { ok: true, v: Number(props.getProperty(\"VVER\") || \"0\"), blob: DriveApp.getFileById(id).getBlob().getDataAsString() }; }\n      catch (e) { return { ok: true, v: Number(props.getProperty(\"VVER\") || \"0\"), blob: null }; }\n    }\n    case \"vput\": {\n      if (typeof p.blob !== \"string\" || !/^[A-Za-z0-9_-]+$/.test(p.blob)) return { ok: false, err: \"format\" };\n      const cur = Number(props.getProperty(\"VVER\") || \"0\");\n      if (Number(p.ifv || 0) !== cur) return { ok: false, err: \"conflict\", v: cur };\n      const id = props.getProperty(\"VFILE\");\n      let f = null;\n      if (id) { try { f = DriveApp.getFileById(id); f.setContent(p.blob); } catch (e) { f = null; } }\n      if (!f) { f = folder_().createFile(\"espace-praticienne.chiffre.txt\", p.blob, \"text/plain\"); props.setProperty(\"VFILE\", f.getId()); }\n      props.setProperty(\"VVER\", String(cur + 1));\n      return { ok: true, v: cur + 1 };\n    }\n    case \"inbox\": {\n      purge_();\n      const since = Number(p.since || 0), sh = sheet_(), n = sh.getLastRow();\n      if (n < 1) return { ok: true, items: [] };\n      const rows = sh.getRange(1, 1, n, 4).getValues();\n      const items = [];\n      rows.forEach(function (r) {\n        if (Number(r[0]) <= since) return;\n        let msg = String(r[3]);\n        if (msg.indexOf(\"DRIVE:\") === 0) { try { msg = DriveApp.getFileById(msg.slice(6)).getBlob().getDataAsString(); } catch (e) { return; } }\n        items.push({ seq: Number(r[0]), t: new Date(r[1]).toISOString(), code: String(r[2]), msg: msg });\n      });\n      return { ok: true, items: items };\n    }\n  }\n  return { ok: false, err: \"action\" };\n}\n\nfunction purge_() {\n  const sh = sheet_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const lim = Date.now() - RETENTION_DAYS * 864e5;\n  const rows = sh.getRange(1, 1, n, 4).getValues();\n  let k = 0;\n  while (k < rows.length && new Date(rows[k][1]).getTime() < lim) {\n    const cell = String(rows[k][3]);\n    if (cell.indexOf(\"DRIVE:\") === 0) { try { DriveApp.getFileById(cell.slice(6)).setTrashed(true); } catch (e) {} }\n    k++;\n  }\n  if (k > 0) sh.deleteRows(1, k);\n}\n\nfunction notify_() {\n  if (!NOTIFY) return;\n  const cache = CacheService.getScriptCache();\n  if (cache.get(\"notif\")) return;\n  cache.put(\"notif\", \"1\", 1800);\n  MailApp.sendEmail(Session.getEffectiveUser().getEmail(), \"Entre-Séances : nouvelles réponses\",\n    \"Un patient vient d'envoyer des réponses.\\nOuvrez votre espace praticienne pour les relever.\\n\\nCe mail ne contient aucune donnée de patient.\");\n}\n\n/* Envoi d'une notification (sans contenu). La signature est faite ici si la praticienne n'en a pas fourni. */\nfunction pushTo_(code, endpoint, jwt, k) {\n  const props = PropertiesService.getScriptProperties();\n  if (!jwt) {\n    const d = props.getProperty(\"VAPID_D\"); k = props.getProperty(\"VAPID_PUB\");\n    if (!d || !k) return { ok: false, err: \"novapid\" };\n    if (typeof BigInt === \"undefined\") return { ok: false, err: \"nobigint\" };\n    const m = /^(https:\\/\\/[^\\/]+)/.exec(endpoint);\n    jwt = vapidJwt_(m[1], d);\n  }\n  const res = UrlFetchApp.fetch(endpoint, { method: \"post\", headers: { Authorization: \"vapid t=\" + jwt + \", k=\" + k, TTL: \"86400\", Urgency: \"normal\" }, payload: \"\", muteHttpExceptions: true });\n  const st = res.getResponseCode();\n  if (st === 404 || st === 410) { kvSet_(\"S_\" + code, null); kvSet_(\"R_\" + code, null); }\n  return { ok: st >= 200 && st < 300, status: st, why: st >= 300 ? String(res.getContentText()).slice(0, 200) : \"\" };\n}\n\n/* Rappels quotidiens : lancé automatiquement toutes les 10 minutes */\nfunction rappels() {\n  const sh = data_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const rows = sh.getRange(1, 1, n, 2).getValues(), now = new Date();\n  rows.forEach(function (r) {\n    const key = String(r[0]); if (key.indexOf(\"R_\") !== 0) return;\n    const code = key.slice(2);\n    let rem; try { rem = JSON.parse(String(r[1]).replace(/^v:/, \"\")); } catch (e) { return; }\n    let day, hm, today;\n    try { day = Number(Utilities.formatDate(now, rem.tz, \"u\")); hm = Utilities.formatDate(now, rem.tz, \"HH:mm\"); today = Utilities.formatDate(now, rem.tz, \"yyyy-MM-dd\"); } catch (e) { return; }\n    if (rem.days.indexOf(day) < 0 || rem.last === today) return;\n    const toMin = t => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));\n    const diff = toMin(hm) - toMin(rem.time);\n    if (diff < 0 || diff > 60) return;\n    const s = kvGet_(\"S_\" + code); if (!s) return;\n    try { pushTo_(code, JSON.parse(s).endpoint); } catch (e) {}\n    rem.last = today; if (kvGet_(\"R_\" + code)) kvSet_(\"R_\" + code, JSON.stringify(rem));\n  });\n}\n\n/* ---- Signature ECDSA P-256 (ES256) pour les notifications, en JavaScript pur ---- */\nlet EC_CACHE_ = null;\nfunction EC_() {\n  if (EC_CACHE_) return EC_CACHE_;\n  const B0 = BigInt(0), B1 = BigInt(1), B2 = BigInt(2), B3 = BigInt(3), B4 = BigInt(4), B8 = BigInt(8);\n  const P = BigInt(\"0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff\");\n  const N = BigInt(\"0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551\");\n  const A = P - B3;\n  const G = [BigInt(\"0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296\"), BigInt(\"0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5\"), B1];\n  const mod = (a, m) => { const r = a % m; return r >= B0 ? r : r + m; };\n  const inv = (a, m) => { let [r0, r1, s0, s1] = [mod(a, m), m, B1, B0]; while (r1) { const q = r0 / r1; [r0, r1] = [r1, r0 - q * r1]; [s0, s1] = [s1, s0 - q * s1]; } return mod(s0, m); };\n  function dbl(p) {\n    const [X, Y, Z] = p; if (!Y || !Z) return [B0, B1, B0];\n    const ZZ = mod(Z * Z, P), S = mod(B4 * X * Y * Y, P), M = mod(B3 * X * X + A * ZZ * ZZ, P);\n    const X3 = mod(M * M - B2 * S, P), Y3 = mod(M * (S - X3) - B8 * Y * Y * Y * Y, P), Z3 = mod(B2 * Y * Z, P);\n    return [X3, Y3, Z3];\n  }\n  function add(p, q) {\n    if (!p[2]) return q; if (!q[2]) return p;\n    const Z1Z1 = mod(p[2] * p[2], P), Z2Z2 = mod(q[2] * q[2], P);\n    const U1 = mod(p[0] * Z2Z2, P), U2 = mod(q[0] * Z1Z1, P), S1 = mod(p[1] * q[2] * Z2Z2, P), S2 = mod(q[1] * p[2] * Z1Z1, P);\n    if (U1 === U2) return S1 === S2 ? dbl(p) : [B0, B1, B0];\n    const H = mod(U2 - U1, P), R = mod(S2 - S1, P), HH = mod(H * H, P), HHH = mod(H * HH, P), V = mod(U1 * HH, P);\n    const X3 = mod(R * R - HHH - B2 * V, P), Y3 = mod(R * (V - X3) - S1 * HHH, P), Z3 = mod(H * p[2] * q[2], P);\n    return [X3, Y3, Z3];\n  }\n  function mul(k, p) { let r = [B0, B1, B0], q = p; while (k > B0) { if (k & B1) r = add(r, q); q = dbl(q); k >>= B1; } return r; }\n  function affineX(p) { const zi = inv(p[2], P); return mod(p[0] * zi * zi, P); }\n  EC_CACHE_ = { N: N, G: G, mul: mul, affineX: affineX, inv: inv, mod: mod, B0: B0, B1: B1 };\n  return EC_CACHE_;\n}\nfunction bytesToBig_(b) { let h = \"0x\"; b.forEach(x => { h += ((x + 256) % 256).toString(16).padStart(2, \"0\"); }); return BigInt(h === \"0x\" ? \"0x0\" : h); }\nfunction bigToBytes32_(x) { const h = x.toString(16).padStart(64, \"0\"), out = []; for (let i = 0; i < 64; i += 2) { const v = parseInt(h.slice(i, i + 2), 16); out.push(v > 127 ? v - 256 : v); } return out; }\nfunction b64u_(x) { return (typeof x === \"string\" ? Utilities.base64EncodeWebSafe(x, Utilities.Charset.UTF_8) : Utilities.base64EncodeWebSafe(x)).replace(/=+$/, \"\"); }\nfunction vapidJwt_(aud, dB64) {\n  const props = PropertiesService.getScriptProperties();\n  const sub = \"mailto:\" + (props.getProperty(\"CONTACT\") || Session.getEffectiveUser().getEmail() || \"contact@example.org\");\n  const unsigned = b64u_(JSON.stringify({ typ: \"JWT\", alg: \"ES256\" })) + \".\" + b64u_(JSON.stringify({ aud: aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: sub }));\n  const d = bytesToBig_(Utilities.base64DecodeWebSafe(dB64 + \"==\".slice(0, (4 - dB64.length % 4) % 4)));\n  const z = bytesToBig_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, unsigned, Utilities.Charset.UTF_8));\n  const E = EC_();\n  let r = E.B0, s = E.B0;\n  while (!r || !s) {\n    const k = E.mod(bytesToBig_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + dB64 + unsigned + Date.now(), Utilities.Charset.UTF_8)), E.N - E.B1) + E.B1;\n    r = E.mod(E.affineX(E.mul(k, E.G)), E.N);\n    s = E.mod(E.inv(k, E.N) * (z + r * d), E.N);\n  }\n  return unsigned + \".\" + b64u_(bigToBytes32_(r).concat(bigToBytes32_(s)));\n}\n\n/* À lancer une fois depuis l'éditeur (bouton Exécuter) : autorisations + rappels automatiques. */\nfunction autoriser() {\n  sheet_(); data_(); folder_();\n  try { MailApp.getRemainingDailyQuota(); } catch (e) {}\n  try { UrlFetchApp.fetch(\"https://www.google.com\", { muteHttpExceptions: true }); } catch (e) {}\n  const has = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === \"rappels\");\n  if (!has) ScriptApp.newTrigger(\"rappels\").timeBased().everyMinutes(10).create();\n  PropertiesService.getScriptProperties().setProperty(\"TRIG\", \"1\");\n  Logger.log(\"Autorisations accordées et rappels activés. Vous pouvez déployer une nouvelle version.\");\n}\n";
 let vault = null, vkey = null, vsalt = null, demo = false;
 let view = { tab: "patients", p: {} };
 let lockTimer = null, flash = "";
@@ -842,6 +845,7 @@ const ANGST_ITEMS = ["Moins d'heures de sommeil", "Davantage d'énergie et de r�
   "Augmentation du rire", "Rapidité de la pensée, idées soudaines"];
 const ELAN_ITEMS = ["Humeur exaltée, excitée", "Irritabilité inhabituelle", "Énergie augmentée", "Besoin de sommeil réduit", "Estime de soi augmentée", "Parle plus / plus vite",
   "Pensées rapides, fuite des idées", "Distractibilité", "Activité augmentée, agitation", "Conduites à risque"];
+const COG_ICO = '<svg class="tab-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 2.6h3.4l.5 2.6c.6.2 1.1.5 1.6.9l2.5-.9 1.7 2.9-2 1.7c.1.6.1 1.2 0 1.8l2 1.7-1.7 2.9-2.5-.9c-.5.4-1 .7-1.6.9l-.5 2.6h-3.4l-.5-2.6c-.6-.2-1.1-.5-1.6-.9l-2.5.9-1.7-2.9 2-1.7c-.1-.6-.1-1.2 0-1.8l-2-1.7 1.7-2.9 2.5.9c.5-.4 1-.7 1.6-.9z"/><circle cx="12" cy="12" r="3"/></svg>';
 const MARK = '<svg class="brand-mark" viewBox="0 0 34 34"><rect width="34" height="34" rx="10" fill="var(--accent)"/><path d="M7 14c3-3 6-3 9 0s6 3 10 0" stroke="var(--accent-ink)" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M7 21c3-3 6-3 9 0s6 3 10 0" stroke="var(--sun)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
 /* Repère indicatif inspiré de la structure des critères (non validé) */
 function elanFlag(e) {
@@ -856,7 +860,8 @@ async function deriveVaultKey(pw, salt) {
   const base = await crypto.subtle.importKey("raw", TE.encode(pw), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 310000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
 }
-async function persist() {
+async function persist() { await persistLocal(); if (typeof scheduleSync === "function") scheduleSync(); }
+async function persistLocal() {
   if (demo || !vault) return;
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, vkey, await pack(vault));
@@ -1168,7 +1173,7 @@ function render() {
   const tabs = [["patients", "Patients"], ["exercices", "Exercices"], ["recevoir", "Recevoir"], ["reglages", "Réglages"]];
   app.innerHTML = `<header class="top"><div class="top-in">
       <div class="brand">${MARK}<div><div class="brand-name">Entre-Séances</div><div class="brand-sub">Espace praticienne</div></div></div>
-      <nav class="tabs">${tabs.map(([k, l]) => `<button class="tab" data-nav="${k}" ${view.tab === k ? 'aria-current="page"' : ""}>${l}</button>`).join("")}</nav>
+      <nav class="tabs">${tabs.map(([k, l]) => `<button class="tab" data-nav="${k}" ${view.tab === k ? 'aria-current="page"' : ""}>${k === "reglages" ? COG_ICO : ""}${l}</button>`).join("")}</nav>
       <button class="lockbtn" id="lockBtn">${demo ? "Quitter la démo" : "Verrouiller"}</button></div></header>
     ${demo ? `<div class="demo-band"><b>Mode démonstration.</b> Patients et données fictifs, rien n'est enregistré. Les messages de l'application patient en démonstration (code ${spaced(DEMO_CODE)}) se déchiffrent dans l'onglet Recevoir.</div>` : ""}
     ${flash ? `<div class="result flash" role="status">${flash}</div>` : ""}
@@ -1178,14 +1183,19 @@ function render() {
   const m = MOUNTS[view.tab]; if (m) m(view.p);
   hydratePhotos();
 }
-let polling = false;
+let polling = false, pollN = 0;
 async function poll() {
   if (polling || !relayOn() || document.visibilityState !== "visible") return;
   polling = true;
   try {
-    const res = await fetchInbox();
-    if (res.n || (res.unknown && res.unknown.length) || res.bad) {
-      flash = inboxSummary(res);
+    pollN = (pollN || 0) + 1;
+    let syncNote = "";
+    if (pollN % 5 === 0) { try { syncNote = syncSummary(await syncVault()); } catch (e) {} }
+    let res = await fetchInbox();
+    if (res.unknown && res.unknown.length) { try { syncNote = syncSummary(await syncVault()) || syncNote; const rr = await rereadFailed(); if (rr) res = Object.assign({}, rr, { n: res.n + rr.n }); } catch (e) {} }
+    if (syncNote) flash = syncNote;
+    if (res.n || (res.unknown && res.unknown.length) || res.bad || syncNote) {
+      flash = [syncNote, res.n || (res.unknown && res.unknown.length) || res.bad ? inboxSummary(res) : ""].filter(Boolean).join(" ");
       const safe = view.tab !== "reglages" && !view.p.edit && !view.p.act && view.tab !== "recevoir";
       if (safe) render();
     }
@@ -1195,8 +1205,15 @@ setInterval(poll, 120000);
 document.addEventListener("visibilitychange", poll);
 async function afterUnlock() {
   touch(); nav("patients");
+  const notes = [];
+  if (relayOn()) { try { const s = await syncVault(); const t = syncSummary(s); if (t) notes.push(t); } catch (e) { if (e.detail) notes.push(e.detail); } }
   try { await ensureVapid(); } catch (e) {}
-  if (relayOn()) { try { const res = await fetchInbox(); if (res.n) { flash = inboxSummary(res); if (view.tab === "patients" && !view.p.code) render(); } } catch (e) {} }
+  try { await pushVapid(); } catch (e) {}
+  if (relayOn()) {
+    try { const res = await fetchInbox(); if (res.n || (res.unknown && res.unknown.length)) notes.push(inboxSummary(res)); } catch (e) {}
+    try { const rr = await rereadFailed(); if (rr && rr.n) notes.push("Messages récupérés : " + inboxSummary(rr)); } catch (e) {}
+  }
+  if (notes.length) { flash = notes.join(" "); if (view.tab === "patients" && !view.p.code && !view.p.edit && !view.p.act) render(); }
 }
 
 const PAGES = {}, MOUNTS = {};
@@ -1211,12 +1228,13 @@ function alerts(pt) {
   return out;
 }
 PAGES.patients = p => {
+  if (p.all) return broadcastPage();
   if (p.edit) return patientForm(p.edit === "new" ? null : vault.patients[p.edit]);
   if (p.act) return codeView(vault.patients[p.act], p);
   if (p.code) return patientDetail(vault.patients[p.code], p);
   const list = Object.values(vault.patients).sort((a, b) => (b.lastImport || b.created) < (a.lastImport || a.created) ? -1 : 1);
   return `<div class="head-row"><div><h1>Patients</h1><p class="muted">${list.length} suivi${list.length > 1 ? "s" : ""} en cours${relayOn() ? " · réception directe active" : ""}</p></div>
-    <div class="row">${relayOn() ? `<button class="btn soft" id="fetchNow">Relever les réponses</button>` : ""}<button class="btn" data-nav="patients" data-p='{"edit":"new"}'>Nouveau patient</button></div></div>
+    <div class="row">${relayOn() ? `<button class="btn soft" id="fetchNow">Relever les réponses</button>` : ""}${list.length ? `<button class="btn soft" data-nav="patients" data-p='{"all":true}'>Message à tous</button>` : ""}<button class="btn" data-nav="patients" data-p='{"edit":"new"}'>Nouveau patient</button></div></div>
     ${!relayOn() && !demo ? `<div class="notice" style="margin-bottom:16px">La réception directe n'est pas encore configurée : les codes courts ne fonctionneront pas. <button class="link" data-nav="reglages" data-p='{"guide":true}'>Configurer (10 minutes)</button></div>` : ""}
     ${list.length ? `<div class="grid-list">${list.map(pt => {
       const last = pt.entries.length ? pt.entries[pt.entries.length - 1].t : null, al = alerts(pt);
@@ -1228,6 +1246,7 @@ PAGES.patients = p => {
       : `<div class="empty card"><h2>Aucun patient pour l'instant</h2><p>Créez un patient pour obtenir son code à 6 caractères.</p><button class="btn" data-nav="patients" data-p='{"edit":"new"}'>Nouveau patient</button></div>`}`;
 };
 MOUNTS.patients = p => {
+  if (p.all) { mountBroadcast(); return; }
   if (p.edit) mountForm(p.edit === "new" ? null : vault.patients[p.edit]);
   else if (p.act) mountCode(vault.patients[p.act], p);
   else if (p.code) mountDetail(vault.patients[p.code], p);
@@ -1349,6 +1368,104 @@ async function mountCode(pt, p) {
   if (p.published === false && relayOn()) { const ok = await publishCfg(pt); const st = document.getElementById("pubSt"); if (st) st.textContent = ok ? "Exercices publiés : le code est actif." : "La publication a échoué. Vérifier la connexion puis rouvrir cette page."; }
 }
 
+/* ---------- Synchronisation de l'espace entre appareils ----------
+   La copie stockée dans le relais est chiffrée avec une clé dérivée de votre clé privée :
+   seuls vos appareils (restaurés depuis la même sauvegarde) peuvent la lire. */
+let syncing = false, syncTimer = null;
+async function syncKey() {
+  const h = await crypto.subtle.digest("SHA-256", TE.encode("entre-seances/sync/v1/" + vault.priv.d));
+  return crypto.subtle.importKey("raw", h, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+async function sealVault(v) {
+  const iv = crypto.getRandomValues(new Uint8Array(12)), ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await syncKey(), await pack(v)));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12); return B64.enc(out);
+}
+async function openVaultBlob(blob) {
+  const all = B64.dec(blob);
+  return unpack(new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, await syncKey(), all.slice(12))));
+}
+const stamp = o => (o && (o.updated || o.created)) || "";
+/* Fusionne « remote » dans « local » sans rien perdre. Retourne un résumé. */
+function mergeVault(L, R) {
+  const res = { added: [], updated: 0, entries: 0, vapidChanged: false };
+  L.deleted = Object.assign({}, R.deleted || {}, L.deleted || {});
+  for (const [c, t] of Object.entries(R.deleted || {})) if (!L.deleted[c] || t > L.deleted[c]) L.deleted[c] = t;
+  L.patients = L.patients || {};
+  for (const [code, rp] of Object.entries(R.patients || {})) {
+    const del = L.deleted[code];
+    const lp = L.patients[code];
+    if (!lp) {
+      if (del && del >= stamp(rp)) continue;
+      L.patients[code] = JSON.parse(JSON.stringify(rp)); res.added.push(rp.label || code); res.entries += (rp.entries || []).length; continue;
+    }
+    if (stamp(rp) > stamp(lp)) { for (const k of ["label", "tv", "mods", "hier", "tca", "cx", "tx", "updated"]) if (k in rp) lp[k] = rp[k]; res.updated++; }
+    const ids = new Set((lp.entries || []).map(e => e.id));
+    for (const e of rp.entries || []) if (!ids.has(e.id)) { lp.entries.push(e); res.entries++; }
+    lp.entries.sort((a, b) => a.t < b.t ? -1 : 1);
+    const mm = {}; for (const m of (lp.msgs || []).concat(rp.msgs || [])) { const x = mm[m.id]; mm[m.id] = x ? Object.assign({}, x, m, { lu: x.lu || m.lu }) : m; }
+    lp.delMsgs = [...new Set((lp.delMsgs || []).concat(rp.delMsgs || []))];
+    lp.msgs = Object.values(mm).filter(m => !lp.delMsgs.includes(m.id)).sort((a, b) => a.t < b.t ? -1 : 1);
+    if ((rp.lastImport || "") > (lp.lastImport || "")) lp.lastImport = rp.lastImport;
+    if (!lp.created || (rp.created && rp.created < lp.created)) lp.created = rp.created;
+  }
+  for (const [code, t] of Object.entries(L.deleted)) { const lp = L.patients[code]; if (lp && t >= stamp(lp)) delete L.patients[code]; }
+  L.deletedCx = Object.assign({}, R.deletedCx || {}, L.deletedCx || {});
+  L.cx = L.cx || {};
+  for (const [id, d] of Object.entries(R.cx || {})) if (!L.cx[id] || stamp(d) > stamp(L.cx[id])) L.cx[id] = d;
+  for (const [id, t] of Object.entries(L.deletedCx)) if (L.cx[id] && t >= stamp(L.cx[id])) delete L.cx[id];
+  /* Une seule clé de notification pour tous les appareils : on garde la même partout (choix stable) */
+  if (R.vapid && (!L.vapid || R.vapid.pub < L.vapid.pub)) { L.vapid = R.vapid; res.vapidChanged = true; }
+  L.cursor = Math.max(L.cursor || 0, R.cursor || 0);
+  for (const k of ["appUrl", "email"]) if (!L[k] && R[k]) L[k] = R[k];
+  return res;
+}
+/* Tire la copie du relais, fusionne, renvoie la version fusionnée. Gère les conflits entre deux appareils. */
+async function syncVault() {
+  if (!relayOn() || syncing) return null;
+  syncing = true;
+  try {
+    let summary = { added: [], updated: 0, entries: 0, vapidChanged: false };
+    for (let i = 0; i < 4; i++) {
+      const r = await relay(vault.relay, { a: "vget", token: vault.token }, 60000);
+      if (!r.ok) { const e = new Error("vget"); e.detail = r.err === "action" ? "Votre relais Google n'est pas à jour : remplacer son code par la version 5 (Réglages → Guide), puis publier une nouvelle version." : "Synchronisation impossible (" + (r.err || "?") + ")."; throw e; }
+      if (r.blob) {
+        let remote;
+        try { remote = await openVaultBlob(r.blob); } catch (e) { const er = new Error("cle"); er.detail = "La copie du relais appartient à un autre espace (clé différente). Restaurer sur cet appareil la sauvegarde de l'appareil principal."; throw er; }
+        if (remote.pub !== vault.pub) { const er = new Error("cle"); er.detail = "La copie du relais appartient à un autre espace."; throw er; }
+        const m = mergeVault(vault, remote);
+        summary.added.push(...m.added); summary.updated += m.updated; summary.entries += m.entries; summary.vapidChanged = summary.vapidChanged || m.vapidChanged;
+      }
+      const w = await relay(vault.relay, { a: "vput", token: vault.token, blob: await sealVault(Object.assign({}, vault, { failed: [] })), ifv: r.v || 0 }, 120000);
+      if (w.ok) { vault.syncV = w.v; vault.lastSync = new Date().toISOString(); break; }
+      if (w.err !== "conflict") { const e = new Error("vput"); e.detail = "Synchronisation impossible (" + (w.err || "?") + ")."; throw e; }
+    }
+    await persistLocal();
+    if (summary.vapidChanged) { for (const pt of Object.values(vault.patients)) await publishCfg(pt); try { await pushVapid(true); } catch (e) {} }
+    return summary;
+  } finally { syncing = false; }
+}
+function scheduleSync() {
+  if (!relayOn()) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => { syncVault().catch(() => {}); }, 3000);
+}
+/* Après une fusion, relit les messages qui n'avaient pas pu être ajoutés (code absent) */
+async function rereadFailed() {
+  if (!vault.failed || !vault.failed.length) return null;
+  const known = vault.failed.filter(f => vault.patients[f.code]);
+  if (!known.length) return null;
+  vault.cursor = Math.min(...known.map(f => f.seq)) - 1;
+  return fetchInbox();
+}
+function syncSummary(s) {
+  if (!s) return "";
+  const parts = [];
+  if (s.added.length) parts.push(`${s.added.length} patient${s.added.length > 1 ? "s" : ""} ajouté${s.added.length > 1 ? "s" : ""} depuis vos autres appareils (${s.added.map(esc).join(", ")})`);
+  if (s.entries && !s.added.length) parts.push(`${s.entries} réponse${s.entries > 1 ? "s" : ""} récupérée${s.entries > 1 ? "s" : ""} depuis vos autres appareils`);
+  if (s.updated) parts.push(`${s.updated} fiche${s.updated > 1 ? "s" : ""} mise${s.updated > 1 ? "s" : ""} à jour`);
+  return parts.length ? "Synchronisé : " + parts.join(", ") + "." : "";
+}
+
 /* ---------- Messages aux patients et notifications ---------- */
 async function ensureVapid() {
   if (demo || !vault || vault.vapid) return false;
@@ -1357,6 +1474,12 @@ async function ensureVapid() {
   await persist();
   if (relayOn()) for (const pt of Object.values(vault.patients)) await publishCfg(pt);
   return true;
+}
+/* Confie la clé de notification au relais, pour qu'il puisse envoyer les rappels programmés */
+async function pushVapid(force) {
+  if (!relayOn() || !vault.vapid || (!force && vault.vapidRelay === vault.vapid.pub)) return;
+  const r = await relay(vault.relay, { a: "setvapid", token: vault.token, d: vault.vapid.priv.d, pub: vault.vapid.pub });
+  if (r.ok) { vault.vapidRelay = vault.vapid.pub; await persistLocal(); }
 }
 async function vapidJwt(aud) {
   const key = await crypto.subtle.importKey("jwk", vault.vapid.priv, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
@@ -1412,7 +1535,7 @@ function msgPanel(pt) {
 }
 async function mountMsgPanel(pt) {
   document.querySelectorAll("[data-idea]").forEach(b => b.onclick = () => { const t = document.getElementById("mtxt"); t.value = b.dataset.idea; t.focus(); });
-  document.querySelectorAll("[data-delmsg]").forEach(b => b.onclick = async () => { pt.msgs = (pt.msgs || []).filter(m => m.id !== b.dataset.delmsg); await persist(); await publishMsgs(pt); nav("patients", { code: pt.code, per: view.p.per }); });
+  document.querySelectorAll("[data-delmsg]").forEach(b => b.onclick = async () => { pt.msgs = (pt.msgs || []).filter(m => m.id !== b.dataset.delmsg); pt.delMsgs = (pt.delMsgs || []).concat(b.dataset.delmsg); await persist(); await publishMsgs(pt); nav("patients", { code: pt.code, per: view.p.per }); });
   const send = document.getElementById("msend"), box = document.getElementById("mnot"), st = document.getElementById("nstat");
   send.onclick = async () => {
     const x = document.getElementById("mtxt").value.trim(), res = document.getElementById("mres");
@@ -1432,6 +1555,64 @@ async function mountMsgPanel(pt) {
   if (!document.body.contains(st)) return;
   if (ep && vault.vapid) { box.disabled = false; st.textContent = "(le patient a activé les notifications)"; }
   else { box.checked = false; st.textContent = "(le patient n'a pas activé les notifications : le message s'affichera à l'ouverture de l'application)"; }
+}
+
+/* ---------- Message à tous les patients ---------- */
+const BC_MODELS = [
+  ["Mise à jour de l'application", "Une mise à jour d'Entre-Séances est disponible. Ouvre l'application et appuie sur « Mettre à jour l'application » en bas de l'écran d'accueil.", "Une mise à jour d'Entre-Séances est disponible. Ouvrez l'application et appuyez sur « Mettre à jour l'application » en bas de l'écran d'accueil."],
+  ["Nouveaux exercices", "De nouveaux exercices sont disponibles dans ton application. Ouvre-la pour les découvrir.", "De nouveaux exercices sont disponibles dans votre application. Ouvrez-la pour les découvrir."],
+  ["Rappels", "Tu peux maintenant recevoir un rappel pour tes exercices : Réglages (roue crantée), puis « Me rappeler de faire mes exercices ».", "Vous pouvez maintenant recevoir un rappel pour vos exercices : Réglages (roue crantée), puis « Me rappeler de faire mes exercices »."],
+  ["Absence du cabinet", "Le cabinet sera fermé du … au … . En cas d'urgence, utilise le bouton Aide de l'application.", "Le cabinet sera fermé du … au … . En cas d'urgence, utilisez le bouton Aide de l'application."]
+];
+function broadcastPage() {
+  const list = Object.values(vault.patients).sort((a, b) => (a.label || a.code).localeCompare(b.label || b.code));
+  return `<button class="link" data-nav="patients">← Tous les patients</button>
+    <div class="head-row"><div><h1>Message à tous</h1><p class="muted">Le message s'affiche sur l'écran d'accueil de chaque destinataire, comme un message individuel.</p></div></div>
+    <div class="split">
+      <div class="card stack">
+        <div><p class="grp">Partir d'un modèle</p><div class="row">${BC_MODELS.map((m, i) => `<button type="button" class="btn soft small-btn" data-bcm="${i}">${m[0]}</button>`).join("")}</div></div>
+        <div><label class="lbl" for="bcTu">Message pour les patients en « tu »</label><textarea id="bcTu" maxlength="1000" style="min-height:110px"></textarea></div>
+        <div><label class="lbl" for="bcVous">Message pour les patients en « vous »</label><textarea id="bcVous" maxlength="1000" style="min-height:110px" placeholder="Laisser vide pour envoyer le même texte à tous"></textarea></div>
+        <label class="mod-check"><input type="checkbox" id="bcNotif" checked><span>Envoyer aussi une notification aux patients qui l'ont activée</span></label>
+        <p class="hint" id="bcErr" role="alert"></p>
+        <div class="row"><button class="btn" id="bcSend" ${relayOn() || demo ? "" : "disabled"}>Envoyer à <span id="bcN">${list.length}</span> patient(s)</button></div>
+        ${!relayOn() && !demo ? `<p class="hint">La réception directe doit être configurée pour envoyer des messages.</p>` : ""}
+        <div id="bcProg" class="stack"></div>
+      </div>
+      <div class="card stack"><div class="row" style="justify-content:space-between"><span class="lbl">Destinataires</span><span class="row"><button type="button" class="link" id="bcAll">Tous</button><button type="button" class="link" id="bcNone">Aucun</button></span></div>
+        <div class="mods">${list.map(pt => `<label class="mod-check"><input type="checkbox" class="bcp" value="${pt.code}" checked><span><b>${esc(pt.label || "Sans repère")}</b><br><span class="small muted">${spaced(pt.code)} · « ${pt.tv} »</span></span></label>`).join("")}</div></div>
+    </div>`;
+}
+function mountBroadcast() {
+  const boxes = [...document.querySelectorAll(".bcp")], n = document.getElementById("bcN");
+  const count = () => { n.textContent = boxes.filter(b => b.checked).length; };
+  boxes.forEach(b => b.onchange = count);
+  document.getElementById("bcAll").onclick = () => { boxes.forEach(b => { b.checked = true; }); count(); };
+  document.getElementById("bcNone").onclick = () => { boxes.forEach(b => { b.checked = false; }); count(); };
+  document.querySelectorAll("[data-bcm]").forEach(b => b.onclick = () => { const m = BC_MODELS[Number(b.dataset.bcm)]; document.getElementById("bcTu").value = m[1]; document.getElementById("bcVous").value = m[2]; });
+  const send = document.getElementById("bcSend");
+  send.onclick = async () => {
+    const tu = document.getElementById("bcTu").value.trim(), vous = document.getElementById("bcVous").value.trim() || tu, err = document.getElementById("bcErr");
+    const codes = boxes.filter(b => b.checked).map(b => b.value);
+    if (!tu && !vous) { err.textContent = "Écrire un message d'abord."; return; }
+    if (!codes.length) { err.textContent = "Choisir au moins un destinataire."; return; }
+    err.textContent = ""; send.disabled = true;
+    const prog = document.getElementById("bcProg"), notif = document.getElementById("bcNotif").checked;
+    let ok = 0, pushed = 0, fail = [];
+    for (let i = 0; i < codes.length; i++) {
+      const pt = vault.patients[codes[i]];
+      prog.innerHTML = `<p class="small">Envoi ${i + 1} sur ${codes.length}…</p>`;
+      pt.msgs = pt.msgs || []; pt.msgs.push({ id: uid(), t: new Date().toISOString(), x: pt.tv === "vous" ? vous : (tu || vous), ex: "", all: 1 });
+      if (demo) { ok++; continue; }
+      const r = await publishMsgs(pt);
+      if (r === true) { ok++; if (notif) { const pr = await sendPush(pt); if (pr.ok) pushed++; } }
+      else fail.push(pt.label || spaced(pt.code));
+    }
+    await persist();
+    flash = demo ? `Message ajouté pour ${ok} patient(s) (démonstration : rien n'est envoyé).`
+      : `Message envoyé à ${ok} patient(s)${notif ? `, dont ${pushed} avec notification` : ""}.${fail.length ? ` Échec pour : ${fail.map(esc).join(", ")} (relais injoignable ou pas à jour) ; le message partira au prochain envoi.` : ""}`;
+    nav("patients");
+  };
 }
 
 /* ---------- Bibliothèque d'exercices personnalisés ---------- */
@@ -1508,7 +1689,7 @@ MOUNTS.exercices = p => {
     if (f.some(x => (x.k === "choix" || x.k === "multi") && x.o.length < 2)) { err.textContent = "Un choix demande au moins deux options."; return; }
     e.currentTarget.disabled = true;
     const id = old ? old.id : uid();
-    vault.cx[id] = { id, t, d: document.getElementById("xd").value.trim(), c: document.getElementById("xc").value.trim(), f };
+    vault.cx[id] = { id, t, d: document.getElementById("xd").value.trim(), c: document.getElementById("xc").value.trim(), f, updated: new Date().toISOString() };
     await persist();
     for (const pt of Object.values(vault.patients)) if ((pt.cx || []).includes(id)) await publishCfg(pt);
     flash = old ? "Exercice enregistré et mis à jour chez les patients concernés." : "Exercice créé. Attribuez-le depuis la fiche d'un patient : Modifier les exercices.";
@@ -1519,7 +1700,7 @@ MOUNTS.exercices = p => {
     del.onclick = () => { document.getElementById("delBox").hidden = false; };
     document.getElementById("delNo").onclick = () => { document.getElementById("delBox").hidden = true; };
     document.getElementById("delYes").onclick = async () => {
-      delete vault.cx[old.id];
+      delete vault.cx[old.id]; vault.deletedCx = vault.deletedCx || {}; vault.deletedCx[old.id] = new Date().toISOString();
       for (const pt of Object.values(vault.patients)) if ((pt.cx || []).includes(old.id)) { pt.cx = pt.cx.filter(x => x !== old.id); await publishCfg(pt); }
       await persist(); flash = "Exercice supprimé."; nav("exercices");
     };
@@ -1738,7 +1919,7 @@ function report(pt, per) {
 }
 function mountDetail(pt, p) {
   if (!pt) return;
-  if (p.del) { document.getElementById("delYes").onclick = async () => { if (relayOn()) { try { await relay(vault.relay, { a: "delcfg", token: vault.token, code: pt.code }); } catch (e) {} } delete vault.patients[pt.code]; await persist(); nav("patients"); }; return; }
+  if (p.del) { document.getElementById("delYes").onclick = async () => { if (relayOn()) { try { await relay(vault.relay, { a: "delcfg", token: vault.token, code: pt.code }); } catch (e) {} } vault.deleted = vault.deleted || {}; vault.deleted[pt.code] = new Date().toISOString(); delete vault.patients[pt.code]; await persist(); nav("patients"); }; return; }
   document.querySelectorAll('.chips[data-name="per"] .chip').forEach(b => b.addEventListener("picked", () => nav("patients", { code: pt.code, per: b.dataset.v })));
   mountMsgPanel(pt);
   const cr = document.getElementById("cr");
@@ -1811,9 +1992,14 @@ PAGES.reglages = p => {
       <div id="diagOut" class="stack"></div>
       ${(vault.failed || []).length ? `<p class="notice small">${vault.failed.length} message(s) n'ont pas pu être ajoutés : ${vault.failed.slice(-5).map(f => `${spaced(f.code)} (${f.why})`).join(" ; ")}.</p>` : ""}
       <button class="link" id="reread">Relire tous les messages du relais depuis le début</button></div>` : "";
+  const syncCard = relayOn() ? `<div class="card stack"><h3>Synchronisation entre mes appareils</h3>
+      <p class="small">Votre espace (patients, réponses, messages, exercices perso) est recopié automatiquement entre l'ordinateur et le téléphone, à chaque ouverture et après chaque modification. La copie stockée dans votre Google Drive est chiffrée : seuls vos appareils peuvent la lire.</p>
+      <p class="small muted">${vault.lastSync ? "Dernière synchronisation : " + fmtDT(vault.lastSync) : "Pas encore synchronisé."} · ${Object.keys(vault.patients).length} patient(s) dans cet espace.</p>
+      <button class="btn" id="syncNow" style="align-self:flex-start">Synchroniser maintenant</button><p class="hint" id="syncMsg" role="status"></p>
+      <p class="hint">Les photos de repas restent sur l'appareil qui les a reçues.</p></div>` : "";
   return `<div class="head-row"><h1>Réglages</h1></div>
   <div class="split">
-    ${relayCard}${diagCard}
+    ${relayCard}${syncCard}${diagCard}
     <div class="card stack"><h3>Informations transmises aux patients</h3>
       <div><label class="lbl" for="url">Lien de l'application patient</label><input type="text" id="url" value="${esc(vault.appUrl || "")}" placeholder="https://…"><p class="hint">Sert au QR code et au message d'invitation.</p></div>
       <div><label class="lbl" for="em">Adresse mail (envoi manuel de secours)</label><input type="text" id="em" value="${esc(vault.email)}"></div>
@@ -1821,6 +2007,7 @@ PAGES.reglages = p => {
     <div class="card stack"><h3>Sauvegarde</h3>
       <p class="small">Copie chiffrée de tout votre espace (patients, réponses, connexion au relais), protégée par votre mot de passe. Les photos ne sont pas incluses : enregistrez celles à garder dans le dossier du patient. Refaites la sauvegarde après chaque relevé important.</p>
       ${demo ? `<p class="notice">Indisponible en démonstration.</p>` : `<button class="btn" id="bk">Générer la sauvegarde</button><textarea id="bkTxt" class="mono" readonly hidden style="min-height:120px"></textarea>`}
+      <p class="small muted">Version de l'application : ${APP_VERSION}</p>
       <h3 style="margin-top:8px">Sécurité</h3>
       <p class="small">L'espace se verrouille après ${LOCK_MIN} minutes sans activité. Empreinte de votre clé publique : <span class="mono">${esc(vault.pub.slice(0, 16))}…</span></p>
       ${demo ? "" : `<button class="link" data-nav="reglages" data-p='{"wipe":true}'>Supprimer tout l'espace de cet appareil</button>`}</div>
@@ -1837,6 +2024,15 @@ MOUNTS.reglages = p => {
     if (err) { m.textContent = err; return; }
     flash = "Réception directe connectée. Les exercices de vos patients ont été publiés. Dernière étape : coller la même adresse dans config.js sur GitHub."; nav("reglages");
   };
+  const sn = document.getElementById("syncNow");
+  if (sn) sn.onclick = async () => {
+    const m = document.getElementById("syncMsg"); sn.disabled = true; m.textContent = "Synchronisation…";
+    try {
+      const sm = await syncVault(); const rr = await rereadFailed();
+      flash = [syncSummary(sm) || "Cet appareil est à jour.", rr && rr.n ? "Messages récupérés : " + inboxSummary(rr) : ""].filter(Boolean).join(" ");
+      nav("reglages");
+    } catch (e) { m.textContent = e.detail || "Synchronisation impossible : vérifier la connexion."; sn.disabled = false; }
+  };
   const cc = document.getElementById("cpCfg"); if (cc) cc.onclick = async e => { const t = document.getElementById("cfgl"); if (!(await copyText(t.value, e.currentTarget))) selectAll(t); };
   const rr = document.getElementById("reread");
   if (rr) rr.onclick = async () => { rr.textContent = "Relecture…"; vault.cursor = 0; try { flash = inboxSummary(await fetchInbox()); } catch (e) { flash = e.detail || "Le relais ne répond pas."; } nav("reglages"); };
@@ -1845,10 +2041,14 @@ MOUNTS.reglages = p => {
     const out = document.getElementById("diagOut"), line = (ok, t) => `<p class="small">${ok ? "✔" : "✖"} ${t}</p>`;
     dg.disabled = true; out.innerHTML = `<p class="small">Vérification…</p>`; let h = "";
     try {
-      const pg = await relay(vault.relay, { a: "ping" }); h += line(!!pg.ok, "Le relais répond.");
+      const pg = await relay(vault.relay, { a: "ping" }); h += line(!!pg.ok, `Le relais répond (version ${pg.v || "1 à 3"} ; version attendue : 6).`);
       if (pg.sheet === false) h += line(false, "Le relais n'arrive pas à utiliser sa feuille Google : " + esc(pg.why) + ". Dans Apps Script, exécuter la fonction « autoriser », puis publier une nouvelle version.");
-      else if (pg.sheet === undefined || (pg.v || 0) < 4) h += line(false, "Le code du relais est ancien : le remplacer par celui du guide, puis Déployer → Gérer les déploiements → crayon → Nouvelle version.");
+      else if (pg.sheet === undefined || (pg.v || 0) < 5) h += line(false, "Le code du relais est ancien : le remplacer par celui du guide, puis Déployer → Gérer les déploiements → crayon → Nouvelle version.");
       else h += line(true, "Le relais peut ranger les messages.");
+      if ((pg.v || 0) >= 6) {
+        h += line(!!pg.trig, pg.trig ? "Les rappels quotidiens sont actifs." : "Rappels quotidiens inactifs : dans Apps Script, exécuter la fonction « autoriser » une fois.");
+        if (!pg.vapid) { try { await pushVapid(true); h += line(true, "Clé de notification transmise au relais."); } catch (e) { h += line(false, "Clé de notification non transmise."); } }
+      }
       const ck = await relay(vault.relay, { a: "check", token: vault.token }); h += line(!!ck.ok, ck.ok ? "Votre espace est bien le propriétaire du relais." : "Ce relais appartient à un autre espace (clé différente).");
       let pubOk = 0, pubKo = [];
       for (const pt of Object.values(vault.patients)) { (await publishCfg(pt)) ? pubOk++ : pubKo.push(spaced(pt.code)); }
