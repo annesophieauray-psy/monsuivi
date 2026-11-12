@@ -252,6 +252,27 @@ ol.guide li p { margin-top: 4px; font-size: 0.94em; }
 .lib td.num { white-space: nowrap; }
 .tab { display: inline-flex; align-items: center; gap: 6px; }
 .tab-ico { flex: none; }
+/* Questionnaires de repérage */
+.qn-entry { border-left: 6px solid var(--accent); }
+.qn-folder { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.qn-folder > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 16px; font-family: var(--f-display); font-weight: 600; }
+.qn-folder > summary::-webkit-details-marker { display: none; }
+.qn-fold-t { flex: 1; }
+.qn-fold-ico { width: 22px; height: 16px; border-radius: 3px; background: var(--accent); position: relative; flex: none; opacity: .85; }
+.qn-fold-ico::before { content: ""; position: absolute; left: 0; top: -4px; width: 10px; height: 5px; border-radius: 2px 2px 0 0; background: var(--accent); }
+.qn-folder[open] > summary { border-bottom: 1px solid var(--line); }
+.qn-fold-body { padding: 14px 16px 16px; }
+.qn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.qn-card .lab { font-family: var(--f-display); font-weight: 600; font-size: 1.08em; }
+.qn-card details > summary, .qn-res details > summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.qn-prev, .qn-ans { padding-left: 1.4em; margin: 6px 0; display: flex; flex-direction: column; gap: 4px; }
+.qn-send select { flex: 1; min-width: 12em; }
+.qn-res { display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.qn-res:last-child { border-bottom: 0; }
+.qn-res p { margin: 0; }
+.qn-pend { justify-content: space-between; background: var(--surface-2); border-radius: 10px; padding: 8px 12px; }
+@media (max-width: 560px) { .qn-grid { grid-template-columns: 1fr; } .two { grid-template-columns: 1fr; } }
+.qn-res .score-box span b { font-size: 1em; font-family: inherit; line-height: inherit; }
 </style>
 <div class="shell" id="app"></div>
 <script>
@@ -804,9 +825,309 @@ function tccValText(r) {
   if (r.k === "echelle") return r.v + "/10";
   return String(r.v);
 }
+/* =====================================================================
+   Questionnaires standardisés : textes des items (versions françaises publiées).
+   Ce fichier est lu par l'application patient : il ne contient AUCUN nom de
+   questionnaire ni de trouble. Les noms, références et cotations sont dans
+   l'espace praticienne uniquement.
+   ===================================================================== */
+const QN_FREQ5 = ["Jamais", "Rarement", "Parfois", "Souvent", "Très souvent"];
+const QN_AGREE4 = ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"];
+const QN_YN = ["Oui", "Non"];
+const QN_ITEMS = {
+  q01: { kind: "likert", o: QN_FREQ5, min: 5,
+    intro: "Répondez aux questions suivantes en vous auto-évaluant sur chacun des critères. Pour répondre aux questions, choisissez la réponse qui décrit le mieux vos sentiments ou vos comportements au cours des six derniers mois.",
+    items: ["Avec quelle fréquence avez-vous des difficultés à finaliser les derniers détails d'un projet une fois que le plus intéressant a été fait ?",
+      "Avec quelle fréquence avez-vous des difficultés à mettre les choses en ordre lorsque vous devez faire un travail qui demande une certaine organisation ?",
+      "Avec quelle fréquence avez-vous des difficultés pour vous souvenir de vos rendez-vous ou de vos engagements ?",
+      "Avec quelle fréquence avez-vous tendance à éviter ou à remettre à plus tard un travail qui demande beaucoup de réflexion ?",
+      "Avec quelle fréquence avez-vous la bougeotte ou agitez-vous vos mains ou vos pieds lorsque vous devez rester assis pendant un long moment ?",
+      "Avec quelle fréquence vous sentez-vous trop actif ou obligé de faire des choses, comme si vous étiez actionné par un moteur ?",
+      "Avec quelle fréquence faites-vous des erreurs d'étourderie lorsque vous travaillez sur un projet ennuyeux ou difficile ?",
+      "Avec quelle fréquence avez-vous des difficultés à rester attentif lorsque vous faites un travail ennuyeux ou répétitif ?",
+      "Avec quelle fréquence avez-vous des difficultés à vous concentrer sur ce que les gens vous disent, même lorsqu'ils vous parlent directement ?",
+      "Avec quelle fréquence avez-vous tendance à égarer ou du mal à retrouver des choses à la maison ou au travail ?",
+      "Avec quelle fréquence êtes-vous distrait par de l'activité ou du bruit autour de vous ?",
+      "Avec quelle fréquence vous levez-vous pendant des réunions ou d'autres situations dans lesquelles vous êtes censé rester assis ?",
+      "Avec quelle fréquence avez-vous la bougeotte ou vous sentez-vous agité ?",
+      "Avec quelle fréquence avez-vous des difficultés à vous détendre et à vous relaxer pendant votre temps libre ?",
+      "Avec quelle fréquence avez-vous remarqué que vous étiez trop bavard lorsque vous étiez en compagnie d'autres personnes ?",
+      "Avec quelle fréquence vous surprenez-vous terminant les phrases des autres dans une discussion avant qu'ils aient pu le faire eux-mêmes ?",
+      "Avec quelle fréquence avez-vous des difficultés à attendre votre tour dans une file d'attente ?",
+      "Avec quelle fréquence interrompez-vous les autres lorsqu'ils sont occupés ?"] },
+  q02: { kind: "likert", o: QN_AGREE4, min: 3,
+    intro: "Voici une liste de situations. Veuillez lire chacune d'elles très attentivement et précisez, en choisissant une réponse, dans quelle mesure vous êtes d'accord ou pas.",
+    items: ["Je remarque souvent des bruits discrets que les autres ne remarquent pas.",
+      "Je me concentre habituellement plus sur l'ensemble d'une image que sur les petits détails de celle-ci.",
+      "Je trouve qu'il est facile de faire plus d'une chose à la fois.",
+      "Si je suis interrompu(e), je peux facilement revenir à ce que j'étais en train de faire.",
+      "Je trouve qu'il est facile de « lire entre les lignes » lorsque quelqu'un me parle.",
+      "Je sais m'en rendre compte quand mon interlocuteur s'ennuie.",
+      "Quand je lis une histoire, je trouve qu'il est difficile de me représenter les intentions des personnages.",
+      "J'aime collectionner des informations sur des catégories de choses (types de voitures, d'oiseaux, de trains, de plantes, ...).",
+      "Je trouve qu'il est facile de décoder ce que les autres pensent ou ressentent juste en regardant leur visage.",
+      "Je trouve qu'il est difficile de décoder les intentions des autres."] },
+  q03: { kind: "mdq", min: 5,
+    intro: "Est-ce qu'il y a déjà eu une période au cours de laquelle vous n'étiez pas vraiment vous-même et…",
+    items: ["…vous vous sentiez tellement bien ou accéléré(e), au point que d'autres personnes pensaient que vous n'étiez pas dans votre état habituel ou que le fait d'être tellement accéléré(e) vous attira des ennuis ?",
+      "…vous vous sentiez tellement irritable que vous avez insulté des gens ou que vous avez déclenché des bagarres ou des disputes ?",
+      "…vous vous sentiez beaucoup plus sûr(e) de vous que d'habitude ?",
+      "…vous dormiez beaucoup moins que d'habitude et vous trouviez que cela ne vous manquait pas vraiment ?",
+      "…vous étiez beaucoup plus loquace ou parliez plus vite que d'habitude ?",
+      "…les pensées défilaient rapidement dans votre tête ou vous ne pouviez pas ralentir le cours de votre pensée ?",
+      "…vous étiez si facilement distrait(e) par tout ce qui se passait autour de vous, au point d'avoir de la peine à vous concentrer ou à rester sur une idée ?",
+      "…vous aviez beaucoup plus d'énergie que d'habitude ?",
+      "…vous étiez beaucoup plus actif(ve) ou faisiez bien plus de choses que d'habitude ?",
+      "…vous étiez beaucoup plus sociable ou ouvert(e) que d'habitude, par exemple, vous téléphoniez à des amis au milieu de la nuit ?",
+      "…vous étiez beaucoup plus intéressé(e) par la sexualité que d'habitude ?",
+      "…vous faisiez des choses inhabituelles pour vous ou que d'autres personnes auraient pu considérer comme excessives, stupides ou risquées ?",
+      "…les dépenses que vous avez faites ont causé des problèmes à vous ou à votre famille ?"],
+    q2: "Si vous avez répondu « oui » à plus d'une question ci-dessus, plusieurs d'entre elles sont-elles survenues au cours de la même période ?",
+    q3: "À quel point ceci vous a-t-il causé des problèmes – comme être dans l'incapacité de travailler ; avoir des problèmes familiaux, financiers ou légaux ; vous impliquer dans des disputes ou des bagarres ?",
+    o3: ["Aucun problème", "Problème mineur", "Problème modéré", "Problème sévère"] },
+  q04: { kind: "likert", o: QN_YN, min: 1,
+    intro: "Répondez par oui ou par non à chacune des questions suivantes.",
+    items: ["Vous faites-vous vomir parce que vous vous sentez mal d'avoir trop mangé ?",
+      "Vous inquiétez-vous d'avoir perdu le contrôle de ce que vous mangez ?",
+      "Avez-vous récemment perdu plus de 6 kg en 3 mois ?",
+      "Pensez-vous que vous êtes gros(se) alors que d'autres vous trouvent trop mince ?",
+      "Diriez-vous que la nourriture domine votre vie ?"] },
+  q05: { kind: "audit", min: 3,
+    intro: "Pour chaque question, choisissez la réponse qui correspond le mieux à votre situation. Un verre standard correspond à environ 10 g d'alcool pur : par exemple un demi de bière (25 cl), un verre de vin (10 cl) ou un verre d'alcool fort (3 cl).",
+    items: [
+      ["À quelle fréquence vous arrive-t-il de consommer des boissons contenant de l'alcool ?", ["Jamais", "1 fois par mois ou moins", "2 à 4 fois par mois", "2 à 3 fois par semaine", "4 fois ou plus par semaine"], [0, 1, 2, 3, 4]],
+      ["Combien de verres standard buvez-vous au cours d'une journée ordinaire où vous buvez de l'alcool ?", ["Un ou deux", "Trois ou quatre", "Cinq ou six", "Sept à neuf", "Dix ou plus"], [0, 1, 2, 3, 4]],
+      ["Au cours d'une même occasion, à quelle fréquence vous arrive-t-il de boire six verres standard ou plus ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence avez-vous observé que vous n'étiez plus capable de vous arrêter de boire après avoir commencé ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence le fait d'avoir bu de l'alcool vous a-t-il empêché de faire ce qu'on attendait normalement de vous ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence, après une période de forte consommation, avez-vous dû boire de l'alcool dès le matin pour vous remettre en forme ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence avez-vous eu un sentiment de culpabilité ou de regret après avoir bu ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence avez-vous été incapable de vous souvenir de ce qui s'était passé la nuit précédente parce que vous aviez bu ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Vous êtes-vous blessé(e) ou avez-vous blessé quelqu'un parce que vous aviez bu ?", ["Non", "Oui, mais pas dans les douze derniers mois", "Oui, au cours des douze derniers mois"], [0, 2, 4]],
+      ["Est-ce qu'un ami ou un médecin ou un autre professionnel de santé s'est déjà préoccupé de votre consommation d'alcool et vous a conseillé de la diminuer ?", ["Non", "Oui, mais pas dans les douze derniers mois", "Oui, au cours des douze derniers mois"], [0, 2, 4]]] },
+  q06: { kind: "likert", o: QN_FREQ5, min: 2,
+    intro: "Au cours des 12 derniers mois :",
+    items: ["Avez-vous déjà fumé du cannabis avant midi ?",
+      "Avez-vous déjà fumé du cannabis lorsque vous étiez seul(e) ?",
+      "Avez-vous déjà eu des problèmes de mémoire quand vous fumez du cannabis ?",
+      "Des amis ou des membres de votre famille vous ont-ils déjà dit que vous devriez réduire votre consommation de cannabis ?",
+      "Avez-vous déjà essayé de réduire ou d'arrêter votre consommation de cannabis sans y parvenir ?",
+      "Avez-vous déjà eu des problèmes à cause de votre consommation de cannabis (dispute, bagarre, accident, mauvais résultat à l'école…) ?"] },
+  q07: { kind: "likert", o: QN_YN, min: 2,
+    intro: "Au cours de ta vie :",
+    items: ["Es-tu déjà monté(e) dans un véhicule (auto, moto, scooter) conduit par quelqu'un (incluant toi-même) qui avait bu ou qui avait consommé des drogues ?",
+      "Utilises-tu de l'alcool ou d'autres drogues pour te détendre, te sentir mieux ou pour tenir le coup ?",
+      "T'est-il déjà arrivé d'oublier ce que tu as fait sous l'effet de l'alcool ou d'autres drogues ?",
+      "Consommes-tu de l'alcool ou d'autres drogues quand tu es seul(e) ?",
+      "As-tu déjà eu des problèmes en consommant de l'alcool ou d'autres drogues ?",
+      "Tes amis ou ta famille t'ont-ils déjà dit que tu devais réduire ta consommation de boissons alcoolisées ou d'autres drogues ?"] },
+  q08: { kind: "pairs", min: 10,
+    intro: "Pour chaque paire, choisissez la proposition qui vous décrit le mieux ou qui est la plus proche de votre opinion. Il n'y a pas de bonne ou de mauvaise réponse.",
+    items: [
+      ["J'ai un talent naturel pour influencer les gens.", "Je ne suis pas doué(e) pour influencer les gens.", 0],
+      ["La modestie ne me correspond pas.", "Je suis essentiellement quelqu'un de modeste.", 0],
+      ["Je relèverais presque tous les défis.", "J'ai tendance à être quelqu'un de plutôt prudent.", 0],
+      ["Je suis parfois embarrassé(e) lorsque les gens me font des compliments.", "Je sais que je suis bon parce que tout le monde me le dit.", 1],
+      ["L'idée de diriger le monde me paralyse.", "Si je dirigeais le monde, il serait meilleur.", 1],
+      ["Habituellement, avec mon bagou, j'arrive toujours à me tirer d'affaire.", "J'essaye d'accepter les conséquences de mon comportement.", 0],
+      ["Je préfère me fondre dans la foule.", "J'aime être le centre de l'attention.", 1],
+      ["Je réussirai.", "Je ne me sens pas trop concerné(e) par la réussite.", 0],
+      ["Je ne suis ni meilleur(e) ni pire que les autres.", "Je suis une personne hors du commun.", 1],
+      ["Je ne suis pas sûr(e) que je pourrais être un bon chef.", "Je me vois comme un bon chef.", 1],
+      ["Je suis assertif (j'ai de l'assurance).", "Je souhaite être plus assuré(e).", 0],
+      ["J'aime avoir de l'autorité sur les autres personnes.", "Ça ne me gêne pas d'obéir aux ordres.", 0],
+      ["Je trouve facile de manipuler les gens.", "Je n'aime pas quand je me surprends à manipuler les autres.", 0],
+      ["Je suis intransigeant(e) quant au respect qui m'est dû.", "On me témoigne habituellement le respect que je mérite.", 0],
+      ["Je n'aime pas particulièrement mettre mon corps en évidence.", "J'aime mettre mon corps en évidence.", 1],
+      ["Je peux lire à travers les gens comme dans un livre.", "Les gens sont parfois difficiles à comprendre.", 0],
+      ["Si je me sens compétent(e), je suis disposé(e) à prendre la responsabilité de prendre les décisions.", "J'aime prendre la responsabilité de prendre des décisions.", 1],
+      ["Je souhaite être raisonnablement heureux(se).", "Je désire être quelqu'un aux yeux du monde.", 1],
+      ["Mon corps n'est pas spécialement beau.", "J'aime regarder mon corps.", 1],
+      ["J'essaye de ne pas me faire valoir aux yeux d'autrui.", "Je sais me mettre en avantage si j'en ai l'opportunité.", 1],
+      ["Je sais toujours ce que je suis en train de faire.", "Parfois, je ne suis pas sûr(e) de ce que je fais.", 0],
+      ["Je dépends parfois d'autres personnes pour que les choses soient faites.", "Je dépends rarement de quelqu'un d'autre pour que les choses soient faites.", 1],
+      ["Parfois, je raconte de bonnes histoires.", "Tout le monde aime bien écouter mes histoires.", 1],
+      ["J'attends beaucoup des autres.", "J'aime faire des choses pour les autres personnes.", 0],
+      ["Je ne serai jamais satisfait(e) avant d'avoir tout ce que je mérite.", "Je prends les choses agréables comme elles viennent.", 0],
+      ["Les compliments m'embarrassent.", "J'aime être complimenté(e).", 1],
+      ["J'ai un fort désir de pouvoir.", "Le pouvoir, en ce qui me concerne, ne m'intéresse pas.", 0],
+      ["Je ne me préoccupe pas des nouvelles modes.", "J'aime lancer de nouvelles modes.", 1],
+      ["J'aime me regarder dans un miroir.", "Je ne me sens pas particulièrement attiré(e) par le fait de me regarder dans un miroir.", 0],
+      ["J'apprécie réellement être le centre de l'attention.", "Cela me met mal à l'aise d'être le centre de l'attention.", 0],
+      ["Je peux faire de ma vie ce que je veux.", "Les gens ne peuvent pas toujours vivre leur vie comme ils le veulent.", 0],
+      ["Être reconnu(e) en tant qu'autorité ne signifie pas grand-chose pour moi.", "Les gens semblent toujours reconnaître mon autorité.", 1],
+      ["Je préférerais être un chef.", "Cela fait peu de différences pour moi d'être un chef ou non.", 0],
+      ["Je serai une personne formidable.", "J'espère que je vais être couronné(e) de succès.", 0],
+      ["Parfois, les gens croient ce que je leur raconte.", "Je peux faire croire n'importe quoi à n'importe qui.", 1],
+      ["Je suis un chef né.", "Être un « Homme de tête » est une qualité que l'on met longtemps à acquérir.", 0],
+      ["Je souhaite que quelqu'un écrive un jour ma biographie.", "Je n'aime pas que les gens se mêlent de ma vie privée pour quelques raisons que ce soient.", 0],
+      ["Je suis vexé(e) lorsque les gens ne remarquent pas mon allure vestimentaire quand je sors.", "Cela ne me gêne pas d'être fondu(e) dans la foule lorsque je sors.", 0],
+      ["J'ai plus de capacités que les autres personnes.", "Je peux apprendre beaucoup des autres personnes.", 0],
+      ["Je suis plus comme tout le monde.", "Je suis une personne extraordinaire.", 1]] },
+  q09: { kind: "likert", o: ["Vrai", "Faux"], min: 4,
+    intro: "Pensez aux dernières périodes où vous vous êtes senti(e) « bien dans votre peau, heureux(se), agité(e) ou irritable ». Pour chaque proposition, répondez vrai ou faux.",
+    items: ["Moins d'heures de sommeil", "Davantage d'énergie et de résistance physique", "Davantage de confiance en soi", "Davantage de plaisir à faire plus de travail",
+      "Davantage d'activités sociales (plus d'appels téléphoniques, plus de visites)", "Plus de déplacements et voyages ; davantage d'imprudences au volant", "Dépenses d'argent excessives",
+      "Comportement déraisonnable dans les affaires", "Surcroît d'activité (y compris au travail)", "Davantage de projets et d'idées créatives", "Moins de timidité, moins d'inhibition",
+      "Plus bavard que d'habitude", "Plus d'impatience ou d'irritabilité que d'habitude", "Attention facilement distraite", "Augmentation des pulsions sexuelles",
+      "Augmentation de la consommation de café et de cigarettes", "Augmentation de la consommation d'alcool", "Exagérément optimiste, voire euphorique",
+      "Augmentation du rire (farces, plaisanteries, jeux de mots, calembours)", "Rapidité de la pensée, idées soudaines, calembours"] }
+};
+function qnCount(id) { const q = QN_ITEMS[id]; if (!q) return 0; return q.kind === "mdq" ? q.items.length + 2 : q.items.length; }
+/* =====================================================================
+   Questionnaires standardisés : noms, références, licences et cotation.
+   Espace praticienne UNIQUEMENT (jamais inclus dans l'application patient).
+   ===================================================================== */
+const QN_FOLDERS = [
+  ["tpl", "Trouble de la personnalité limite"],
+  ["tdah", "Trouble de l'attention avec ou sans hyperactivité"],
+  ["tsa", "Trouble du spectre de l'autisme"],
+  ["bip", "Trouble bipolaire : repérage des phases (hypo)maniaques"],
+  ["narc", "Trouble de la personnalité narcissique"],
+  ["tca", "Troubles des conduites alimentaires"],
+  ["add", "Troubles de l'usage : alcool, cannabis, autres substances"]
+];
+const QN_FOLDER_NOTE = {
+  tpl: "Aucun auto-questionnaire de repérage du trouble limite n'est à la fois validé en français et diffusable librement : la MSI-BPD n'a pas de version française publiée, et le texte français de la BSL-23 est soumis à l'autorisation de ses auteurs. Si vous disposez d'une version française (achetée ou autorisée), ajoutez-la ci-dessous avec « Ajouter votre questionnaire » : elle sera envoyée au patient sous le titre « Nouveau questionnaire », comme les autres.",
+  narc: "Il n'existe pas d'auto-questionnaire validé qui repère le trouble de la personnalité narcissique au sens du DSM-5. Le NPI-40 mesure des traits narcissiques « grandioses » sur un continuum : utile pour la description clinique, il ne pose pas de diagnostic et ne capte pas le narcissisme « vulnérable ».",
+  add: "Le DAST-10 (autres drogues) n'est pas inclus : son auteur exige une autorisation écrite pour toute reproduction. Vous pouvez l'ajouter avec « Ajouter votre questionnaire » si vous avez cette autorisation."
+};
+const yesN = rep => rep.filter(v => v === 0).length; // 0 = « Oui » / « Vrai »
+const QN_META = {
+  q01: { f: "tdah", n: "ASRS v1.1", full: "Adult ADHD Self-Report Scale v1.1 (OMS), 18 items",
+    age: "Adultes (dès 18 ans ; utilisable avec prudence à partir de 16 ans)", dur: "5 min",
+    ref: "Kessler RC et al. (2005), Psychological Medicine 35:245-256. Version française de l'OMS.",
+    lic: "Diffusion libre par l'OMS et l'Université Harvard pour un usage clinique non commercial.",
+    seuil: "Partie A (items 1 à 6) : au moins 4 réponses dans la zone grisée = profil évocateur d'un TDAH de l'adulte. La partie B (items 7 à 18) n'a pas de seuil : elle aide à décrire le profil.",
+    score(e) {
+      const r = e.rep, gA = [2, 2, 2, 3, 3, 3], gB = { 6: 2, 7: 2, 8: 2, 11: 2, 15: 2, 17: 2 };
+      const a = r.slice(0, 6).filter((v, i) => v >= gA[i]).length;
+      const b = r.slice(6).filter((v, i) => v >= (gB[i + 6] || 3)).length;
+      const ina = [0, 1, 2, 3, 6, 7, 8, 9, 10].reduce((s, i) => s + r[i], 0), hyp = [4, 5, 11, 12, 13, 14, 15, 16, 17].reduce((s, i) => s + r[i], 0);
+      const pos = a >= 4;
+      return { main: `${a}/6`, unit: "Partie A", pos, short: `ASRS A ${a}/6`,
+        lines: [`Partie A : ${a} réponse${a > 1 ? "s" : ""} sur 6 dans la zone grisée (seuil ≥ 4) : ${pos ? "profil évocateur d'un TDAH de l'adulte, à confirmer par un entretien diagnostique (DIVA-5, anamnèse développementale)" : "sous le seuil de repérage"}.`,
+          `Partie B : ${b} réponse${b > 1 ? "s" : ""} sur 12 dans la zone grisée (descriptif).`,
+          `Sous-scores (0 = jamais, 4 = très souvent) : inattention ${ina}/36, hyperactivité-impulsivité ${hyp}/36.`] };
+    } },
+  q02: { f: "tsa", n: "AQ-10", full: "Autism Spectrum Quotient, version courte adulte, 10 items",
+    age: "Adultes (dès 16 ans). Pour les plus jeunes, les auteurs proposent des versions adolescent et enfant distinctes, remplies par les parents.", dur: "3 min",
+    ref: "Allison C, Auyeung B, Baron-Cohen S (2012), J Am Acad Child Adolesc Psychiatry 51(2):202-212. Traduction française diffusée par l'Autism Research Centre (Cambridge).",
+    lic: "Diffusion libre par l'Autism Research Centre pour un usage clinique et de recherche, sans modification.",
+    seuil: "1 point par réponse « d'accord » (tout à fait ou plutôt) aux items 1, 7, 8 et 10, et par réponse « pas d'accord » (plutôt pas ou pas du tout) aux items 2, 3, 4, 5, 6 et 9. Score ≥ 6 : envisager une évaluation diagnostique spécialisée (recommandation NICE).",
+    score(e) {
+      const agreeItems = [0, 6, 7, 9];
+      const s = e.rep.filter((v, i) => agreeItems.includes(i) ? v <= 1 : v >= 2).length;
+      const pos = s >= 6;
+      return { main: `${s}/10`, pos, short: `AQ-10 ${s}/10`,
+        lines: [`Score ${s}/10 (seuil ≥ 6) : ${pos ? "au-dessus du seuil, une évaluation diagnostique spécialisée du TSA est à envisager" : "sous le seuil de repérage"}.`,
+          "Rappel : l'AQ-10 a une spécificité modeste (faux positifs fréquents en cas d'anxiété sociale ou de trauma complexe) ; il ne remplace pas l'ADOS-2 ni l'ADI-R."] };
+    } },
+  q03: { f: "bip", n: "MDQ", full: "Mood Disorder Questionnaire, 13 items + 2 questions",
+    age: "Adultes (une version adolescent existe, remplie par les parents)", dur: "5 min",
+    ref: "Hirschfeld RM et al. (2000), Am J Psychiatry 157:1873-1875. Version française : Weber Rouget B et al. (2005), Journal of Affective Disorders 88:103-108.",
+    lic: "Diffusion libre pour un usage clinique.",
+    seuil: "Dépistage positif si les trois conditions sont réunies : au moins 7 « oui » sur les 13 items, plusieurs signes survenus au cours de la même période, et un retentissement « modéré » ou « sévère ».",
+    score(e) {
+      const y = yesN(e.rep), same = e.q2 === 0, imp = e.q3 == null ? -1 : e.q3;
+      const pos = y >= 7 && same && imp >= 2;
+      const IMP = ["aucun problème", "problème mineur", "problème modéré", "problème sévère"];
+      return { main: `${y}/13`, pos, short: `MDQ ${y}/13`,
+        lines: [`${y} « oui » sur 13 (seuil ≥ 7) · même période : ${e.q2 == null ? "non demandé (0 ou 1 « oui »)" : same ? "oui" : "non"} · retentissement : ${imp >= 0 ? IMP[imp] : "?"}.`,
+          pos ? "Dépistage POSITIF : les trois critères sont réunis. Rechercher des antécédents d'épisode (hypo)maniaque en entretien." : "Dépistage négatif : les trois critères ne sont pas tous réunis.",
+          "Le MDQ repère surtout le trouble bipolaire de type I ; sa sensibilité est plus faible pour le type II."] };
+    } },
+  q09: { f: "bip", n: "Hypomanie (J. Angst)", full: "Liste de contrôle des symptômes d'hypomanie de J. Angst, 20 items Vrai/Faux",
+    age: "Adolescents et adultes", dur: "4 min",
+    ref: "Angst J et al. (2005), Journal of Affective Disorders 88:217-233 (HCL-32 dont elle est issue). Version française diffusée par le RESPADD.",
+    lic: "Utilisation clinique libre.",
+    seuil: "Plus de 10 réponses « vrai » : hypomanie probable, à explorer en entretien.",
+    score(e) {
+      const s = yesN(e.rep), pos = s > 10;
+      return { main: `${s}/20`, pos, short: `Angst ${s}/20`,
+        lines: [`${s} « vrai » sur 20 (seuil > 10) : ${pos ? "hypomanie probable, à explorer en entretien" : "sous le seuil"}.`] };
+    } },
+  q08: { f: "narc", n: "NPI-40", full: "Narcissistic Personality Inventory, 40 paires",
+    age: "Adolescents (dès 15 ans) et adultes", dur: "10 min",
+    ref: "Raskin R, Terry H (1988), J Pers Soc Psychol 54:890-902. Version française : Braun S, Kempenaers C, Linkowski P, Loas G (2016), Frontiers in Psychology 7:1980.",
+    lic: "Version française publiée sous licence Creative Commons CC BY.",
+    seuil: "Aucun seuil diagnostique. 1 point par proposition « narcissique » choisie (0 à 40). À titre indicatif, la moyenne est d'environ 15 en population étudiante (Raskin et Terry, 1988).",
+    score(e) {
+      const it = QN_ITEMS.q08.items, s = e.rep.filter((v, i) => v === it[i][2]).length;
+      return { main: `${s}/40`, pos: null, short: `NPI ${s}/40`,
+        lines: [`Score ${s}/40 (traits narcissiques grandioses, mesure dimensionnelle).`,
+          "Pas de seuil diagnostique : à mettre en lien avec l'entretien clinique (critères DSM-5, SCID-5-PD). Le narcissisme vulnérable n'est pas mesuré."] };
+    } },
+  q04: { f: "tca", n: "SCOFF-F", full: "SCOFF, version française, 5 questions Oui/Non",
+    age: "Adolescents et adultes", dur: "1 min",
+    ref: "Morgan JF, Reid F, Lacey JH (1999), BMJ 319:1467-1468. Version française : Garcia FD et al. (2010), Eating and Weight Disorders 15:e225-e230. Recommandé par la HAS (2010).",
+    lic: "Utilisation clinique libre.",
+    seuil: "Au moins 2 « oui » : repérage positif d'un trouble des conduites alimentaires, à approfondir (EDE-Q, entretien).",
+    score(e) {
+      const s = yesN(e.rep), pos = s >= 2;
+      return { main: `${s}/5`, pos, short: `SCOFF ${s}/5`,
+        lines: [`${s} « oui » sur 5 (seuil ≥ 2) : ${pos ? "repérage POSITIF d'un TCA, à approfondir" : "sous le seuil"}.`] };
+    } },
+  q05: { f: "add", n: "AUDIT", full: "Alcohol Use Disorders Identification Test (OMS), 10 items",
+    age: "Adultes (utilisable dès 15-16 ans)", dur: "3 min",
+    ref: "Babor TF et al., OMS (2001). Version française : Gache P et al. (2005), Alcoholism Clin Exp Res 29:2001-2007 ; diffusion RESPADD.",
+    lic: "Diffusion libre par l'OMS.",
+    seuil: "Femmes : 0 à 5 faible risque, 6 à 12 consommation à risque, 13 et plus dépendance possible. Hommes : 0 à 6, 7 à 12, 13 et plus. AUDIT-C (3 premiers items) : ≥ 3 chez la femme, ≥ 4 chez l'homme = consommation à risque.",
+    score(e) {
+      const it = QN_ITEMS.q05.items, pts = e.rep.map((v, i) => it[i][2][v] || 0), s = pts.reduce((a, b) => a + b, 0), c = pts.slice(0, 3).reduce((a, b) => a + b, 0);
+      const lvl = (lim) => s >= 13 ? "dépendance possible" : s >= lim ? "consommation à risque" : "faible risque";
+      return { main: `${s}/40`, pos: s >= 6, short: `AUDIT ${s}/40`,
+        lines: [`Score total ${s}/40 · AUDIT-C ${c}/12.`, `Si patiente : ${lvl(6)}. Si patient : ${lvl(7)}.`,
+          pts[8] || pts[9] ? "Items 9 ou 10 non nuls : conséquences repérées (blessure ou inquiétude de l'entourage)." : ""].filter(Boolean) };
+    } },
+  q06: { f: "add", n: "CAST", full: "Cannabis Abuse Screening Test (OFDT), 6 items",
+    age: "Adolescents et jeunes adultes (validé dès 15 ans)", dur: "2 min",
+    ref: "Legleye S, Karila L, Beck F, Reynaud M (2007), Journal of Substance Use 12:233-242. Diffusion OFDT et RESPADD.",
+    lic: "Utilisation clinique libre (outil public OFDT).",
+    seuil: "Cotation de 0 (jamais) à 4 (très souvent) : 0 à 2 pas de risque, 3 à 6 risque faible, 7 et plus usage problématique.",
+    score(e) {
+      const s = e.rep.reduce((a, b) => a + b, 0), lvl = s >= 7 ? "usage problématique" : s >= 3 ? "risque faible" : "pas de risque repéré";
+      return { main: `${s}/24`, pos: s >= 7, short: `CAST ${s}/24`, lines: [`Score ${s}/24 : ${lvl}.`, "À ne proposer qu'à un patient qui a consommé du cannabis dans les 12 derniers mois."] };
+    } },
+  q07: { f: "add", n: "ADOSPA", full: "ADOSPA (adaptation française du CRAFFT), 6 questions Oui/Non, tutoiement",
+    age: "Adolescents (12 à 18 ans)", dur: "1 min",
+    ref: "Karila L, Legleye S, Beck F et al. (2007), Presse Médicale 36:943-950. Recommandé par la HAS pour le repérage précoce chez l'adolescent.",
+    lic: "Utilisation clinique libre.",
+    seuil: "Au moins 2 « oui » : usage nocif probable d'alcool ou d'autres drogues, à explorer.",
+    score(e) {
+      const s = yesN(e.rep), pos = s >= 2;
+      return { main: `${s}/6`, pos, short: `ADOSPA ${s}/6`, lines: [`${s} « oui » sur 6 (seuil ≥ 2) : ${pos ? "repérage POSITIF, usage nocif probable" : "sous le seuil"}.`] };
+    } }
+};
+const QN_ORDER = ["q01", "q02", "q03", "q09", "q08", "q04", "q05", "q06", "q07"];
+/* Questionnaires ajoutés par la praticienne (sa propre version sous licence) */
+function qnCustom(id) { return vault && vault.qx && vault.qx[id]; }
+function qnDef(q) {
+  if (q && q.startsWith("x:")) {
+    const d = qnCustom(q.slice(2)); if (!d) return null;
+    return { f: d.f, n: d.n, full: d.ref || "Questionnaire ajouté par vous", age: d.age || "", dur: "", ref: d.ref || "", lic: "Version fournie par vous", seuil: d.seuil || "", custom: true,
+      score(e) {
+        const inv = d.inv || [], max = Math.max(...d.o.map(o => o[1])), min = Math.min(...d.o.map(o => o[1]));
+        const pts = e.rep.map((v, i) => { const p = (d.o[v] || [0, 0])[1]; return inv.includes(i + 1) ? max + min - p : p; });
+        const s = pts.reduce((a, b) => a + b, 0), pos = d.cut != null && d.cut !== "" ? s >= Number(d.cut) : null;
+        return { main: `${s}/${max * d.items.length}`, pos, short: `${d.n} ${s}`, lines: [`Score ${s} sur ${max * d.items.length}${d.cut !== "" && d.cut != null ? ` (seuil ≥ ${d.cut}) : ${pos ? "au-dessus du seuil" : "sous le seuil"}` : ""}.`] };
+      } };
+  }
+  return QN_META[q] || null;
+}
+function qnAnswerText(q, e) {
+  if (q && q.startsWith("x:")) { const d = qnCustom(q.slice(2)); return d ? d.items.map((t, i) => [t, (d.o[e.rep[i]] || ["?"])[0]]) : []; }
+  const it = QN_ITEMS[q]; if (!it) return [];
+  if (it.kind === "audit") return it.items.map((x, i) => [x[0], x[1][e.rep[i]] + ` (${x[2][e.rep[i]]} pt)`]);
+  if (it.kind === "pairs") return it.items.map((x, i) => [`Paire ${i + 1}`, `${x[e.rep[i]]}${e.rep[i] === x[2] ? " (+1)" : ""}`]);
+  if (it.kind === "mdq") return it.items.map((t, i) => [t, e.rep[i] === 0 ? "Oui" : "Non"]).concat([[it.q2, e.q2 == null ? "non demandé" : e.q2 === 0 ? "Oui" : "Non"], [it.q3, it.o3[e.q3] || "?"]]);
+  return it.items.map((t, i) => [t, it.o[e.rep[i]]]);
+}
+function qnScore(e) { const d = qnDef(e.q); if (!d) return null; try { return d.score(e); } catch (x) { return null; } }
+function qnName(q) { const d = qnDef(q); return d ? d.n : "Questionnaire supprimé"; }
 /* ===== Entre-Séances — espace praticienne ===== */
 const VKEY = "es_praticienne_v1";
-const APP_VERSION = "2026.11.11";
+const APP_VERSION = "2026.11.12";
 const DEMO_PRIV = {"key_ops":["deriveKey"],"ext":true,"kty":"EC","x":"FXufJrgrxbSPIYmrbG2IrkTmdroIAHbeo0AjlEmFV-E","y":"iQbRRt_g9vrYtbJ0Jnm7yGxny1celneAbJEpW6XDQBg","crv":"P-256","d":"xW4H5AUxJv1XbmZ8CzsbV1qiQHsZUI6ERusujKccI2s"};
 const RELAIS_GS = "/* =====================================================================\n   Entre-Séances : relais de réception (Google Apps Script) — version 6.1\n   - Reçoit uniquement des messages CHIFFRÉS : Google ne peut pas les lire.\n   - Transmet aux patients leurs exercices et vos messages (chiffrés eux aussi).\n   - Envoie aux patients qui l'ont accepté une notification sans contenu.\n   - Synchronise votre espace entre vos appareils (copie chiffrée, illisible par Google).\n   - Envoie aux patients qui l'ont demandé un rappel quotidien, aux jours et à l'heure choisis.\n   - Garde les réponses 60 jours, puis les efface.\n   - Vous prévient par mail (sans aucun contenu) quand un patient envoie.\n   Ne rien modifier ci-dessous, sauf les deux réglages.\n   ===================================================================== */\nconst RETENTION_DAYS = 60;   // durée de conservation des réponses chiffrées\nconst NOTIFY = true;         // false pour ne pas recevoir de mail de notification\n\nfunction doGet() { return out_({ ok: true, app: \"entre-seances\", v: 6 }); }\n\nfunction doPost(e) {\n  let p = {};\n  try { p = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, err: \"format\" }); }\n  const lock = LockService.getScriptLock();\n  try { lock.waitLock(20000); return out_(route_(p)); }\n  catch (err) { return out_({ ok: false, err: String(err) }); }\n  finally { try { lock.releaseLock(); } catch (x) {} }\n}\n\nfunction out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }\nfunction book_() {\n  // Fonctionne que le script soit rattaché à une feuille Google ou créé seul sur script.google.com\n  let ss = null;\n  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}\n  if (!ss) {\n    const props = PropertiesService.getScriptProperties(), id = props.getProperty(\"SHEET_ID\");\n    if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) {} }\n    if (!ss) { ss = SpreadsheetApp.create(\"Entre-Séances relais (messages chiffrés)\"); props.setProperty(\"SHEET_ID\", ss.getId()); }\n  }\n  return ss;\n}\nfunction sheet_() { const ss = book_(); return ss.getSheetByName(\"Messages\") || ss.insertSheet(\"Messages\"); }\nfunction data_() { const ss = book_(); return ss.getSheetByName(\"Données\") || ss.insertSheet(\"Données\"); }\nfunction folder_() {\n  const it = DriveApp.getFoldersByName(\"Entre-Séances (messages chiffrés)\");\n  return it.hasNext() ? it.next() : DriveApp.createFolder(\"Entre-Séances (messages chiffrés)\");\n}\nfunction okCode_(c) { return typeof c === \"string\" && /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(c); }\n\n/* Petit stockage clé → valeur dans l'onglet « Données » (valeurs jusqu'à 45 000 caractères) */\nfunction find_(sh, k) { return sh.getRange(\"A:A\").createTextFinder(k).matchEntireCell(true).findNext(); }\nfunction kvGet_(k) {\n  const sh = data_(), f = find_(sh, k);\n  if (!f) return null;\n  const v = String(sh.getRange(f.getRow(), 2).getValue());\n  return v.indexOf(\"v:\") === 0 ? v.slice(2) : v;\n}\nfunction kvSet_(k, v) {\n  const sh = data_(), f = find_(sh, k);\n  if (v === null) { if (f) sh.deleteRow(f.getRow()); return; }\n  if (f) sh.getRange(f.getRow(), 2).setValue(\"v:\" + v); else sh.appendRow([k, \"v:\" + v]);\n}\nfunction cfgOf_(props, code) { return kvGet_(\"C_\" + code) || props.getProperty(\"C_\" + code); }\n\nfunction route_(p) {\n  const props = PropertiesService.getScriptProperties();\n  const token = props.getProperty(\"TOKEN\");\n  switch (p.a) {\n    case \"ping\": {\n      let sheet = true, why = \"\";\n      try { sheet_(); data_(); } catch (e) { sheet = false; why = String(e); }\n      return { ok: true, init: !!token, sheet: sheet, why: why, v: 6, trig: props.getProperty(\"TRIG\") === \"1\", vapid: !!props.getProperty(\"VAPID_D\") };\n    }\n    case \"init\":\n      if (token) return { ok: false, err: \"deja\" };\n      if (typeof p.token !== \"string\" || p.token.length < 24 || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ TOKEN: p.token, PUB: p.pub, SEQ: \"0\" });\n      return { ok: true };\n    case \"cfg\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"inconnu\" };\n      const blob = cfgOf_(props, p.code);\n      return blob ? { ok: true, pub: props.getProperty(\"PUB\"), blob: blob, msgs: kvGet_(\"M_\" + p.code), sub: !!kvGet_(\"S_\" + p.code) } : { ok: false, err: \"inconnu\" };\n    }\n    case \"send\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (typeof p.msg !== \"string\" || !/^PSY1\\.[A-Za-z0-9_-]+$/.test(p.msg) || p.msg.length > 20000000) return { ok: false, err: \"format\" };\n      const seq = Number(props.getProperty(\"SEQ\") || \"0\") + 1;\n      props.setProperty(\"SEQ\", String(seq));\n      let cell = p.msg;\n      if (p.msg.length > 45000) cell = \"DRIVE:\" + folder_().createFile(\"m\" + seq + \".txt\", p.msg, \"text/plain\").getId();\n      sheet_().appendRow([seq, new Date(), p.code, cell]);\n      try { notify_(); } catch (e) {}\n      return { ok: true, seq: seq };\n    }\n    case \"psub\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      let sub;\n      try { sub = JSON.parse(p.sub); } catch (e) { return { ok: false, err: \"format\" }; }\n      if (!sub || typeof sub.endpoint !== \"string\" || sub.endpoint.indexOf(\"https://\") !== 0 || p.sub.length > 4000) return { ok: false, err: \"format\" };\n      kvSet_(\"S_\" + p.code, JSON.stringify({ endpoint: sub.endpoint, msg: p.msg !== false }));\n      return { ok: true };\n    }\n    case \"punsub\":\n      if (okCode_(p.code) && cfgOf_(props, p.code)) { kvSet_(\"S_\" + p.code, null); kvSet_(\"R_\" + p.code, null); }\n      return { ok: true };\n    case \"prem\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (!p.on) { kvSet_(\"R_\" + p.code, null); return { ok: true }; }\n      const days = (p.days || []).filter(d => d >= 1 && d <= 7);\n      if (!days.length || !/^\\d{2}:\\d{2}$/.test(p.time || \"\") || typeof p.tz !== \"string\" || p.tz.length > 60) return { ok: false, err: \"format\" };\n      kvSet_(\"R_\" + p.code, JSON.stringify({ days: days, time: p.time, tz: p.tz, last: \"\" }));\n      return { ok: true, trig: props.getProperty(\"TRIG\") === \"1\" };\n    }\n  }\n  if (!token || p.token !== token) return { ok: false, err: \"auth\" };\n  switch (p.a) {\n    case \"check\": return { ok: true, v: 6 };\n    case \"setcfg\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"C_\" + p.code, p.blob); props.deleteProperty(\"C_\" + p.code);\n      return { ok: true };\n    case \"setmsgs\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"M_\" + p.code, p.blob);\n      return { ok: true };\n    case \"delcfg\":\n      if (okCode_(p.code)) { props.deleteProperty(\"C_\" + p.code); kvSet_(\"C_\" + p.code, null); kvSet_(\"M_\" + p.code, null); kvSet_(\"S_\" + p.code, null); }\n      return { ok: true };\n    case \"getsub\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      const o = s ? JSON.parse(s) : null;\n      return { ok: true, endpoint: o && o.msg !== false ? o.endpoint : null };\n    }\n    case \"setvapid\":\n      if (typeof p.d !== \"string\" || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ VAPID_D: p.d, VAPID_PUB: p.pub });\n      return { ok: true };\n    case \"push\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      if (!s || JSON.parse(s).msg === false) return { ok: false, err: \"nosub\" };\n      return pushTo_(p.code, JSON.parse(s).endpoint, p.jwt, p.k);\n    }\n    case \"vget\": {\n      const id = props.getProperty(\"VFILE\");\n      if (!id) return { ok: true, v: 0, blob: null };\n      try { return { ok: true, v: Number(props.getProperty(\"VVER\") || \"0\"), blob: DriveApp.getFileById(id).getBlob().getDataAsString() }; }\n      catch (e) { return { ok: true, v: Number(props.getProperty(\"VVER\") || \"0\"), blob: null }; }\n    }\n    case \"vput\": {\n      if (typeof p.blob !== \"string\" || !/^[A-Za-z0-9_-]+$/.test(p.blob)) return { ok: false, err: \"format\" };\n      const cur = Number(props.getProperty(\"VVER\") || \"0\");\n      if (Number(p.ifv || 0) !== cur) return { ok: false, err: \"conflict\", v: cur };\n      const id = props.getProperty(\"VFILE\");\n      let f = null;\n      if (id) { try { f = DriveApp.getFileById(id); f.setContent(p.blob); } catch (e) { f = null; } }\n      if (!f) { f = folder_().createFile(\"espace-praticienne.chiffre.txt\", p.blob, \"text/plain\"); props.setProperty(\"VFILE\", f.getId()); }\n      props.setProperty(\"VVER\", String(cur + 1));\n      return { ok: true, v: cur + 1 };\n    }\n    case \"inbox\": {\n      purge_();\n      const since = Number(p.since || 0), sh = sheet_(), n = sh.getLastRow();\n      if (n < 1) return { ok: true, items: [] };\n      const rows = sh.getRange(1, 1, n, 4).getValues();\n      const items = [];\n      rows.forEach(function (r) {\n        if (Number(r[0]) <= since) return;\n        let msg = String(r[3]);\n        if (msg.indexOf(\"DRIVE:\") === 0) { try { msg = DriveApp.getFileById(msg.slice(6)).getBlob().getDataAsString(); } catch (e) { return; } }\n        items.push({ seq: Number(r[0]), t: new Date(r[1]).toISOString(), code: String(r[2]), msg: msg });\n      });\n      return { ok: true, items: items };\n    }\n  }\n  return { ok: false, err: \"action\" };\n}\n\nfunction purge_() {\n  const sh = sheet_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const lim = Date.now() - RETENTION_DAYS * 864e5;\n  const rows = sh.getRange(1, 1, n, 4).getValues();\n  let k = 0;\n  while (k < rows.length && new Date(rows[k][1]).getTime() < lim) {\n    const cell = String(rows[k][3]);\n    if (cell.indexOf(\"DRIVE:\") === 0) { try { DriveApp.getFileById(cell.slice(6)).setTrashed(true); } catch (e) {} }\n    k++;\n  }\n  if (k > 0) sh.deleteRows(1, k);\n}\n\nfunction notify_() {\n  if (!NOTIFY) return;\n  const cache = CacheService.getScriptCache();\n  if (cache.get(\"notif\")) return;\n  cache.put(\"notif\", \"1\", 1800);\n  MailApp.sendEmail(Session.getEffectiveUser().getEmail(), \"Entre-Séances : nouvelles réponses\",\n    \"Un patient vient d'envoyer des réponses.\\nOuvrez votre espace praticienne pour les relever.\\n\\nCe mail ne contient aucune donnée de patient.\");\n}\n\n/* Envoi d'une notification (sans contenu). La signature est faite ici si la praticienne n'en a pas fourni. */\nfunction pushTo_(code, endpoint, jwt, k) {\n  const props = PropertiesService.getScriptProperties();\n  if (!jwt) {\n    const d = props.getProperty(\"VAPID_D\"); k = props.getProperty(\"VAPID_PUB\");\n    if (!d || !k) return { ok: false, err: \"novapid\" };\n    if (typeof BigInt === \"undefined\") return { ok: false, err: \"nobigint\" };\n    const m = /^(https:\\/\\/[^\\/]+)/.exec(endpoint);\n    jwt = vapidJwt_(m[1], d);\n  }\n  const res = UrlFetchApp.fetch(endpoint, { method: \"post\", headers: { Authorization: \"vapid t=\" + jwt + \", k=\" + k, TTL: \"86400\", Urgency: \"normal\" }, payload: \"\", muteHttpExceptions: true });\n  const st = res.getResponseCode();\n  if (st === 404 || st === 410) { kvSet_(\"S_\" + code, null); kvSet_(\"R_\" + code, null); }\n  return { ok: st >= 200 && st < 300, status: st, why: st >= 300 ? String(res.getContentText()).slice(0, 200) : \"\" };\n}\n\n/* Rappels quotidiens : lancé automatiquement toutes les 10 minutes */\nfunction rappels() {\n  const sh = data_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const rows = sh.getRange(1, 1, n, 2).getValues(), now = new Date();\n  rows.forEach(function (r) {\n    const key = String(r[0]); if (key.indexOf(\"R_\") !== 0) return;\n    const code = key.slice(2);\n    let rem; try { rem = JSON.parse(String(r[1]).replace(/^v:/, \"\")); } catch (e) { return; }\n    let day, hm, today;\n    try { day = Number(Utilities.formatDate(now, rem.tz, \"u\")); hm = Utilities.formatDate(now, rem.tz, \"HH:mm\"); today = Utilities.formatDate(now, rem.tz, \"yyyy-MM-dd\"); } catch (e) { return; }\n    if (rem.days.indexOf(day) < 0 || rem.last === today) return;\n    const toMin = t => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));\n    const diff = toMin(hm) - toMin(rem.time);\n    if (diff < 0 || diff > 60) return;\n    const s = kvGet_(\"S_\" + code); if (!s) return;\n    try { pushTo_(code, JSON.parse(s).endpoint); } catch (e) {}\n    rem.last = today; if (kvGet_(\"R_\" + code)) kvSet_(\"R_\" + code, JSON.stringify(rem));\n  });\n}\n\n/* ---- Signature ECDSA P-256 (ES256) pour les notifications, en JavaScript pur ---- */\nlet EC_CACHE_ = null;\nfunction EC_() {\n  if (EC_CACHE_) return EC_CACHE_;\n  const B0 = BigInt(0), B1 = BigInt(1), B2 = BigInt(2), B3 = BigInt(3), B4 = BigInt(4), B8 = BigInt(8);\n  const P = BigInt(\"0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff\");\n  const N = BigInt(\"0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551\");\n  const A = P - B3;\n  const G = [BigInt(\"0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296\"), BigInt(\"0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5\"), B1];\n  const mod = (a, m) => { const r = a % m; return r >= B0 ? r : r + m; };\n  const inv = (a, m) => { let [r0, r1, s0, s1] = [mod(a, m), m, B1, B0]; while (r1) { const q = r0 / r1; [r0, r1] = [r1, r0 - q * r1]; [s0, s1] = [s1, s0 - q * s1]; } return mod(s0, m); };\n  function dbl(p) {\n    const [X, Y, Z] = p; if (!Y || !Z) return [B0, B1, B0];\n    const ZZ = mod(Z * Z, P), S = mod(B4 * X * Y * Y, P), M = mod(B3 * X * X + A * ZZ * ZZ, P);\n    const X3 = mod(M * M - B2 * S, P), Y3 = mod(M * (S - X3) - B8 * Y * Y * Y * Y, P), Z3 = mod(B2 * Y * Z, P);\n    return [X3, Y3, Z3];\n  }\n  function add(p, q) {\n    if (!p[2]) return q; if (!q[2]) return p;\n    const Z1Z1 = mod(p[2] * p[2], P), Z2Z2 = mod(q[2] * q[2], P);\n    const U1 = mod(p[0] * Z2Z2, P), U2 = mod(q[0] * Z1Z1, P), S1 = mod(p[1] * q[2] * Z2Z2, P), S2 = mod(q[1] * p[2] * Z1Z1, P);\n    if (U1 === U2) return S1 === S2 ? dbl(p) : [B0, B1, B0];\n    const H = mod(U2 - U1, P), R = mod(S2 - S1, P), HH = mod(H * H, P), HHH = mod(H * HH, P), V = mod(U1 * HH, P);\n    const X3 = mod(R * R - HHH - B2 * V, P), Y3 = mod(R * (V - X3) - S1 * HHH, P), Z3 = mod(H * p[2] * q[2], P);\n    return [X3, Y3, Z3];\n  }\n  function mul(k, p) { let r = [B0, B1, B0], q = p; while (k > B0) { if (k & B1) r = add(r, q); q = dbl(q); k >>= B1; } return r; }\n  function affineX(p) { const zi = inv(p[2], P); return mod(p[0] * zi * zi, P); }\n  EC_CACHE_ = { N: N, G: G, mul: mul, affineX: affineX, inv: inv, mod: mod, B0: B0, B1: B1 };\n  return EC_CACHE_;\n}\nfunction bytesToBig_(b) { let h = \"0x\"; b.forEach(x => { h += ((x + 256) % 256).toString(16).padStart(2, \"0\"); }); return BigInt(h === \"0x\" ? \"0x0\" : h); }\nfunction bigToBytes32_(x) { const h = x.toString(16).padStart(64, \"0\"), out = []; for (let i = 0; i < 64; i += 2) { const v = parseInt(h.slice(i, i + 2), 16); out.push(v > 127 ? v - 256 : v); } return out; }\nfunction b64u_(x) { return (typeof x === \"string\" ? Utilities.base64EncodeWebSafe(x, Utilities.Charset.UTF_8) : Utilities.base64EncodeWebSafe(x)).replace(/=+$/, \"\"); }\nfunction vapidJwt_(aud, dB64) {\n  const props = PropertiesService.getScriptProperties();\n  const sub = \"mailto:\" + (props.getProperty(\"CONTACT\") || Session.getEffectiveUser().getEmail() || \"contact@example.org\");\n  const unsigned = b64u_(JSON.stringify({ typ: \"JWT\", alg: \"ES256\" })) + \".\" + b64u_(JSON.stringify({ aud: aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: sub }));\n  const d = bytesToBig_(Utilities.base64DecodeWebSafe(dB64 + \"==\".slice(0, (4 - dB64.length % 4) % 4)));\n  const z = bytesToBig_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, unsigned, Utilities.Charset.UTF_8));\n  const E = EC_();\n  let r = E.B0, s = E.B0;\n  while (!r || !s) {\n    const k = E.mod(bytesToBig_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + dB64 + unsigned + Date.now(), Utilities.Charset.UTF_8)), E.N - E.B1) + E.B1;\n    r = E.mod(E.affineX(E.mul(k, E.G)), E.N);\n    s = E.mod(E.inv(k, E.N) * (z + r * d), E.N);\n  }\n  return unsigned + \".\" + b64u_(bigToBytes32_(r).concat(bigToBytes32_(s)));\n}\n\n/* À lancer une fois depuis l'éditeur (bouton Exécuter) : autorisations + rappels automatiques. */\nfunction autoriser() {\n  sheet_(); data_(); folder_();\n  try { MailApp.getRemainingDailyQuota(); } catch (e) {}\n  try { UrlFetchApp.fetch(\"https://www.google.com\", { muteHttpExceptions: true }); } catch (e) {}\n  const has = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === \"rappels\");\n  if (!has) ScriptApp.newTrigger(\"rappels\").timeBased().everyMinutes(10).create();\n  PropertiesService.getScriptProperties().setProperty(\"TRIG\", \"1\");\n  Logger.log(\"Autorisations accordées et rappels activés. Vous pouvez déployer une nouvelle version.\");\n}\n";
 let vault = null, vkey = null, vsalt = null, demo = false;
@@ -831,7 +1152,7 @@ const MOD_GROUPS = [["Suivi général", ["humeur", "pensees", "sud", "expo", "so
 const ALL_MODS = Object.keys(MOD_INFO);
 const DEFAULT_MODS = ["humeur", "pensees", "sud", "expo", "sommeil", "respi", "angoisse", "fiches", "taches", "jauge"];
 const TYPE_LABEL = { humeur: "Humeur", pensees: "Tableau des pensées", sud: "Malaise (SUD)", expo: "Exposition", sommeil: "Sommeil", respi: "Respiration", taches: "Tâche", jauge: "Jauge",
-  repas: "Repas", envie: "Envie de crise", angoisse: "Crise d'angoisse", angst: "Angst", elan: "Élan", perso: "Exercice perso", tcc: "Exercice TCC" };
+  repas: "Repas", envie: "Envie de crise", angoisse: "Crise d'angoisse", angst: "Angst", elan: "Élan", perso: "Exercice perso", tcc: "Exercice TCC", qn: "Questionnaire" };
 const SLOTS = { pdj: "Petit-déjeuner", cm: "Collation du matin", dej: "Déjeuner", gout: "Goûter", din: "Dîner", cs: "Collation du soir", grig: "Grignotage" };
 const TCA_PROFILES = { AN: "Anorexie mentale", BN: "Boulimie", HP: "Hyperphagie boulimique", AU: "Autre TCA / non spécifié" };
 const TCA_OPTS = { photo: "Photos des repas", faim: "Faim avant / satiété après", ctrl: "Sensation de perte de contrôle", comp: "Comportements compensatoires",
@@ -948,10 +1269,12 @@ function demoVault() {
   add(8, "tcc", { xid: "pe-schemas", titre: TCC_BY_ID["pe-schemas"].t, rep: [{ q: "Ce qui me ressemble", k: "rate", v: { "Imperfection / honte": "Beaucoup", "Exigences élevées": "Beaucoup", "Abandon / instabilité": "Un peu", "Inhibition émotionnelle": "Un peu", "Échec": "Un peu" } }] }, 20);
   add(5, "tcc", { xid: "enreg", titre: TCC_BY_ID.enreg.t, rep: [{ q: "La situation", k: "texte", v: "Remarque d'un prof sur mon devoir devant la classe." }, { q: "Mes émotions", k: "chips", v: ["Honte", "Colère"] }, { q: "Leur intensité", k: "pct", v: 80 }, { q: "Mes pensées ou images à ce moment-là", k: "texte", v: "Tout le monde pense que je suis nul." }, { q: "Le schéma qui s'est activé", k: "chips", v: ["Imperfection / honte"] }, { q: "Le besoin qui n'était pas comblé", k: "chips", v: ["Respect", "Valorisation"] }, { q: "Ma réaction (ce que j'ai fait ou dit)", k: "texte", v: "J'ai rangé mes affaires et je n'ai plus parlé." }, { q: "Ça ressemble à", k: "chips", v: TCC_LISTS.strat[1] }, { q: "Une façon plus juste de voir la situation", k: "texte", v: "Il parlait du devoir, pas de moi." }, { q: "Ce qui aurait été plus adapté", k: "texte", v: "Lui demander des explications après le cours." }, { q: "Comment je peux vraiment répondre à mon besoin", k: "texte", v: "En parler à mon ami." }] }, 21);
   add(1, "tcc", { xid: "dialogue", titre: TCC_BY_ID.dialogue.t, rep: [{ q: "Trois phrases de ma voix critique", k: "lignes", v: ["Tu rates tout", "Tu ne vaux rien", ""] }, { q: "Trois phrases de mon Adulte sain", k: "lignes", v: ["Tu apprends", "Une note n'est pas toi", ""] }, { q: "Une situation difficile en ce moment", k: "texte", v: "Les contrôles de fin de trimestre." }, { q: "La critique dit…", k: "texte", v: "Tu vas encore échouer." }, { q: "Mon Adulte sain répond…", k: "texte", v: "Tu as révisé, fais de ton mieux, c'est suffisant." }] }, 21);
+  add(16, "qn", { qi: "dq1", q: "q04", rep: [1, 0, 1, 1, 0] }, 18);
+  add(15, "qn", { qi: "dq2", q: "q07", rep: [1, 0, 1, 1, 1, 1] }, 19);
   E.sort((a, b) => a.t < b.t ? -1 : 1);
   return { v: 2, priv: DEMO_PRIV, pub: DEMO_PUB, email: "annesophie.auray.psy@gmail.com", appUrl: "https://entre-seances.github.io", created: day(40), relay: "", token: "", cursor: 0, cx: { "demo-act": cxAct },
     patients: {
-      [DEMO_CODE]: { code: DEMO_CODE, label: "Patient fictif (ado)", tv: "tu", mods: ALL_MODS.slice(), created: day(36), lastImport: day(1), cx: ["demo-act"], tx: TCC_PRESETS.tca.slice(),
+      [DEMO_CODE]: { code: DEMO_CODE, label: "Patient fictif (ado)", tv: "tu", mods: ALL_MODS.slice(), created: day(36), lastImport: day(1), cx: ["demo-act"], tx: TCC_PRESETS.tca.slice(), qs: [{ i: "dq1", q: "q04", at: day(17), done: day(16) }, { i: "dq2", q: "q07", at: day(17), done: day(15) }, { i: "dq3", q: "q01", at: day(1) }],
         msgs: [{ id: "dm1", t: day(3, 18, 30), x: "Bravo pour tes notes de la semaine. Continue le journal du sommeil, c'est très utile pour la prochaine séance.", ex: "m:sommeil", lu: day(3, 19, 2) }, { id: "dm2", t: day(0, 9, 10), x: "J'ai vu que ta jauge d'énergie était très haute ces derniers jours. Peux-tu remplir le questionnaire « Mon élan » avant notre rendez-vous ? Et ce soir, essaie l'exercice des activités agréables.", ex: "x:demo-act" }],
         tca: { p: ["HP"], r: ["pdj", "dej", "gout", "din"], o: { photo: 1, faim: 1, ctrl: 1, comp: 0, emo: 1, pens: 0, saute: 1, grig: 1 } },
         hier: [["Demander l'heure à quelqu'un dans la rue", 3], ["Commander seul(e) au comptoir d'un café", 5], ["Poser une question en classe", 7], ["Passer un appel pour prendre un rendez-vous", 8]], entries: E },
@@ -978,7 +1301,7 @@ function sleepHours(e) {
   const [ch, cm] = e.coucher.split(":").map(Number), [lh, lm] = e.lever.split(":").map(Number);
   let m = (lh * 60 + lm) - (ch * 60 + cm); if (m <= 0) m += 1440; return m / 60;
 }
-function cfgFor(pt) { return { v: 3, m: pt.mods, h: (pt.hier || []).filter(h => h[0].trim()), t: pt.tv, e: vault.email, a: pt.tca || null, vp: vault.vapid ? vault.vapid.pub : "", cx: (pt.cx || []).map(id => vault.cx && vault.cx[id]).filter(Boolean), tx: (pt.tx || []).filter(id => TCC_BY_ID[id]) }; }
+function cfgFor(pt) { return { v: 3, m: pt.mods, h: (pt.hier || []).filter(h => h[0].trim()), t: pt.tv, e: vault.email, a: pt.tca || null, vp: vault.vapid ? vault.vapid.pub : "", cx: (pt.cx || []).map(id => vault.cx && vault.cx[id]).filter(Boolean), tx: (pt.tx || []).filter(id => TCC_BY_ID[id]), qs: qnForCfg(pt) }; }
 function activationCfg(pt) { return Object.assign(cfgFor(pt), { c: pt.code, k: vault.pub }); }
 const getChips = name => [...document.querySelectorAll(`.chips[data-name="${name}"] .chip[aria-pressed="true"]`)].map(b => b.dataset.v);
 document.addEventListener("click", e => {
@@ -1032,6 +1355,7 @@ async function importData(data) {
   for (const e of data.e) {
     if (e.type === "msglu") { const m = (pt.msgs || []).find(x => x.id === e.mid); if (m && !m.lu) m.lu = e.t; continue; }
     if (known.has(e.id)) continue;
+    if (e.type === "qn") { const a = (pt.qs || []).find(x => x.i === e.qi); if (a && !a.done) a.done = e.t; }
     if (e.img) { try { await storePhoto(e.id, e.img); e.photo = "ok"; } catch (x) { e.photo = "perdue"; } delete e.img; }
     pt.entries.push(e); n++;
   }
@@ -1223,6 +1547,8 @@ function alerts(pt) {
   const lim = Date.now() - 30 * 864e5, recent = pt.entries.filter(e => new Date(e.t) > lim), out = [];
   const lastA = recent.filter(e => e.type === "angst").pop(); if (lastA && lastA.total > 10) out.push(`Angst ${lastA.total}/20`);
   const lastE = recent.filter(e => e.type === "elan").pop(); if (lastE && elanFlag(lastE)) out.push("Élan à explorer");
+  const qs = {}; recent.filter(e => e.type === "qn").forEach(e => { qs[e.q] = e; });
+  Object.values(qs).forEach(e => { const sc = qnScore(e); if (sc && sc.pos) out.push(`${sc.short} : seuil atteint`); });
   const comp = pt.entries.filter(e => e.type === "repas" && e.comp && e.comp.length && new Date(e.t) > Date.now() - 7 * 864e5).length; if (comp) out.push(`Compensations ×${comp} (7 j)`);
   const crises = pt.entries.filter(e => e.type === "repas" && e.ctrl === "Oui" && new Date(e.t) > Date.now() - 7 * 864e5).length; if (crises) out.push(`Perte de contrôle ×${crises} (7 j)`);
   return out;
@@ -1403,6 +1729,9 @@ function mergeVault(L, R) {
     for (const e of rp.entries || []) if (!ids.has(e.id)) { lp.entries.push(e); res.entries++; }
     lp.entries.sort((a, b) => a.t < b.t ? -1 : 1);
     const mm = {}; for (const m of (lp.msgs || []).concat(rp.msgs || [])) { const x = mm[m.id]; mm[m.id] = x ? Object.assign({}, x, m, { lu: x.lu || m.lu }) : m; }
+    const qq = {}; for (const a of (lp.qs || []).concat(rp.qs || [])) { const x = qq[a.i]; qq[a.i] = x ? Object.assign({}, x, a, { done: x.done || a.done }) : a; }
+    lp.delQs = [...new Set((lp.delQs || []).concat(rp.delQs || []))];
+    if (lp.qs || rp.qs) lp.qs = Object.values(qq).sort((a, b) => a.at < b.at ? -1 : 1);
     lp.delMsgs = [...new Set((lp.delMsgs || []).concat(rp.delMsgs || []))];
     lp.msgs = Object.values(mm).filter(m => !lp.delMsgs.includes(m.id)).sort((a, b) => a.t < b.t ? -1 : 1);
     if ((rp.lastImport || "") > (lp.lastImport || "")) lp.lastImport = rp.lastImport;
@@ -1413,6 +1742,10 @@ function mergeVault(L, R) {
   L.cx = L.cx || {};
   for (const [id, d] of Object.entries(R.cx || {})) if (!L.cx[id] || stamp(d) > stamp(L.cx[id])) L.cx[id] = d;
   for (const [id, t] of Object.entries(L.deletedCx)) if (L.cx[id] && t >= stamp(L.cx[id])) delete L.cx[id];
+  L.deletedQx = Object.assign({}, R.deletedQx || {}, L.deletedQx || {});
+  L.qx = L.qx || {};
+  for (const [id, d] of Object.entries(R.qx || {})) if (!L.qx[id] || stamp(d) > stamp(L.qx[id])) L.qx[id] = d;
+  for (const [id, t] of Object.entries(L.deletedQx)) if (L.qx[id] && t >= stamp(L.qx[id])) delete L.qx[id];
   /* Une seule clé de notification pour tous les appareils : on garde la même partout (choix stable) */
   if (R.vapid && (!L.vapid || R.vapid.pub < L.vapid.pub)) { L.vapid = R.vapid; res.vapidChanged = true; }
   L.cursor = Math.max(L.cursor || 0, R.cursor || 0);
@@ -1625,12 +1958,14 @@ const CX_MODELS = {
 PAGES.exercices = p => {
   vault.cx = vault.cx || {};
   if (p.lib) return tccLibrary(p);
+  if (p.qn) return qnLibrary(p);
   if (p.edit) return cxBuilder(p.edit === "new" ? (p.model ? Object.assign({ id: "" }, JSON.parse(JSON.stringify(CX_MODELS[p.model]))) : { id: "", t: "", d: "", c: "", f: [{ k: "texte", q: "" }] }) : vault.cx[p.edit]);
   const list = Object.values(vault.cx);
   const users = id => Object.values(vault.patients).filter(pt => (pt.cx || []).includes(id)).length;
   return `<div class="head-row"><div><h1>Exercices personnalisés</h1><p class="muted">Créez vos propres exercices, puis attribuez-les dans la fiche de chaque patient (Modifier les exercices).</p></div>
     <button class="btn" data-nav="exercices" data-p='{"edit":"new"}'>Nouvel exercice</button></div>
     ${list.length ? `<div class="grid-list">${list.map(d => `<button class="pcard" data-nav="exercices" data-p='${JSON.stringify({ edit: d.id })}'><span class="lab">${esc(d.t)}</span><span class="muted small">${esc(d.d || "")}</span><span class="row"><span class="pill">${d.f.length} élément${d.f.length > 1 ? "s" : ""}</span><span class="pill">${users(d.id)} patient${users(d.id) > 1 ? "s" : ""}</span></span></button>`).join("")}</div>` : `<div class="empty card"><h2>Aucun exercice personnalisé</h2><p>Partez de zéro ou d'un modèle.</p></div>`}
+    <div class="card stack qn-entry" style="margin-top:16px"><span class="lbl">Questionnaires de repérage</span><p class="small">${QN_ORDER.length} questionnaires validés en français, rangés en ${QN_FOLDERS.length} dossiers par trouble (personnalité limite, TDAH, TSA, bipolarité, personnalité narcissique, TCA, usage d'alcool et de drogues). Le patient ne voit que « Nouveau questionnaire » ; la cotation est automatique dans sa fiche.</p><button class="btn" data-nav="exercices" data-p='{"qn":true}' style="align-self:flex-start">Ouvrir les questionnaires</button></div>
     <div class="card stack" style="margin-top:16px"><span class="lbl">Exercices TCC</span><p class="small">${TCC_EX.length} exercices de thérapie des schémas, besoins et valeurs, prêts à l'emploi et triés par indication. Ils s'attribuent dans la fiche du patient (module « Exercices TCC »).</p><button class="btn soft" data-nav="exercices" data-p='{"lib":true}' style="align-self:flex-start">Ouvrir la bibliothèque TCC</button></div>
     <div class="card stack" style="margin-top:16px"><span class="lbl">Partir d'un modèle</span><div class="row">${Object.entries(CX_MODELS).map(([k, m]) => `<button class="btn soft" data-nav="exercices" data-p='${JSON.stringify({ edit: "new", model: k })}'>${m.t}</button>`).join("")}</div></div>`;
 };
@@ -1661,6 +1996,7 @@ function cxBuilder(d) {
       <p class="small"><b>Types d'éléments :</b> réponse libre, échelle de 0 à 10, choix unique ou multiple, oui/non, minuteur (avec sonnerie à la fin), consigne simple.</p></div></div>`;
 }
 MOUNTS.exercices = p => {
+  if (p.qn) { mountQnLibrary(p); return; }
   if (p.lib) { document.querySelectorAll('.chips[data-name="ttag"] .chip').forEach(b => b.addEventListener("picked", () => nav("exercices", { lib: true, tag: b.dataset.v }))); return; }
   if (!p.edit) return;
   const box = document.getElementById("flds");
@@ -1773,6 +2109,154 @@ function tccPanels(pt, list) {
   return out;
 }
 
+/* ---------- Questionnaires de repérage ---------- */
+const QN_TAG = q => { const d = qnDef(q); return d ? (QN_FOLDERS.find(f => f[0] === d.f) || ["", ""])[1] : ""; };
+function qnList(f) { return QN_ORDER.filter(id => QN_META[id].f === f).concat(Object.values(vault.qx || {}).filter(d => d.f === f).map(d => "x:" + d.id)); }
+function qnLen(q) { if (q.startsWith("x:")) { const d = qnCustom(q.slice(2)); return d ? d.items.length : 0; } return qnCount(q); }
+function qnForCfg(pt) {
+  const del = pt.delQs || [];
+  return (pt.qs || []).filter(a => !a.done && !del.includes(a.i)).map(a => {
+    if (!a.q.startsWith("x:")) return QN_ITEMS[a.q] ? { i: a.i, q: a.q } : null;
+    const d = qnCustom(a.q.slice(2)); return d ? { i: a.i, x: { id: d.id, intro: d.intro || "", items: d.items, o: d.o.map(o => o[0]) } } : null;
+  }).filter(Boolean);
+}
+function qnPendingPr(pt) { const del = pt.delQs || []; return (pt.qs || []).filter(a => !a.done && !del.includes(a.i) && !pt.entries.some(e => e.qi === a.i)); }
+async function assignQn(pt, q) {
+  const now = new Date().toISOString();
+  pt.qs = pt.qs || []; pt.qs.push({ i: uid(), q, at: now }); pt.updated = now;
+  await persist();
+  if (demo) return "Questionnaire ajouté (démonstration : rien n'est envoyé).";
+  const ok = await publishCfg(pt);
+  if (!ok) return "Questionnaire enregistré, mais pas encore publié (relais injoignable) : il partira à la prochaine publication de la fiche.";
+  let note = ""; try { const r = await sendPush(pt); if (r.ok) note = " Notification envoyée."; } catch (e) {}
+  return `« ${qnName(q)} » envoyé à ${pt.label || spaced(pt.code)} : il apparaîtra sous le titre « Nouveau questionnaire » à sa prochaine ouverture de l'application.${note}`;
+}
+function qnOptgroups(pt) {
+  return `<option value="">Choisir un questionnaire…</option>` + QN_FOLDERS.map(([f, l]) => { const ids = qnList(f); return ids.length ? `<optgroup label="${esc(l)}">${ids.map(q => `<option value="${q}">${esc(qnName(q))}${q.startsWith("x:") ? " (votre version)" : ""}</option>`).join("")}</optgroup>` : ""; }).join("");
+}
+function qnItemsPreview(q) {
+  const it = q.startsWith("x:") ? null : QN_ITEMS[q], d = qnCustom(q.slice(2));
+  if (!it && d) return `<p class="small"><b>Consigne :</b> ${esc(d.intro || "–")}</p><ol class="small qn-prev">${d.items.map(t => `<li>${esc(t)}</li>`).join("")}</ol><p class="small"><b>Réponses :</b> ${d.o.map(o => `${esc(o[0])} (${o[1]})`).join(" · ")}</p>`;
+  if (!it) return "";
+  const lis = it.kind === "audit" ? it.items.map(x => `<li>${esc(x[0])}<br><span class="muted">${x[1].map((o, k) => `${esc(o)} (${x[2][k]})`).join(" · ")}</span></li>`)
+    : it.kind === "pairs" ? it.items.map(x => `<li>${x[2] === 0 ? "<b>" : ""}${esc(x[0])}${x[2] === 0 ? "</b>" : ""} / ${x[2] === 1 ? "<b>" : ""}${esc(x[1])}${x[2] === 1 ? "</b>" : ""}</li>`)
+    : it.items.map(t => `<li>${esc(t)}</li>`);
+  return `<p class="small"><b>Consigne vue par le patient :</b> ${esc(it.intro)}</p><ol class="small qn-prev">${lis.join("")}</ol>
+    ${it.kind === "mdq" ? `<p class="small">${esc(it.q2)} (Oui / Non)<br>${esc(it.q3)} (${it.o3.join(" / ")})</p>` : it.o ? `<p class="small"><b>Réponses :</b> ${it.o.join(" · ")}</p>` : ""}
+    ${it.kind === "pairs" ? `<p class="hint">En gras : la proposition cotée 1 point.</p>` : ""}`;
+}
+function qnCard(q) {
+  const d = qnDef(q), pts = Object.values(vault.patients).sort((a, b) => (a.label || a.code).localeCompare(b.label || b.code));
+  return `<div class="card stack qn-card">
+    <div><span class="lab">${esc(d.n)}</span>${d.custom ? ` <span class="pill">votre version</span>` : ""}<br><span class="small muted">${esc(d.full)}</span></div>
+    <div class="row">${d.age ? `<span class="pill">${esc(d.age.split(" (")[0])}</span>` : ""}<span class="pill">${qnLen(q)} items</span>${d.dur ? `<span class="pill">${d.dur}</span>` : ""}</div>
+    ${d.seuil ? `<p class="small"><b>Cotation :</b> ${esc(d.seuil)}</p>` : ""}
+    ${d.age && d.age.includes("(") ? `<p class="small"><b>Âge :</b> ${esc(d.age)}</p>` : ""}
+    <details><summary class="small link-like">Voir les questions</summary>${qnItemsPreview(q)}</details>
+    <details><summary class="small link-like">Référence et droits</summary><p class="small">${esc(d.ref || "–")}</p><p class="small muted">${esc(d.lic)}</p></details>
+    ${pts.length ? `<div class="row qn-send"><select class="qn-pt" aria-label="Patient"><option value="">Envoyer à…</option>${pts.map(pt => `<option value="${pt.code}">${esc(pt.label || "Sans repère")} · ${spaced(pt.code)}</option>`).join("")}</select><button class="btn soft" data-qsend="${q}">Envoyer</button></div>` : `<p class="hint">Créez d'abord un patient pour pouvoir l'envoyer.</p>`}
+    ${d.custom ? `<button class="link" data-nav="exercices" data-p='${JSON.stringify({ qn: true, edit: q.slice(2) })}' style="align-self:flex-start">Modifier ce questionnaire</button>` : ""}
+  </div>`;
+}
+function qnLibrary(p) {
+  if (p.edit) return qnEditor(p.edit === "new" ? { id: "", n: "", f: p.f || "tpl", intro: "", items: [], o: [["Jamais", 0], ["Parfois", 1], ["Souvent", 2], ["Toujours", 3]], inv: [], cut: "", seuil: "", ref: "" } : vault.qx[p.edit]);
+  const open = p.f || "";
+  return `<button class="link" data-nav="exercices">← Exercices</button>
+    <div class="head-row"><div><h1>Questionnaires de repérage</h1><p class="muted">Questionnaires validés en français, rangés par trouble. Côté patient, ils s'affichent uniquement sous le titre <b>« Nouveau questionnaire »</b> : ni le nom ni le trouble recherché n'apparaissent. Les réponses sont cotées automatiquement dans la fiche du patient.</p></div></div>
+    <div class="stack">${QN_FOLDERS.map(([f, l]) => { const ids = qnList(f);
+      return `<details class="qn-folder" ${open === f ? "open" : ""} data-f="${f}"><summary><span class="qn-fold-ico" aria-hidden="true"></span><span class="qn-fold-t">${esc(l)}</span><span class="pill">${ids.length} questionnaire${ids.length > 1 ? "s" : ""}</span></summary>
+        <div class="stack qn-fold-body">${QN_FOLDER_NOTE[f] ? `<p class="notice small">${esc(QN_FOLDER_NOTE[f])}</p>` : ""}
+          ${ids.length ? `<div class="qn-grid">${ids.map(qnCard).join("")}</div>` : ""}
+          <button class="btn ghost" data-nav="exercices" data-p='${JSON.stringify({ qn: true, edit: "new", f })}' style="align-self:flex-start">Ajouter votre questionnaire dans ce dossier</button></div></details>`; }).join("")}</div>
+    <p class="hint" style="margin-top:14px">Ce sont des outils de <b>repérage</b> : un score au-dessus du seuil oriente vers une évaluation diagnostique, il ne pose pas de diagnostic. Les versions françaises sont reproduites telles que publiées par leurs auteurs.</p>`;
+}
+function qnEditor(d) {
+  return `<button class="link" data-nav="exercices" data-p='${JSON.stringify({ qn: true, f: d.f })}'>← Questionnaires de repérage</button>
+    <div class="head-row"><div><h1>${d.id ? "Modifier le questionnaire" : "Ajouter votre questionnaire"}</h1><p class="muted">Pour une version française dont vous détenez les droits (achetée, ou autorisée par ses auteurs). Recopiez les items à l'identique.</p></div></div>
+    <div class="split"><div class="stack"><div class="card stack">
+      <div class="two"><div><label class="lbl" for="qn_n">Nom (vu par vous seule)</label><input type="text" id="qn_n" maxlength="40" value="${esc(d.n)}" placeholder="Ex. : BSL-23"></div>
+        <div><label class="lbl" for="qn_f">Dossier</label><select id="qn_f">${QN_FOLDERS.map(([k, l]) => `<option value="${k}" ${k === d.f ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></div></div>
+      <div><label class="lbl" for="qn_ref">Nom complet et référence (vus par vous seule)</label><input type="text" id="qn_ref" maxlength="300" value="${esc(d.ref || "")}" placeholder="Ex. : Borderline Symptom List 23, Bohus et al. 2009, version française…"></div>
+      <div><label class="lbl" for="qn_i">Consigne (vue par le patient)</label><textarea id="qn_i" maxlength="800">${esc(d.intro || "")}</textarea><p class="hint">Évitez d'y nommer le trouble recherché.</p></div>
+      <div><label class="lbl" for="qn_items">Items, un par ligne</label><textarea id="qn_items" style="min-height:220px">${esc(d.items.join("\n"))}</textarea></div>
+      <div><label class="lbl" for="qn_o">Réponses possibles, une par ligne, au format « libellé = points »</label><textarea id="qn_o" style="min-height:110px">${esc(d.o.map(o => `${o[0]} = ${o[1]}`).join("\n"))}</textarea></div>
+      <div class="two"><div><label class="lbl" for="qn_inv">Items à cotation inversée (numéros séparés par des virgules)</label><input type="text" id="qn_inv" value="${esc((d.inv || []).join(", "))}"></div>
+        <div><label class="lbl" for="qn_cut">Seuil (score total ≥)</label><input type="number" id="qn_cut" value="${d.cut === "" || d.cut == null ? "" : d.cut}" style="max-width:8em"></div></div>
+      <div><label class="lbl" for="qn_s">Interprétation (vue par vous seule)</label><textarea id="qn_s" maxlength="800">${esc(d.seuil || "")}</textarea></div></div>
+      <p class="hint" id="qn_err" role="alert"></p>
+      <div class="row"><button class="btn" id="qn_save">Enregistrer</button>${d.id ? `<button class="link" id="qn_del">Supprimer</button>` : ""}</div></div>
+    <div class="card stack"><span class="lbl">Ce que verra le patient</span><p class="small muted">Une tuile « Nouveau questionnaire » en haut de son écran d'accueil, puis la consigne et les items avec les réponses sous forme de boutons. Le nom, la référence, la cotation et l'interprétation restent dans votre espace.</p></div></div>`;
+}
+function mountQnLibrary(p) {
+  if (p.edit) {
+    const old = p.edit !== "new" ? vault.qx[p.edit] : null;
+    document.getElementById("qn_save").onclick = async () => {
+      const err = document.getElementById("qn_err"), v = id => document.getElementById(id).value.trim();
+      const items = v("qn_items").split("\n").map(s => s.trim()).filter(Boolean);
+      const o = v("qn_o").split("\n").map(s => s.trim()).filter(Boolean).map(s => { const m = s.match(/^(.*?)\s*=\s*(-?\d+)\s*$/); return m ? [m[1].trim(), Number(m[2])] : null; });
+      if (!v("qn_n")) { err.textContent = "Donnez un nom au questionnaire."; return; }
+      if (items.length < 2) { err.textContent = "Ajoutez au moins deux items, un par ligne."; return; }
+      if (o.length < 2 || o.some(x => !x)) { err.textContent = "Chaque réponse doit être au format « libellé = points », par exemple « Souvent = 2 »."; return; }
+      const inv = v("qn_inv").split(/[,; ]+/).map(Number).filter(n => n >= 1 && n <= items.length);
+      vault.qx = vault.qx || {};
+      const id = old ? old.id : uid();
+      vault.qx[id] = { id, n: v("qn_n"), f: v("qn_f"), ref: v("qn_ref"), intro: v("qn_i"), items, o, inv, cut: v("qn_cut"), seuil: v("qn_s"), created: old ? old.created : new Date().toISOString(), updated: new Date().toISOString() };
+      await persist();
+      const users = Object.values(vault.patients).filter(pt => qnPendingPr(pt).some(a => a.q === "x:" + id));
+      for (const pt of users) await publishCfg(pt);
+      flash = "Questionnaire enregistré."; nav("exercices", { qn: true, f: v("qn_f") });
+    };
+    const del = document.getElementById("qn_del");
+    if (del) del.onclick = async () => {
+      if (!confirm(`Supprimer « ${old.n} » ? Les envois en attente seront annulés ; les réponses déjà reçues restent dans les fiches, sans cotation.`)) return;
+      delete vault.qx[old.id]; vault.deletedQx = vault.deletedQx || {}; vault.deletedQx[old.id] = new Date().toISOString();
+      for (const pt of Object.values(vault.patients)) if (qnPendingPr(pt).some(a => a.q === "x:" + old.id)) await publishCfg(pt);
+      await persist(); nav("exercices", { qn: true, f: old.f });
+    };
+    return;
+  }
+  document.querySelectorAll("[data-qsend]").forEach(b => b.onclick = async () => {
+    const sel = b.parentElement.querySelector(".qn-pt"), pt = vault.patients[sel.value];
+    if (!pt) { sel.focus(); return; }
+    b.disabled = true; b.textContent = "Envoi…";
+    flash = await assignQn(pt, b.dataset.qsend);
+    nav("exercices", { qn: true, f: (b.closest(".qn-folder") || {}).dataset.f });
+  });
+}
+/* Fiche patient */
+function qnPanel(pt) {
+  const pend = qnPendingPr(pt), res = pt.entries.filter(e => e.type === "qn").slice().reverse();
+  return `<section class="panel qn-panel" style="grid-column:1/-1"><h3>Questionnaires de repérage <small>vus par le patient sous le titre « Nouveau questionnaire »</small></h3>
+    <div class="split" style="gap:16px"><div class="stack">
+      <label class="lbl" for="qnSel">Envoyer un questionnaire</label>
+      <div class="row"><select id="qnSel" style="flex:1;min-width:14em">${qnOptgroups(pt)}</select><button class="btn" id="qnGo" ${relayOn() || demo ? "" : "disabled"}>Envoyer</button></div>
+      <p class="hint" id="qnInfo"></p>
+      ${pend.length ? `<span class="lbl">En attente de réponse</span><div class="stack">${pend.map(a => `<div class="row qn-pend"><span><b>${esc(qnName(a.q))}</b> <span class="small muted">envoyé le ${fmtD(a.at, { day: "numeric", month: "long" })}</span></span><button class="link" data-qcancel="${a.i}">Annuler l'envoi</button></div>`).join("")}</div>` : ""}
+      <button class="link" data-nav="exercices" data-p='{"qn":true}' style="align-self:flex-start">Voir la bibliothèque des questionnaires</button>
+    </div><div class="stack"><span class="lbl">Résultats${res.length ? ` (${res.length})` : ""}</span>
+      ${res.length ? res.map(e => { const s = qnScore(e), d = qnDef(e.q);
+        return `<div class="qn-res"><div class="score-box ${s && s.pos ? "hi" : ""}"><b>${s ? s.main.split("/")[0] : "?"}<small>${s && s.main.includes("/") ? "/" + s.main.split("/")[1] : ""}</small></b><span><b>${esc(qnName(e.q))}</b> · ${fmtD(e.t, { day: "numeric", month: "long", year: "numeric" })}<br><span class="small muted">${esc(QN_TAG(e.q))}</span></span></div>
+          ${s ? s.lines.map(l => `<p class="small">${esc(l)}</p>`).join("") : `<p class="small muted">Cotation indisponible (questionnaire supprimé).</p>`}
+          <details><summary class="small link-like">Réponses item par item</summary><ol class="small qn-ans">${qnAnswerText(e.q, e).map(([q, a]) => `<li>${esc(q)} <b>${esc(a)}</b></li>`).join("")}</ol></details></div>`; }).join("")
+      : `<p class="small muted">Aucun questionnaire reçu pour l'instant.</p>`}
+    </div></div></section>`;
+}
+function mountQnPanel(pt) {
+  const go = document.getElementById("qnGo"), sel = document.getElementById("qnSel"), info = document.getElementById("qnInfo");
+  if (!go) return;
+  sel.onchange = () => { const d = qnDef(sel.value); info.textContent = d ? `${d.full}. ${d.age ? "Âge : " + d.age + "." : ""}` : ""; };
+  go.onclick = async () => {
+    if (!sel.value) { sel.focus(); return; }
+    go.disabled = true; go.textContent = "Envoi…";
+    flash = await assignQn(pt, sel.value); nav("patients", { code: pt.code, per: view.p.per });
+  };
+  document.querySelectorAll("[data-qcancel]").forEach(b => b.onclick = async () => {
+    pt.delQs = (pt.delQs || []).concat(b.dataset.qcancel); pt.updated = new Date().toISOString();
+    await persist(); if (!demo) await publishCfg(pt);
+    flash = "Envoi annulé : le questionnaire disparaît de l'application du patient à sa prochaine ouverture."; nav("patients", { code: pt.code, per: view.p.per });
+  });
+}
+
 /* Fiche patient : graphiques et journal */
 const PERIODS = [["14", "14 jours"], ["30", "30 jours"], ["90", "3 mois"], ["all", "Tout"]];
 function inPeriod(pt, per) {
@@ -1799,6 +2283,7 @@ function entryText(e) {
     }
     case "envie": return `Envie ${e.avant} → ${e.apres} · ${e.issue || "?"} · ${e.minutes} min${e.activites && e.activites.length ? " · " + e.activites.join(", ") : ""}${e.declencheur ? " · déclencheur : « " + e.declencheur + " »" : ""}`;
     case "angoisse": return `Pic ${e.pic}/10 → ${e.apres}/10 · ${e.minutes} min${e.declencheur ? " · « " + e.declencheur + " »" : ""}`;
+    case "qn": { const sc = qnScore(e); return `${qnName(e.q)} : ${sc ? sc.lines[0] : "réponses reçues"}`; }
     case "angst": return `Total ${e.total}/20 « vrai »${e.total > 10 ? " (au-dessus du seuil > 10)" : ""}`;
     case "tcc": return `${e.titre} · ` + (e.rep || []).filter(r => r.k !== "rate").map(r => `${r.q} : ${tccValText(r)}`).join(" · ");
     case "perso": return `${e.titre} · ` + (e.rep || []).map(r => `${r.q} : ${Array.isArray(r.v) ? r.v.join(", ") : r.v}`).join(" · ");
@@ -1889,7 +2374,7 @@ function patientDetail(pt, p) {
     <div class="detail-head"><div class="row"><div><h1>${esc(pt.label || "Sans repère")}</h1><p class="muted"><span class="code-chip">${spaced(pt.code)}</span> · « ${pt.tv} » · suivi depuis le ${fmtD(pt.created, { day: "numeric", month: "long", year: "numeric" })}${pt.lastImport ? ` · dernière réception ${fmtDT(pt.lastImport)}` : ""}</p></div>
       <div class="row"><button class="btn" id="cr">Copier le compte rendu</button><button class="btn soft" data-nav="patients" data-p='{"edit":"${pt.code}"}'>Modifier les exercices</button><button class="btn ghost" data-nav="patients" data-p='{"act":"${pt.code}"}'>Code et fiche à remettre</button></div></div>
       ${p.published === true ? `<p class="result">Modifications publiées : le patient les recevra à la prochaine ouverture de l'application.</p>` : p.published === false ? `<p class="result err">Modifications enregistrées, mais pas publiées (relais injoignable). Rouvrir « Code et fiche à remettre » pour réessayer.</p>` : ""}
-      <div class="panels" style="margin-bottom:6px">${msgPanel(pt)}</div>
+      <div class="panels" style="margin-bottom:6px">${msgPanel(pt)}${qnPanel(pt)}</div>
       <div class="chips" data-name="per">${PERIODS.map(([k, l]) => `<button class="chip" data-v="${k}" aria-pressed="${k === per}">${l}</button>`).join("")}</div></div>
     ${list.length ? `<div class="kpis"><div class="kpi"><b>${list.length}</b><span>réponses sur la période</span></div>${Object.entries(list.reduce((c, e) => (c[e.type] = (c[e.type] || 0) + 1, c), {})).map(([k, n]) => `<div class="kpi"><b>${n}</b><span>${TYPE_LABEL[k] || k}</span></div>`).join("")}</div>
     <div class="panels">${P.join("")}
@@ -1905,6 +2390,7 @@ function report(pt, per) {
   if (hum.length) lines.push(`Humeur du jour : ${pl(hum.length, "saisie")}${en.length ? `, énergie moyenne ${r1(avg(en.map(e => e.energie)))}/10` : ""}${md.length ? `, humeurs : ${Object.entries(md.reduce((c, e) => (c[MOOD_LABEL[e.humeur]] = (c[MOOD_LABEL[e.humeur]] || 0) + 1, c), {})).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ×${n}`).join(", ")}` : ""}.`);
   const ag = by("angst"); if (ag.length) lines.push(`Questionnaire d'Angst : ${ag.map(e => `${fmtD(e.t)} ${e.total}/20`).join(", ")} (seuil > 10).`);
   const el = by("elan"); if (el.length) lines.push(`Suivi de l'élan : ${el.map(e => `${fmtD(e.t)} ${e.oui}/10${elanFlag(e) ? " à explorer" : ""}`).join(", ")}.`);
+  by("qn").forEach(e => { const sc = qnScore(e); lines.push(`${qnName(e.q)} (${fmtD(e.t)}) : ${sc ? sc.lines.join(" ") : "réponses reçues"}`); });
   const rep = by("repas"); if (rep.length) lines.push(`Repas : ${rep.filter(e => e.slot !== "grig").length} repas notés dont ${rep.filter(e => e.pris === false).length} non pris, ${rep.filter(e => e.slot === "grig").length} grignotages, perte de contrôle ×${rep.filter(e => e.ctrl === "Oui").length}, compensations ×${rep.flatMap(e => e.comp || []).length}.`);
   const env = by("envie"); if (env.length) lines.push(`Envies de crise : ${env.length} (${env.filter(e => e.issue === "J'ai fait une crise").length} avec crise).`);
   const ang = by("angoisse"); if (ang.length) lines.push(`Crises d'angoisse : ${ang.length}, pic moyen ${r1(avg(ang.map(e => e.pic)))}/10.`);
@@ -1921,7 +2407,7 @@ function mountDetail(pt, p) {
   if (!pt) return;
   if (p.del) { document.getElementById("delYes").onclick = async () => { if (relayOn()) { try { await relay(vault.relay, { a: "delcfg", token: vault.token, code: pt.code }); } catch (e) {} } vault.deleted = vault.deleted || {}; vault.deleted[pt.code] = new Date().toISOString(); delete vault.patients[pt.code]; await persist(); nav("patients"); }; return; }
   document.querySelectorAll('.chips[data-name="per"] .chip').forEach(b => b.addEventListener("picked", () => nav("patients", { code: pt.code, per: b.dataset.v })));
-  mountMsgPanel(pt);
+  mountMsgPanel(pt); mountQnPanel(pt);
   const cr = document.getElementById("cr");
   cr.onclick = async () => {
     const txt = report(pt, p.per || "30");

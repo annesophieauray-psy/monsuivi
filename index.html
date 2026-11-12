@@ -275,6 +275,14 @@ ol.how { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; 
 .pin-card { display: flex; flex-direction: column; gap: 12px; }
 .pin-card p { overflow-wrap: anywhere; }
 .chips.days .chip { min-width: 3.4em; padding: 8px 10px; }
+
+/* Questionnaires envoyés par la psychologue */
+.seg.col { grid-template-columns: 1fr; }
+.seg.col .segb { text-align: left; padding: 10px 14px; line-height: 1.35; font-weight: 500; }
+.qn-tiles { margin-bottom: 14px; }
+.qn-tile { border: 2px solid var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
+.qn-intro { background: var(--surface); border-left: 4px solid var(--accent); padding: 10px 14px; border-radius: 8px; margin-top: 10px; }
+.qtext-plain { font-weight: 600; margin: 0; }
 </style>
 <div class="shell" id="app"></div>
 <script>
@@ -827,6 +835,155 @@ function tccValText(r) {
   if (r.k === "echelle") return r.v + "/10";
   return String(r.v);
 }
+/* =====================================================================
+   Questionnaires standardisés : textes des items (versions françaises publiées).
+   Ce fichier est lu par l'application patient : il ne contient AUCUN nom de
+   questionnaire ni de trouble. Les noms, références et cotations sont dans
+   l'espace praticienne uniquement.
+   ===================================================================== */
+const QN_FREQ5 = ["Jamais", "Rarement", "Parfois", "Souvent", "Très souvent"];
+const QN_AGREE4 = ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"];
+const QN_YN = ["Oui", "Non"];
+const QN_ITEMS = {
+  q01: { kind: "likert", o: QN_FREQ5, min: 5,
+    intro: "Répondez aux questions suivantes en vous auto-évaluant sur chacun des critères. Pour répondre aux questions, choisissez la réponse qui décrit le mieux vos sentiments ou vos comportements au cours des six derniers mois.",
+    items: ["Avec quelle fréquence avez-vous des difficultés à finaliser les derniers détails d'un projet une fois que le plus intéressant a été fait ?",
+      "Avec quelle fréquence avez-vous des difficultés à mettre les choses en ordre lorsque vous devez faire un travail qui demande une certaine organisation ?",
+      "Avec quelle fréquence avez-vous des difficultés pour vous souvenir de vos rendez-vous ou de vos engagements ?",
+      "Avec quelle fréquence avez-vous tendance à éviter ou à remettre à plus tard un travail qui demande beaucoup de réflexion ?",
+      "Avec quelle fréquence avez-vous la bougeotte ou agitez-vous vos mains ou vos pieds lorsque vous devez rester assis pendant un long moment ?",
+      "Avec quelle fréquence vous sentez-vous trop actif ou obligé de faire des choses, comme si vous étiez actionné par un moteur ?",
+      "Avec quelle fréquence faites-vous des erreurs d'étourderie lorsque vous travaillez sur un projet ennuyeux ou difficile ?",
+      "Avec quelle fréquence avez-vous des difficultés à rester attentif lorsque vous faites un travail ennuyeux ou répétitif ?",
+      "Avec quelle fréquence avez-vous des difficultés à vous concentrer sur ce que les gens vous disent, même lorsqu'ils vous parlent directement ?",
+      "Avec quelle fréquence avez-vous tendance à égarer ou du mal à retrouver des choses à la maison ou au travail ?",
+      "Avec quelle fréquence êtes-vous distrait par de l'activité ou du bruit autour de vous ?",
+      "Avec quelle fréquence vous levez-vous pendant des réunions ou d'autres situations dans lesquelles vous êtes censé rester assis ?",
+      "Avec quelle fréquence avez-vous la bougeotte ou vous sentez-vous agité ?",
+      "Avec quelle fréquence avez-vous des difficultés à vous détendre et à vous relaxer pendant votre temps libre ?",
+      "Avec quelle fréquence avez-vous remarqué que vous étiez trop bavard lorsque vous étiez en compagnie d'autres personnes ?",
+      "Avec quelle fréquence vous surprenez-vous terminant les phrases des autres dans une discussion avant qu'ils aient pu le faire eux-mêmes ?",
+      "Avec quelle fréquence avez-vous des difficultés à attendre votre tour dans une file d'attente ?",
+      "Avec quelle fréquence interrompez-vous les autres lorsqu'ils sont occupés ?"] },
+  q02: { kind: "likert", o: QN_AGREE4, min: 3,
+    intro: "Voici une liste de situations. Veuillez lire chacune d'elles très attentivement et précisez, en choisissant une réponse, dans quelle mesure vous êtes d'accord ou pas.",
+    items: ["Je remarque souvent des bruits discrets que les autres ne remarquent pas.",
+      "Je me concentre habituellement plus sur l'ensemble d'une image que sur les petits détails de celle-ci.",
+      "Je trouve qu'il est facile de faire plus d'une chose à la fois.",
+      "Si je suis interrompu(e), je peux facilement revenir à ce que j'étais en train de faire.",
+      "Je trouve qu'il est facile de « lire entre les lignes » lorsque quelqu'un me parle.",
+      "Je sais m'en rendre compte quand mon interlocuteur s'ennuie.",
+      "Quand je lis une histoire, je trouve qu'il est difficile de me représenter les intentions des personnages.",
+      "J'aime collectionner des informations sur des catégories de choses (types de voitures, d'oiseaux, de trains, de plantes, ...).",
+      "Je trouve qu'il est facile de décoder ce que les autres pensent ou ressentent juste en regardant leur visage.",
+      "Je trouve qu'il est difficile de décoder les intentions des autres."] },
+  q03: { kind: "mdq", min: 5,
+    intro: "Est-ce qu'il y a déjà eu une période au cours de laquelle vous n'étiez pas vraiment vous-même et…",
+    items: ["…vous vous sentiez tellement bien ou accéléré(e), au point que d'autres personnes pensaient que vous n'étiez pas dans votre état habituel ou que le fait d'être tellement accéléré(e) vous attira des ennuis ?",
+      "…vous vous sentiez tellement irritable que vous avez insulté des gens ou que vous avez déclenché des bagarres ou des disputes ?",
+      "…vous vous sentiez beaucoup plus sûr(e) de vous que d'habitude ?",
+      "…vous dormiez beaucoup moins que d'habitude et vous trouviez que cela ne vous manquait pas vraiment ?",
+      "…vous étiez beaucoup plus loquace ou parliez plus vite que d'habitude ?",
+      "…les pensées défilaient rapidement dans votre tête ou vous ne pouviez pas ralentir le cours de votre pensée ?",
+      "…vous étiez si facilement distrait(e) par tout ce qui se passait autour de vous, au point d'avoir de la peine à vous concentrer ou à rester sur une idée ?",
+      "…vous aviez beaucoup plus d'énergie que d'habitude ?",
+      "…vous étiez beaucoup plus actif(ve) ou faisiez bien plus de choses que d'habitude ?",
+      "…vous étiez beaucoup plus sociable ou ouvert(e) que d'habitude, par exemple, vous téléphoniez à des amis au milieu de la nuit ?",
+      "…vous étiez beaucoup plus intéressé(e) par la sexualité que d'habitude ?",
+      "…vous faisiez des choses inhabituelles pour vous ou que d'autres personnes auraient pu considérer comme excessives, stupides ou risquées ?",
+      "…les dépenses que vous avez faites ont causé des problèmes à vous ou à votre famille ?"],
+    q2: "Si vous avez répondu « oui » à plus d'une question ci-dessus, plusieurs d'entre elles sont-elles survenues au cours de la même période ?",
+    q3: "À quel point ceci vous a-t-il causé des problèmes – comme être dans l'incapacité de travailler ; avoir des problèmes familiaux, financiers ou légaux ; vous impliquer dans des disputes ou des bagarres ?",
+    o3: ["Aucun problème", "Problème mineur", "Problème modéré", "Problème sévère"] },
+  q04: { kind: "likert", o: QN_YN, min: 1,
+    intro: "Répondez par oui ou par non à chacune des questions suivantes.",
+    items: ["Vous faites-vous vomir parce que vous vous sentez mal d'avoir trop mangé ?",
+      "Vous inquiétez-vous d'avoir perdu le contrôle de ce que vous mangez ?",
+      "Avez-vous récemment perdu plus de 6 kg en 3 mois ?",
+      "Pensez-vous que vous êtes gros(se) alors que d'autres vous trouvent trop mince ?",
+      "Diriez-vous que la nourriture domine votre vie ?"] },
+  q05: { kind: "audit", min: 3,
+    intro: "Pour chaque question, choisissez la réponse qui correspond le mieux à votre situation. Un verre standard correspond à environ 10 g d'alcool pur : par exemple un demi de bière (25 cl), un verre de vin (10 cl) ou un verre d'alcool fort (3 cl).",
+    items: [
+      ["À quelle fréquence vous arrive-t-il de consommer des boissons contenant de l'alcool ?", ["Jamais", "1 fois par mois ou moins", "2 à 4 fois par mois", "2 à 3 fois par semaine", "4 fois ou plus par semaine"], [0, 1, 2, 3, 4]],
+      ["Combien de verres standard buvez-vous au cours d'une journée ordinaire où vous buvez de l'alcool ?", ["Un ou deux", "Trois ou quatre", "Cinq ou six", "Sept à neuf", "Dix ou plus"], [0, 1, 2, 3, 4]],
+      ["Au cours d'une même occasion, à quelle fréquence vous arrive-t-il de boire six verres standard ou plus ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence avez-vous observé que vous n'étiez plus capable de vous arrêter de boire après avoir commencé ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence le fait d'avoir bu de l'alcool vous a-t-il empêché de faire ce qu'on attendait normalement de vous ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence, après une période de forte consommation, avez-vous dû boire de l'alcool dès le matin pour vous remettre en forme ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence avez-vous eu un sentiment de culpabilité ou de regret après avoir bu ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Dans les douze derniers mois, à quelle fréquence avez-vous été incapable de vous souvenir de ce qui s'était passé la nuit précédente parce que vous aviez bu ?", ["Jamais", "Moins d'une fois par mois", "Une fois par mois", "Une fois par semaine", "Chaque jour ou presque"], [0, 1, 2, 3, 4]],
+      ["Vous êtes-vous blessé(e) ou avez-vous blessé quelqu'un parce que vous aviez bu ?", ["Non", "Oui, mais pas dans les douze derniers mois", "Oui, au cours des douze derniers mois"], [0, 2, 4]],
+      ["Est-ce qu'un ami ou un médecin ou un autre professionnel de santé s'est déjà préoccupé de votre consommation d'alcool et vous a conseillé de la diminuer ?", ["Non", "Oui, mais pas dans les douze derniers mois", "Oui, au cours des douze derniers mois"], [0, 2, 4]]] },
+  q06: { kind: "likert", o: QN_FREQ5, min: 2,
+    intro: "Au cours des 12 derniers mois :",
+    items: ["Avez-vous déjà fumé du cannabis avant midi ?",
+      "Avez-vous déjà fumé du cannabis lorsque vous étiez seul(e) ?",
+      "Avez-vous déjà eu des problèmes de mémoire quand vous fumez du cannabis ?",
+      "Des amis ou des membres de votre famille vous ont-ils déjà dit que vous devriez réduire votre consommation de cannabis ?",
+      "Avez-vous déjà essayé de réduire ou d'arrêter votre consommation de cannabis sans y parvenir ?",
+      "Avez-vous déjà eu des problèmes à cause de votre consommation de cannabis (dispute, bagarre, accident, mauvais résultat à l'école…) ?"] },
+  q07: { kind: "likert", o: QN_YN, min: 2,
+    intro: "Au cours de ta vie :",
+    items: ["Es-tu déjà monté(e) dans un véhicule (auto, moto, scooter) conduit par quelqu'un (incluant toi-même) qui avait bu ou qui avait consommé des drogues ?",
+      "Utilises-tu de l'alcool ou d'autres drogues pour te détendre, te sentir mieux ou pour tenir le coup ?",
+      "T'est-il déjà arrivé d'oublier ce que tu as fait sous l'effet de l'alcool ou d'autres drogues ?",
+      "Consommes-tu de l'alcool ou d'autres drogues quand tu es seul(e) ?",
+      "As-tu déjà eu des problèmes en consommant de l'alcool ou d'autres drogues ?",
+      "Tes amis ou ta famille t'ont-ils déjà dit que tu devais réduire ta consommation de boissons alcoolisées ou d'autres drogues ?"] },
+  q08: { kind: "pairs", min: 10,
+    intro: "Pour chaque paire, choisissez la proposition qui vous décrit le mieux ou qui est la plus proche de votre opinion. Il n'y a pas de bonne ou de mauvaise réponse.",
+    items: [
+      ["J'ai un talent naturel pour influencer les gens.", "Je ne suis pas doué(e) pour influencer les gens.", 0],
+      ["La modestie ne me correspond pas.", "Je suis essentiellement quelqu'un de modeste.", 0],
+      ["Je relèverais presque tous les défis.", "J'ai tendance à être quelqu'un de plutôt prudent.", 0],
+      ["Je suis parfois embarrassé(e) lorsque les gens me font des compliments.", "Je sais que je suis bon parce que tout le monde me le dit.", 1],
+      ["L'idée de diriger le monde me paralyse.", "Si je dirigeais le monde, il serait meilleur.", 1],
+      ["Habituellement, avec mon bagou, j'arrive toujours à me tirer d'affaire.", "J'essaye d'accepter les conséquences de mon comportement.", 0],
+      ["Je préfère me fondre dans la foule.", "J'aime être le centre de l'attention.", 1],
+      ["Je réussirai.", "Je ne me sens pas trop concerné(e) par la réussite.", 0],
+      ["Je ne suis ni meilleur(e) ni pire que les autres.", "Je suis une personne hors du commun.", 1],
+      ["Je ne suis pas sûr(e) que je pourrais être un bon chef.", "Je me vois comme un bon chef.", 1],
+      ["Je suis assertif (j'ai de l'assurance).", "Je souhaite être plus assuré(e).", 0],
+      ["J'aime avoir de l'autorité sur les autres personnes.", "Ça ne me gêne pas d'obéir aux ordres.", 0],
+      ["Je trouve facile de manipuler les gens.", "Je n'aime pas quand je me surprends à manipuler les autres.", 0],
+      ["Je suis intransigeant(e) quant au respect qui m'est dû.", "On me témoigne habituellement le respect que je mérite.", 0],
+      ["Je n'aime pas particulièrement mettre mon corps en évidence.", "J'aime mettre mon corps en évidence.", 1],
+      ["Je peux lire à travers les gens comme dans un livre.", "Les gens sont parfois difficiles à comprendre.", 0],
+      ["Si je me sens compétent(e), je suis disposé(e) à prendre la responsabilité de prendre les décisions.", "J'aime prendre la responsabilité de prendre des décisions.", 1],
+      ["Je souhaite être raisonnablement heureux(se).", "Je désire être quelqu'un aux yeux du monde.", 1],
+      ["Mon corps n'est pas spécialement beau.", "J'aime regarder mon corps.", 1],
+      ["J'essaye de ne pas me faire valoir aux yeux d'autrui.", "Je sais me mettre en avantage si j'en ai l'opportunité.", 1],
+      ["Je sais toujours ce que je suis en train de faire.", "Parfois, je ne suis pas sûr(e) de ce que je fais.", 0],
+      ["Je dépends parfois d'autres personnes pour que les choses soient faites.", "Je dépends rarement de quelqu'un d'autre pour que les choses soient faites.", 1],
+      ["Parfois, je raconte de bonnes histoires.", "Tout le monde aime bien écouter mes histoires.", 1],
+      ["J'attends beaucoup des autres.", "J'aime faire des choses pour les autres personnes.", 0],
+      ["Je ne serai jamais satisfait(e) avant d'avoir tout ce que je mérite.", "Je prends les choses agréables comme elles viennent.", 0],
+      ["Les compliments m'embarrassent.", "J'aime être complimenté(e).", 1],
+      ["J'ai un fort désir de pouvoir.", "Le pouvoir, en ce qui me concerne, ne m'intéresse pas.", 0],
+      ["Je ne me préoccupe pas des nouvelles modes.", "J'aime lancer de nouvelles modes.", 1],
+      ["J'aime me regarder dans un miroir.", "Je ne me sens pas particulièrement attiré(e) par le fait de me regarder dans un miroir.", 0],
+      ["J'apprécie réellement être le centre de l'attention.", "Cela me met mal à l'aise d'être le centre de l'attention.", 0],
+      ["Je peux faire de ma vie ce que je veux.", "Les gens ne peuvent pas toujours vivre leur vie comme ils le veulent.", 0],
+      ["Être reconnu(e) en tant qu'autorité ne signifie pas grand-chose pour moi.", "Les gens semblent toujours reconnaître mon autorité.", 1],
+      ["Je préférerais être un chef.", "Cela fait peu de différences pour moi d'être un chef ou non.", 0],
+      ["Je serai une personne formidable.", "J'espère que je vais être couronné(e) de succès.", 0],
+      ["Parfois, les gens croient ce que je leur raconte.", "Je peux faire croire n'importe quoi à n'importe qui.", 1],
+      ["Je suis un chef né.", "Être un « Homme de tête » est une qualité que l'on met longtemps à acquérir.", 0],
+      ["Je souhaite que quelqu'un écrive un jour ma biographie.", "Je n'aime pas que les gens se mêlent de ma vie privée pour quelques raisons que ce soient.", 0],
+      ["Je suis vexé(e) lorsque les gens ne remarquent pas mon allure vestimentaire quand je sors.", "Cela ne me gêne pas d'être fondu(e) dans la foule lorsque je sors.", 0],
+      ["J'ai plus de capacités que les autres personnes.", "Je peux apprendre beaucoup des autres personnes.", 0],
+      ["Je suis plus comme tout le monde.", "Je suis une personne extraordinaire.", 1]] },
+  q09: { kind: "likert", o: ["Vrai", "Faux"], min: 4,
+    intro: "Pensez aux dernières périodes où vous vous êtes senti(e) « bien dans votre peau, heureux(se), agité(e) ou irritable ». Pour chaque proposition, répondez vrai ou faux.",
+    items: ["Moins d'heures de sommeil", "Davantage d'énergie et de résistance physique", "Davantage de confiance en soi", "Davantage de plaisir à faire plus de travail",
+      "Davantage d'activités sociales (plus d'appels téléphoniques, plus de visites)", "Plus de déplacements et voyages ; davantage d'imprudences au volant", "Dépenses d'argent excessives",
+      "Comportement déraisonnable dans les affaires", "Surcroît d'activité (y compris au travail)", "Davantage de projets et d'idées créatives", "Moins de timidité, moins d'inhibition",
+      "Plus bavard que d'habitude", "Plus d'impatience ou d'irritabilité que d'habitude", "Attention facilement distraite", "Augmentation des pulsions sexuelles",
+      "Augmentation de la consommation de café et de cigarettes", "Augmentation de la consommation d'alcool", "Exagérément optimiste, voire euphorique",
+      "Augmentation du rire (farces, plaisanteries, jeux de mots, calembours)", "Rapidité de la pensée, idées soudaines, calembours"] }
+};
+function qnCount(id) { const q = QN_ITEMS[id]; if (!q) return 0; return q.kind === "mdq" ? q.items.length + 2 : q.items.length; }
 /* ===== Entre-Séances — application patient ===== */
 const KEY = "es_patient_v1";
 let S = lsGet(KEY);
@@ -882,7 +1039,7 @@ const MODS = {
   angst:   { t: "Mes périodes d'énergie", d: () => "Questionnaire en 20 questions (vrai / faux)", q: true }
 };
 const ALL_MODS = Object.keys(MODS);
-const TYPE_LABEL = { humeur: "humeur du jour", pensees: "tableau des pensées", sud: "échelle de malaise", expo: "exposition", sommeil: "journal du sommeil", respi: "exercice de respiration", taches: "tâche découpée", jauge: "jauge", repas: "repas noté", envie: "envie de crise", angoisse: "crise d'angoisse", angst: "questionnaire", elan: "questionnaire", perso: "exercice personnalisé", msglu: "message lu", tcc: "exercice TCC" };
+const TYPE_LABEL = { humeur: "humeur du jour", pensees: "tableau des pensées", sud: "échelle de malaise", expo: "exposition", sommeil: "journal du sommeil", respi: "exercice de respiration", taches: "tâche découpée", jauge: "jauge", repas: "repas noté", envie: "envie de crise", angoisse: "crise d'angoisse", angst: "questionnaire", elan: "questionnaire", perso: "exercice personnalisé", msglu: "message lu", tcc: "exercice TCC", qn: "questionnaire" };
 const RELAIS = (typeof window !== "undefined" && window.ES_RELAIS ? String(window.ES_RELAIS) : "").trim();
 const spacedCode = c => String(c).replace("-", " ");
 const canDirect = () => !!(RELAIS && S && S.cfg && S.cfg.c !== DEMO_CODE);
@@ -890,7 +1047,7 @@ const SLOTS = { pdj: "Petit-déjeuner", cm: "Collation du matin", dej: "Déjeune
 function demoCfg() {
   return { v: 1, c: DEMO_CODE, k: DEMO_PUB, m: ALL_MODS.slice(), t: "tu", e: PSY_EMAIL_DEFAULT,
     h: [["Demander l'heure à quelqu'un dans la rue", 3], ["Commander seul(e) au comptoir d'un café", 5], ["Poser une question en classe", 7], ["Passer un appel pour prendre un rendez-vous", 8]],
-    a: { p: ["HP"], r: ["pdj", "dej", "gout", "din"], o: { photo: 1, faim: 1, ctrl: 1, comp: 0, emo: 1, pens: 0, saute: 1, grig: 1 } }, cx: demoCx(), tx: TCC_EX.map(x => x.id) };
+    a: { p: ["HP"], r: ["pdj", "dej", "gout", "din"], o: { photo: 1, faim: 1, ctrl: 1, comp: 0, emo: 1, pens: 0, saute: 1, grig: 1 } }, cx: demoCx(), tx: TCC_EX.map(x => x.id), qs: [{ i: "demo-q1", q: "q04" }, { i: "demo-q2", q: "q07" }] };
 }
 function newState(cfg) {
   return { msgs: cfg.c === DEMO_CODE ? demoMsgs() : [], read: {}, cfg, prefs: { done: false, dys: false, syl: false, muet: false, size: 1, tv: cfg.t === "vous" ? "vous" : "tu" }, entries: [], task: null };
@@ -1120,6 +1277,7 @@ SCREENS.home = {
       <p class="muted">${T("Que veux-tu faire aujourd'hui ?", "Que souhaitez-vous faire aujourd'hui ?")}</p></div>
       ${um.length ? `<div class="stack msgs-home">${um.map(m => msgCard(m, true)).join("")}</div>` : ""}
       ${nMsg ? `<button class="link msgs-link" data-go="messages">${MAIL_ICO} Mes messages (${nMsg})</button>` : ""}
+      ${qnPending().length ? `<div class="tiles qn-tiles">${qnPending().map(qnTile).join("")}</div>` : ""}
       ${n ? `<button class="send-banner" data-go="envoi"><span><b>${n} ${n > 1 ? "réponses" : "réponse"} à envoyer</b><br><span class="small">${canDirect() ? "Pas encore parties. Toucher pour réessayer." : T("Envoie-les à ta psychologue quand tu veux.", "Envoyez-les à votre psychologue quand vous le souhaitez.")}</span></span>${I.send}</button>` : ""}
       <div class="tiles">${ex.map(tile).join("")}${cxTiles}
       <button class="tile" data-go="envoi"><span class="tile-ico">${I.send}</span><span><span class="tile-t">Envoyer à ma psychologue</span><span class="tile-d">${canDirect() ? "Envoi automatique, chiffré" : "Message chiffré, lisible par elle seule"}</span></span></button></div>
@@ -1241,6 +1399,64 @@ SCREENS.elan = {
       const a = answers(ELAN.length), y = anyYes(a);
       addEntry("elan", { rep: a, oui: a.reduce((x, v) => x + v, 0), jours: y ? getChips("jours")[0] : "", diff: y ? getChips("diff")[0] : "", rem: y ? getChips("rem")[0] : "" });
       await saved("elan");
+    };
+  }
+};
+
+/* ---------- Questionnaires envoyés par la psychologue (titre neutre) ---------- */
+function qnPending() {
+  S.qdone = S.qdone || {};
+  return (S.cfg.qs || []).filter(a => a && a.i && !S.qdone[a.i] && (a.x || QN_ITEMS[a.q]));
+}
+function qnDefP(a) {
+  if (a.x) return { kind: "likert", intro: a.x.intro || "", items: a.x.items || [], o: a.x.o || [], min: Math.max(2, Math.round((a.x.items || []).length / 3)) };
+  return QN_ITEMS[a.q];
+}
+function qnTile(a) {
+  const d = qnDefP(a), n = d.kind === "mdq" ? d.items.length + 2 : d.items.length;
+  return `<button class="tile qn-tile" data-go="qn" data-p='${JSON.stringify({ i: a.i })}'><span class="tile-ico">${I.angst || I.fiches}</span><span><span class="tile-t">Nouveau questionnaire</span><span class="tile-d">${n} questions · environ ${d.min} min</span></span></button>`;
+}
+function qnOpts(key, labels, col) {
+  return `<div class="seg${col ? " col" : ""}" data-group-box data-q="${key}">${labels.map((l, v) => `<button type="button" class="segb" data-v="${v}" aria-pressed="false">${esc(l)}</button>`).join("")}</div>`;
+}
+function qnPick(key) { const b = document.querySelector(`.seg[data-q="${key}"] .segb[aria-pressed="true"]`); return b ? Number(b.dataset.v) : null; }
+SCREENS.qn = {
+  html(p) {
+    const a = (S.cfg.qs || []).find(x => x.i === p.i);
+    if (!a || (S.qdone && S.qdone[a.i])) return `${back()}<div class="empty card"><h2>Questionnaire déjà envoyé</h2><p>Merci, ${T("ta psychologue a bien tes réponses", "votre psychologue a bien vos réponses")}.</p></div>`;
+    const d = qnDefP(a);
+    let body;
+    if (d.kind === "pairs") body = d.items.map((x, i) => `<li class="qitem"><p class="qtext">${T("Choisis", "Choisissez")} la proposition la plus proche de ${T("toi", "vous")}</p>${qnOpts(i, [x[0], x[1]], true)}</li>`).join("");
+    else if (d.kind === "audit") body = d.items.map((x, i) => `<li class="qitem"><p class="qtext">${esc(x[0])}</p>${qnOpts(i, x[1], true)}</li>`).join("");
+    else { const o = d.kind === "mdq" ? ["Oui", "Non"] : d.o; body = d.items.map((t, i) => `<li class="qitem"><p class="qtext">${esc(t)}</p>${qnOpts(i, o, o.length > 2)}</li>`).join(""); }
+    const extra = d.kind === "mdq" ? `<div class="card stack" id="mdq2" hidden><p class="qtext-plain">${esc(d.q2)}</p>${qnOpts("q2", ["Oui", "Non"])}</div>
+      <div class="card stack"><p class="qtext-plain">${esc(d.q3)}</p>${qnOpts("q3", d.o3, true)}</div>` : "";
+    return `${back()}<div class="stack"><div class="screen-head"><h1>Nouveau questionnaire</h1>
+      <p>${T("Ta psychologue te propose ce questionnaire. Il n'y a pas de bonne ou de mauvaise réponse : réponds simplement, sans trop réfléchir.", "Votre psychologue vous propose ce questionnaire. Il n'y a pas de bonne ou de mauvaise réponse : répondez simplement, sans trop réfléchir.")}</p>
+      ${d.intro ? `<p class="qn-intro">${esc(d.intro)}</p>` : ""}</div>
+      <ol class="qlist">${body}</ol>${extra}
+      <div class="sticky-send"><span id="prog" class="small muted"></span><button class="btn wide" id="send" disabled>Envoyer à ma psychologue</button></div></div>`;
+  },
+  mount(p) {
+    const a = (S.cfg.qs || []).find(x => x.i === p.i); if (!a || (S.qdone && S.qdone[a.i])) return;
+    const d = qnDefP(a), n = d.items.length, mdq = d.kind === "mdq";
+    const btn = document.getElementById("send"), pr = document.getElementById("prog");
+    const collect = () => Array.from({ length: n }, (_, i) => qnPick(i));
+    const needQ2 = rep => mdq && rep.filter(v => v === 0).length > 1;
+    const upd = () => {
+      const rep = collect(); let k = rep.filter(x => x != null).length, tot = n;
+      if (mdq) { const q2 = needQ2(rep); document.getElementById("mdq2").hidden = !q2; tot += 1 + (q2 ? 1 : 0); k += (qnPick("q3") != null ? 1 : 0) + (q2 && qnPick("q2") != null ? 1 : 0); }
+      pr.textContent = `${k} sur ${tot} réponses`; btn.disabled = k < tot;
+    };
+    document.addEventListener("picked", upd); upd();
+    const prev = cleanup; cleanup = () => { document.removeEventListener("picked", upd); if (prev) prev(); };
+    btn.onclick = async () => {
+      btn.disabled = true; btn.textContent = "Envoi…";
+      const rep = collect(), data = { qi: a.i, q: a.x ? "x:" + a.x.id : a.q, rep };
+      if (mdq) { data.q2 = needQ2(rep) ? qnPick("q2") : null; data.q3 = qnPick("q3"); }
+      addEntry("qn", data);
+      S.qdone = S.qdone || {}; S.qdone[a.i] = new Date().toISOString(); save();
+      await saved("qn");
     };
   }
 };
@@ -1986,7 +2202,7 @@ SCREENS.reglages = {
       <div class="card stack"><h3>Mon code</h3><p><span class="code-chip no-lis">${esc(S.cfg.c)}</span></p>
         <p class="small muted">Ce code ne permet pas ${T("de te reconnaître", "de vous reconnaître")}. Les réponses envoyées depuis plus de 60 jours sont effacées automatiquement de cet appareil.</p>
         <button class="btn ghost" data-go="reglages" data-p='{"confirm":true}'>Effacer toutes mes données</button>
-        <p class="hint">Version de l'application : 2026.11.11</p></div></div>`;
+        <p class="hint">Version de l'application : 2026.11.12</p></div></div>`;
   },
   mount(p) {
     if (p.diag) { const dc = document.getElementById("diagCard"); if (dc) setTimeout(() => dc.scrollIntoView(), 0); }
