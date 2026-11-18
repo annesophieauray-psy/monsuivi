@@ -283,6 +283,40 @@ ol.how { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; 
 .qn-tile { border: 2px solid var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
 .qn-intro { background: var(--surface); border-left: 4px solid var(--accent); padding: 10px 14px; border-radius: 8px; margin-top: 10px; }
 .qtext-plain { font-weight: 600; margin: 0; }
+
+/* Humeur du jour : jauge colorée */
+.hum-card { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.hum-face svg { display: block; transition: transform .2s; }
+.hum-val { margin: 0; font-size: 1.05em; min-height: 1.5em; text-align: center; }
+.hum-gauge { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; width: 100%; }
+.hcell { height: 52px; border: 0; border-radius: 8px; background: var(--c); cursor: pointer; padding: 0; opacity: .55; display: flex; align-items: flex-end; justify-content: center; transition: transform .15s, opacity .15s; }
+.hcell span { font-size: .78em; font-weight: 700; color: #1F2B2A; padding-bottom: 4px; }
+.hcell[aria-pressed="true"] { opacity: 1; transform: scaleY(1.18); box-shadow: 0 0 0 3px var(--ink); }
+.hum-card .scale-ends { width: 100%; }
+.emo-g { margin: 10px 0 6px; font-size: .85em; color: var(--muted); font-weight: 600; }
+.chips.emo .chip[aria-pressed="true"]::before { content: "✓ "; font-weight: 700; }
+.chips.emo.ok .chip[aria-pressed="true"] { background: #D7EFD0; border-color: #5FA052; color: #1F2B2A; }
+.chips.emo.ko .chip[aria-pressed="true"] { background: #F6DCCF; border-color: #C9714F; color: #1F2B2A; }
+
+/* Pleine conscience */
+.mf-stat { display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap; }
+.mf-stat b { font-family: var(--f-display); font-size: 1.6em; color: var(--accent); }
+.mf-sug { border-left: 6px solid var(--accent); }
+.mf-info summary { cursor: pointer; }
+.mf-info p { margin: 10px 0 0; }
+.mf-voice { margin-top: 6px; }
+.notice.soft { background: var(--accent-soft); border-color: transparent; }
+.mf-run { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; text-align: center; padding: 10px 6px; }
+.mf-orb { width: 190px; height: 190px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, var(--accent-soft), transparent 70%); }
+.mf-orb span { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--accent) 55%, white), var(--accent)); animation: mfPulse 9s ease-in-out infinite; opacity: .85; }
+.mf-orb.paused span { animation-play-state: paused; }
+@keyframes mfPulse { 0%, 100% { transform: scale(.82); opacity: .7; } 50% { transform: scale(1.08); opacity: .95; } }
+@media (prefers-reduced-motion: reduce) { .mf-orb span { animation: none; } }
+.mf-cue { font-size: 1.22em; line-height: 1.5; max-width: 30em; min-height: 6.5em; margin: 0; }
+.mf-cue.in { animation: mfIn 1.2s ease; }
+@keyframes mfIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.mf-voice { display: flex; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.mf-voice input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
 </style>
 <div class="shell" id="app"></div>
 <script>
@@ -984,6 +1018,86 @@ const QN_ITEMS = {
       "Augmentation du rire (farces, plaisanteries, jeux de mots, calembours)", "Rapidité de la pensée, idées soudaines, calembours"] }
 };
 function qnCount(id) { const q = QN_ITEMS[id]; if (!q) return 0; return q.kind === "mdq" ? q.items.length + 2 : q.items.length; }
+/* =====================================================================
+   Pleine conscience : catalogue des pratiques (partagé patient / praticienne)
+   Textes : [forme tu|forme vous]. Les consignes sont réparties sur la durée choisie.
+   Repères issus de la recherche (voir l'onglet Exercices de l'espace praticienne) :
+   pratiques courtes et régulières, choix de l'ancre, yeux ouverts possibles,
+   droit de s'arrêter, suivi des effets indésirables.
+   ===================================================================== */
+const MF_EX = [
+  { id: "stop", t: "STOP : une minute pour soi", d: "S'arrêter, respirer, observer, repartir", durs: [1], w: 1, ts: "ok",
+    steps: [[0, "[Arrête-toi|Arrêtez-vous] un instant, là où [tu es|vous êtes]. Rien à réussir."],
+      [.2, "Une respiration un peu plus lente que d'habitude. Puis la respiration fait comme elle veut."],
+      [.45, "[Observe|Observez] : qu'est-ce qui est là, maintenant ? Une pensée, une émotion, une sensation dans le corps. [Nomme-la|Nommez-la] simplement, en un mot."],
+      [.8, "Et [reprends|reprenez] [ta|votre] journée, avec un peu plus de présence."]] },
+  { id: "pause3", t: "La pause de 3 minutes", d: "Accueillir, se rassembler, s'élargir", durs: [3], w: 1, ts: "ok",
+    steps: [[0, "[Installe-toi|Installez-vous], le dos droit, les pieds au sol. [Tu peux|Vous pouvez] garder les yeux ouverts, le regard posé vers le bas."],
+      [.05, "Première étape : qu'est-ce qui est là, en ce moment ? Quelles pensées ? Quelles émotions ? Quelles sensations dans le corps ? Sans rien changer. Juste constater."],
+      [.36, "Deuxième étape : [rassemble|rassemblez] [ton|votre] attention sur un seul point : la respiration, ou le contact des pieds avec le sol. [Suis|Suivez] ce point, moment après moment."],
+      [.53, "Si l'esprit part ailleurs, c'est normal. [Remarque-le|Remarquez-le], et [reviens|revenez] doucement."],
+      [.7, "Troisième étape : [élargis|élargissez] l'attention au corps tout entier : la posture, le visage, les mains. Comme si tout le corps respirait."],
+      [.92, "Avant de reprendre [tes|vos] activités, [remarque|remarquez] comment [tu te sens|vous vous sentez] maintenant."]] },
+  { id: "ancrage", t: "Ancrage : pieds et mains", d: "Sentir les appuis, revenir ici et maintenant", durs: [3, 5, 10], w: 1, ts: "ok",
+    steps: [[0, "[Assieds-toi|Asseyez-vous] ou [reste|restez] debout, les yeux ouverts. [Regarde|Regardez] autour de [toi|vous] quelques secondes : où [es-tu|êtes-vous] ?"],
+      [.1, "[Porte|Portez] l'attention sur [tes|vos] pieds. Le contact avec le sol, la pression, la température. [Tu peux|Vous pouvez] appuyer un peu plus fort, puis relâcher."],
+      [.35, "Maintenant [tes|vos] mains. Leur poids, sur [tes|vos] cuisses ou sur une surface. Les points de contact, la chaleur ou la fraîcheur."],
+      [.55, "Si l'attention s'en va, pas de souci. [Reviens|Revenez] aux pieds, au sol qui [te|vous] porte."],
+      [.75, "[Sens|Sentez] maintenant les pieds et les mains en même temps. Ces appuis sont là, stables, à chaque instant."],
+      [.93, "Pour terminer, [regarde|regardez] à nouveau autour de [toi|vous]. [Bouge|Bougez] doucement les doigts et les orteils."]] },
+  { id: "souffle", t: "Attention au souffle", d: "Revenir encore et encore à son ancre", durs: [3, 5, 10, 15], w: 2, ts: "ok", ancre: true,
+    steps: [[0, "[Installe-toi|Installez-vous] dans une position à la fois stable et confortable. Les yeux ouverts ou fermés : c'est [toi|vous] qui [choisis|choisissez]."],
+      [.08, "[Repère|Repérez] [ton|votre] ancre : {ancre}. [Laisse|Laissez] l'attention s'y poser."],
+      [.25, "Inutile de contrôler quoi que ce soit. [Observe|Observez] simplement, sensation après sensation."],
+      [.45, "L'esprit part, c'est sa nature. Le moment où [tu remarques|vous remarquez] qu'il est parti, c'est déjà la pleine conscience. [Reviens|Revenez] à l'ancre, avec douceur."],
+      [.7, "Chaque retour compte, même s'il faut revenir cent fois."],
+      [.92, "[Élargis|Élargissez] l'attention à tout le corps, aux sons autour, puis [prépare-toi|préparez-vous] à reprendre [ta|votre] journée."]] },
+  { id: "sons", t: "Écouter les sons", d: "Une ancre extérieure, simple et sûre", durs: [3, 5, 10], w: 3, ts: "ok",
+    steps: [[0, "[Installe-toi|Installez-vous], les yeux ouverts ou mi-clos. [Laisse|Laissez] venir les sons, sans aller les chercher."],
+      [.15, "Les sons proches, les sons lointains. Les sons qui commencent, ceux qui s'arrêtent. Et les silences entre eux."],
+      [.4, "Si [tu remarques|vous remarquez] que [tu donnes|vous donnez] un nom ou une histoire au son, ce n'est pas grave. [Reviens|Revenez] à l'écoute : volume, hauteur, durée."],
+      [.7, "Comme si les sons venaient à [toi|vous], et [tu n'avais|vous n'aviez] rien à faire."],
+      [.92, "Doucement, [reviens|revenez] à la pièce, à [ton|votre] corps, à ce qui [t'attend|vous attend]."]] },
+  { id: "marche", t: "Marcher en pleine conscience", d: "Les yeux ouverts, pas après pas", durs: [3, 5, 10], w: 3, ts: "ok",
+    steps: [[0, "[Choisis|Choisissez] un petit trajet : quelques pas aller-retour suffisent. [Marche|Marchez] un peu plus lentement que d'habitude."],
+      [.12, "[Sens|Sentez] le pied qui se soulève, avance, se pose. Le poids qui passe d'une jambe à l'autre."],
+      [.4, "Quand l'esprit part, [reviens|revenez] à la sensation des pieds sur le sol."],
+      [.65, "[Tu peux|Vous pouvez] aussi ouvrir l'attention : ce que [tu vois|vous voyez], l'air sur la peau, les sons."],
+      [.92, "[Arrête-toi|Arrêtez-vous] quelques secondes. [Sens|Sentez] [ton|votre] corps debout, immobile."]] },
+  { id: "scan", t: "Le scan du corps", d: "Parcourir le corps, des pieds à la tête", durs: [5, 10, 15], w: 4, ts: "prudence",
+    steps: [[0, "[Installe-toi|Installez-vous] assis ou allongé. Les yeux ouverts si [tu préfères|vous préférez]. [Tu restes|Vous restez] libre de sauter une zone ou de [t'arrêter|vous arrêter] à tout moment."],
+      [.06, "[Commence|Commencez] par les pieds : orteils, plante, talons. Ce qui est là, ou l'absence de sensation. Les deux vont bien."],
+      [.2, "[Remonte|Remontez] vers les chevilles, les mollets, les genoux, les cuisses."],
+      [.35, "Le bassin, le bas du dos, le ventre. Si une zone est difficile, [reste|restez] plutôt sur une zone neutre, comme les pieds ou les mains."],
+      [.5, "Le haut du dos, la poitrine, les épaules."],
+      [.62, "Les bras, les mains, chaque doigt."],
+      [.74, "La nuque, le visage : la mâchoire, les joues, les yeux, le front."],
+      [.86, "Le corps tout entier, d'un seul coup d'œil intérieur, tel qu'il est maintenant."],
+      [.95, "[Bouge|Bougez] doucement, [ouvre|ouvrez] grand les yeux, [regarde|regardez] autour de [toi|vous]."]] },
+  { id: "pensees", t: "Regarder passer ses pensées", d: "Prendre du recul : les pensées comme des nuages", durs: [3, 5, 10], w: 5, ts: "ok",
+    steps: [[0, "[Installe-toi|Installez-vous] et [pose|posez] quelques instants l'attention sur [ton|votre] ancre : le souffle, ou les pieds au sol."],
+      [.15, "[Imagine|Imaginez] [tes|vos] pensées comme des nuages qui passent dans le ciel, ou des feuilles posées sur une rivière."],
+      [.3, "Quand une pensée arrive, [pose-la|posez-la] sur une feuille et [regarde-la|regardez-la] s'éloigner. Sans la chasser, sans la retenir."],
+      [.5, "[Tu peux|Vous pouvez] la nommer : « une pensée », « un souvenir », « un plan », « un jugement »."],
+      [.7, "Si [tu te retrouves|vous vous retrouvez] emporté par une pensée, c'est normal. [Reviens|Revenez] sur la rive."],
+      [.92, "[Reviens|Revenez] à l'ancre, puis à la pièce autour de [toi|vous]."]] },
+  { id: "bienveillance", t: "Pause de bienveillance", d: "Se parler comme à un ami", durs: [3, 5], w: 6, ts: "prudence",
+    steps: [[0, "[Pense|Pensez] à une difficulté légère du moment, pas la plus lourde. [Remarque|Remarquez] où elle se loge dans le corps."],
+      [.2, "[Dis-toi|Dites-vous] intérieurement : « C'est un moment difficile. » Simplement le reconnaître."],
+      [.4, "« Je ne suis pas seul·e : tout le monde traverse des moments comme celui-ci. »"],
+      [.6, "[Tu peux|Vous pouvez] poser une main là où c'est réconfortant : sur le cœur, le bras, la joue. Ou simplement garder les mains au repos."],
+      [.75, "« Que je puisse être doux avec moi-même. » Ou d'autres mots qui [te|vous] parlent, comme ceux [que tu dirais|que vous diriez] à un ami."],
+      [.93, "[Reviens|Revenez] aux appuis des pieds, et [regarde|regardez] autour de [toi|vous]."]] }
+];
+const MF_BY_ID = Object.fromEntries(MF_EX.map(x => [x.id, x]));
+const MF_ANCRES = { souffle: "les sensations du souffle, au niveau des narines ou du ventre", pieds: "le contact des pieds avec le sol", mains: "le poids et la chaleur de [tes|vos] mains", sons: "les sons autour de [toi|vous]", regard: "un objet posé devant [toi|vous], que [tu regardes|vous regardez]" };
+const MF_ANCRE_LBL = { souffle: "Le souffle", pieds: "Les pieds au sol", mains: "Les mains", sons: "Les sons", regard: "Un objet regardé" };
+const MF_RAPPELS = ["Si l'esprit est parti, [reviens|revenez] doucement.", "Rien à réussir. Juste revenir.", "[Remarque|Remarquez] où est l'attention, maintenant.", "Encore un retour, avec gentillesse."];
+const MF_INFORMEL = ["Me brosser les dents", "Prendre ma douche", "Boire une boisson chaude", "Marcher jusqu'à un lieu", "Écouter un morceau de musique", "Faire la vaisselle", "Regarder par la fenêtre"];
+const MF_VECU_OK = ["Plus calme", "Plus présent·e", "Pareil qu'avant", "Somnolence"];
+const MF_VECU_KO = ["Pensées qui s'emballent", "Agitation, cœur qui s'accélère", "Souvenirs ou images difficiles", "Impression d'irréalité, d'être loin de moi", "Gêne ou douleur dans le corps"];
+/* Semaine suggérée : progression inspirée des programmes en 8 semaines (MBSR, MBCT) */
+const MF_SEMAINES = ["Les appuis et les pauses courtes", "L'ancre de l'attention", "Les sons et le mouvement", "Le corps", "Les pensées", "La bienveillance"];
 /* ===== Entre-Séances — application patient ===== */
 const KEY = "es_patient_v1";
 let S = lsGet(KEY);
@@ -1001,6 +1115,7 @@ const I = {
   sud: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0z"/><path d="M12 10v7"/><path d="M17 6h3M17 10h3"/></svg>',
   expo: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h4v-4h4v-4h4V9h4V5h2"/></svg>',
   sommeil: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/><path d="M15 4h4l-4 4h4"/></svg>',
+  pleine: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><path d="M12 8.5v4.5"/><path d="M5 18c2-1.2 4.4-2 7-2s5 .8 7 2"/><path d="M8.5 12.5 12 11l3.5 1.5"/><path d="M3 21h18"/></svg>',
   respi: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 9c2.5-3 5-3 7.5 0s5 3 7.5 0 3.5-3 5 0"/><path d="M2 15c2.5-3 5-3 7.5 0s5 3 7.5 0 3.5-3 5 0"/></svg>',
   taches: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l1.5 1.5L8 5"/><path d="M4 12l1.5 1.5L8 11"/><path d="M11 6h9M11 12h9M11 18h9"/><circle cx="6" cy="18" r="1.5"/></svg>',
   jauge: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 17a9 9 0 1 1 17 0"/><path d="M12 17l4-6"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></svg>',
@@ -1031,6 +1146,7 @@ const MODS = {
   expo:    { t: "Mon échelle d'exposition", d: () => "Avancer marche après marche" },
   sommeil: { t: "Journal du sommeil", d: () => T("Noter ta nuit", "Noter votre nuit") },
   respi:   { t: "Respirer et se poser", d: () => "La vague, la balle, 5-4-3-2-1" },
+  pleine:  { t: "Pleine conscience", d: () => "Pratiques guidées de 1 à 15 minutes" },
   taches:  { t: "Découper une tâche", d: () => "Une étape à la fois, avec un minuteur" },
   jauge:   { t: "Ma jauge", d: () => T("Bruit, lumière, fatigue : où en es-tu ?", "Bruit, lumière, fatigue : où en êtes-vous ?") },
   tcc:     { t: "Exercices TCC", d: () => "Schémas, besoins et valeurs" },
@@ -1039,7 +1155,7 @@ const MODS = {
   angst:   { t: "Mes périodes d'énergie", d: () => "Questionnaire en 20 questions (vrai / faux)", q: true }
 };
 const ALL_MODS = Object.keys(MODS);
-const TYPE_LABEL = { humeur: "humeur du jour", pensees: "tableau des pensées", sud: "échelle de malaise", expo: "exposition", sommeil: "journal du sommeil", respi: "exercice de respiration", taches: "tâche découpée", jauge: "jauge", repas: "repas noté", envie: "envie de crise", angoisse: "crise d'angoisse", angst: "questionnaire", elan: "questionnaire", perso: "exercice personnalisé", msglu: "message lu", tcc: "exercice TCC", qn: "questionnaire" };
+const TYPE_LABEL = { humeur: "humeur du jour", pensees: "tableau des pensées", sud: "échelle de malaise", expo: "exposition", sommeil: "journal du sommeil", respi: "exercice de respiration", taches: "tâche découpée", jauge: "jauge", repas: "repas noté", envie: "envie de crise", angoisse: "crise d'angoisse", angst: "questionnaire", elan: "questionnaire", perso: "exercice personnalisé", msglu: "message lu", tcc: "exercice TCC", qn: "questionnaire", pleine: "pleine conscience" };
 const RELAIS = (typeof window !== "undefined" && window.ES_RELAIS ? String(window.ES_RELAIS) : "").trim();
 const spacedCode = c => String(c).replace("-", " ");
 const canDirect = () => !!(RELAIS && S && S.cfg && S.cfg.c !== DEMO_CODE);
@@ -1314,11 +1430,30 @@ SCREENS.merci = {
   }
 };
 
-/* Humeur du jour : visage + jauge d'énergie */
+/* Humeur du jour : jauge colorée 0-10 + émotions à cocher + jauge d'énergie */
+const HUM_COL = n => `hsl(${n * 12} 68% ${n === 5 ? 58 : 60}%)`;
+const HUM_TXT = ["Très mal", "Mal", "Mal", "Plutôt mal", "Plutôt mal", "Entre les deux", "Plutôt bien", "Plutôt bien", "Bien", "Bien", "Très bien"];
+const EMO_OK = ["Joie", "Calme", "Soulagement", "Fierté", "Confiance", "Enthousiasme", "Tendresse"];
+const EMO_KO = ["Tristesse", "Inquiétude", "Peur", "Stress", "Colère", "Agacement", "Frustration", "Honte", "Culpabilité", "Solitude", "Ennui", "Vide", "Déception"];
+function levelFace(n, size = 96) {
+  const k = "#1F2B2A", c = (n - 5) * 2.2;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="${n == null ? "var(--surface-2)" : HUM_COL(n)}" stroke="${k}" stroke-opacity=".15" stroke-width="2"/>
+    ${n == null ? `<text x="32" y="40" text-anchor="middle" font-size="22" fill="${k}" opacity=".45">?</text>` : `<circle cx="23" cy="26" r="2.8" fill="${k}"/><circle cx="41" cy="26" r="2.8" fill="${k}"/>
+    <path d="M20 ${42 - c / 2} Q32 ${42 + c} 44 ${42 - c / 2}" fill="none" stroke="${k}" stroke-width="2.6" stroke-linecap="round"/>`}</svg>`;
+}
 SCREENS.humeur = {
   html: () => `${back()}<div class="stack">
-    <div class="screen-head"><h1>Humeur du jour</h1><p>${T("Choisis le visage qui te ressemble le plus aujourd'hui.", "Choisissez le visage qui vous ressemble le plus aujourd'hui.")}</p></div>
-    <div class="moods" data-group-box>${MOODS.map(([k, l]) => `<button class="mood" data-k="${k}" aria-pressed="false">${face(k, 52)}<span>${l}</span></button>`).join("")}</div>
+    <div class="screen-head"><h1>Humeur du jour</h1><p>${T("Comment te sens-tu en ce moment ? Touche la jauge.", "Comment vous sentez-vous en ce moment ? Touchez la jauge.")}</p></div>
+    <div class="card hum-card">
+      <div class="hum-face" id="humF">${levelFace(null)}</div>
+      <p class="hum-val" id="humV" aria-live="polite">${T("Touche une case de la jauge", "Touchez une case de la jauge")}</p>
+      <div class="hum-gauge" role="group" aria-label="Humeur de 0, très mal, à 10, très bien">${Array.from({ length: 11 }, (_, n) => `<button type="button" class="hcell" data-n="${n}" style="--c:${HUM_COL(n)}" aria-pressed="false" aria-label="${n} sur 10, ${HUM_TXT[n]}"><span>${n}</span></button>`).join("")}</div>
+      <div class="scale-ends"><span>Très mal</span><span>Très bien</span></div></div>
+    <div><span class="lbl">${T("Ce que je ressens", "Ce que je ressens")}</span><p class="hint" style="margin-top:0">${T("Coche une ou plusieurs émotions si tu veux. Tu peux aussi n'en cocher aucune.", "Cochez une ou plusieurs émotions si vous le souhaitez. Vous pouvez aussi n'en cocher aucune.")}</p>
+      <p class="emo-g">Plutôt agréables</p><div class="chips emo ok" data-name="emo" data-multi="1">${EMO_OK.map(o => `<button type="button" class="chip" data-v="${o}" aria-pressed="false">${o}</button>`).join("")}</div>
+      <p class="emo-g">Plutôt difficiles</p><div class="chips emo ko" data-name="emo2" data-multi="1">${EMO_KO.map(o => `<button type="button" class="chip" data-v="${o}" aria-pressed="false">${o}</button>`).join("")}</div>
+      <div class="chips emo" data-name="emo3" data-multi="1" style="margin-top:8px"><button type="button" class="chip" data-v="Je ne sais pas trop" aria-pressed="false">Je ne sais pas trop</button></div>
+      <input type="text" id="emoX" maxlength="40" placeholder="${T("Une autre émotion ? (un mot)", "Une autre émotion ? (un mot)")}" style="margin-top:10px"></div>
     <div><span class="lbl">${T("Ta jauge d'énergie", "Votre jauge d'énergie")}</span>
       <div class="battery" id="bat" role="group" aria-label="Jauge d'énergie de 1 à 10">${Array.from({ length: 10 }, (_, i) => `<button type="button" class="cell" data-n="${i + 1}" aria-label="${i + 1} sur 10"></button>`).join("")}<span class="nub"></span></div>
       <div class="scale-ends"><span>Vide</span><span>Pleine</span></div>
@@ -1327,7 +1462,14 @@ SCREENS.humeur = {
     <p class="hint" id="herr" role="alert"></p>
     <button class="btn wide" id="ok">Enregistrer</button></div>`,
   mount() {
-    let energie = null;
+    let energie = null, score = null;
+    const hc = [...document.querySelectorAll(".hcell")];
+    hc.forEach(c => c.onclick = () => {
+      score = Number(c.dataset.n);
+      hc.forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.n) === score)));
+      document.getElementById("humF").innerHTML = levelFace(score);
+      document.getElementById("humV").innerHTML = `<b>${score}/10</b> · ${HUM_TXT[score]}`;
+    });
     const cells = [...document.querySelectorAll("#bat .cell")];
     cells.forEach(c => c.onclick = () => {
       energie = Number(c.dataset.n);
@@ -1335,9 +1477,10 @@ SCREENS.humeur = {
       document.getElementById("batD").textContent = `${energie}/10 · ${ENERGIE_DESC[energie]}`;
     });
     document.getElementById("ok").onclick = () => {
-      const m = document.querySelector('.mood[aria-pressed="true"]');
-      if (!m && energie == null) { document.getElementById("herr").textContent = T("Choisis un visage ou remplis ta jauge.", "Choisissez un visage ou remplissez votre jauge."); return; }
-      addEntry("humeur", { humeur: m ? m.dataset.k : null, energie, note: val("note").trim() });
+      const x = val("emoX").trim();
+      const emotions = getChips("emo").concat(getChips("emo2"), getChips("emo3"), x ? [x] : []);
+      if (score == null && energie == null && !emotions.length) { document.getElementById("herr").textContent = T("Touche la jauge d'humeur, coche une émotion ou remplis ta jauge d'énergie.", "Touchez la jauge d'humeur, cochez une émotion ou remplissez votre jauge d'énergie."); return; }
+      addEntry("humeur", { score, emotions, energie, note: val("note").trim() });
       saved("humeur");
     };
   }
@@ -1922,6 +2065,141 @@ function runBreath(p) {
   cleanup = () => { stopped = true; cancelAnimationFrame(raf); release(); };
 }
 
+/* ---------- Pleine conscience ---------- */
+const TV = s => String(s).replace(/\[([^|\]]*)\|([^\]]*)\]/g, (_, a, b) => S.prefs.tv === "vous" ? b : a);
+function mfCfg() { const c = S.cfg.mf || {}; return { p: (c.p && c.p.length ? c.p : MF_EX.map(x => x.id)).filter(id => MF_BY_ID[id]), ts: !!c.ts, max: c.max || 15 }; }
+function mfDurs(x) { const c = mfCfg(); const d = x.durs.filter(m => m <= c.max); return d.length ? d : [x.durs[0]]; }
+function mfWeek() {
+  const first = S.entries.filter(e => e.type === "pleine").map(e => e.t).sort()[0];
+  if (!first) return 0;
+  return Math.min(MF_SEMAINES.length - 1, Math.floor((Date.now() - new Date(first)) / (7 * 864e5)));
+}
+function mfBell(ctx, when, f = 528) {
+  try { const o = ctx.createOscillator(), g = ctx.createGain(), o2 = ctx.createOscillator(), g2 = ctx.createGain();
+    o.frequency.value = f; o2.frequency.value = f * 2.76; o.connect(g); o2.connect(g2); g.connect(ctx.destination); g2.connect(ctx.destination);
+    g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(0.25, when + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, when + 4);
+    g2.gain.setValueAtTime(0.0001, when); g2.gain.exponentialRampToValueAtTime(0.06, when + 0.02); g2.gain.exponentialRampToValueAtTime(0.0001, when + 2);
+    o.start(when); o2.start(when); o.stop(when + 4.2); o2.stop(when + 4.2); } catch (e) {}
+}
+function mfSay(txt) {
+  try { if (!S.prefs.mfv || !window.speechSynthesis) return; speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt.replace(/[«»]/g, "")); u.lang = "fr-FR"; u.rate = 0.88; u.pitch = 1;
+    const v = speechSynthesis.getVoices().find(v => /^fr/i.test(v.lang)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) {}
+}
+SCREENS.pleine = {
+  html(p) {
+    const ph = p.phase || "menu", c = mfCfg();
+    if (ph === "menu") {
+      const wk = mfWeek(), list = c.p.map(id => MF_BY_ID[id]);
+      const sug = list.filter(x => x.w === wk + 1).concat(list.filter(x => x.w <= wk + 1)).filter((x, i, a) => a.indexOf(x) === i)[0] || list[0];
+      const since = Date.now() - 7 * 864e5, recent = S.entries.filter(e => e.type === "pleine" && new Date(e.t) > since);
+      const days = new Set(recent.map(e => e.t.slice(0, 10))).size, mins = Math.round(recent.reduce((s, e) => s + (e.duree || 0), 0) / 60);
+      return `${back()}<div class="stack"><div class="screen-head"><h1>Pleine conscience</h1><p>${TV("Porter attention, volontairement, à ce qui se passe ici et maintenant, sans juger. Quelques minutes suffisent.")}</p></div>
+        ${recent.length ? `<div class="card mf-stat"><span><b>${days}</b> jour${days > 1 ? "s" : ""} de pratique</span><span><b>${mins}</b> min</span><span class="small muted">ces 7 derniers jours</span></div>` : ""}
+        ${sug ? `<div class="card stack mf-sug"><span class="lbl">Suggestion de la semaine · ${MF_SEMAINES[Math.min(wk, MF_SEMAINES.length - 1)]}</span>
+          <button class="tile" data-go="pleine" data-p='{"phase":"avant","ex":"${sug.id}"}'><span class="tile-ico">${I.pleine}</span><span><span class="tile-t">${sug.t}</span><span class="tile-d">${sug.d} · ${mfDurs(sug).join(", ")} min</span></span></button></div>` : ""}
+        <details class="card mf-info"><summary><b>${TV("Combien de temps pratiquer ?")}</b></summary>
+          <p>${TV("Mieux vaut quelques minutes presque tous les jours qu'une longue séance de temps en temps. Les études ne montrent pas qu'une pratique longue soit plus utile qu'une pratique courte : [choisis|choisissez] une durée que [tu peux|vous pouvez] tenir.")}</p>
+          <p>${TV("L'esprit qui part, ce n'est pas un échec : c'est le moment de l'exercice. Le remarquer et revenir, c'est la pratique.")}</p>
+          <p>${TV("[Tu as|Vous avez] toujours le droit d'ouvrir les yeux, de bouger, de changer d'ancre ou de t'arrêter. Si une pratique fait monter un malaise, des souvenirs pénibles ou une impression d'irréalité, [arrête-la|arrêtez-la] et [parles-en|parlez-en] en séance.").replace("de t'arrêter", T("de t'arrêter", "de vous arrêter"))}</p></details>
+        <span class="lbl" style="margin-top:6px">Toutes les pratiques</span>
+        ${list.map(x => `<button class="tile" data-go="pleine" data-p='{"phase":"avant","ex":"${x.id}"}'><span class="tile-ico">${I.pleine}</span><span><span class="tile-t">${x.t}</span><span class="tile-d">${x.d} · ${mfDurs(x).join(", ")} min</span></span></button>`).join("")}
+        <button class="tile" data-go="pleine" data-p='{"phase":"info"}'><span class="tile-ico">${I.fiches}</span><span><span class="tile-t">Au quotidien</span><span class="tile-d">${TV("Faire une activité ordinaire en pleine conscience")}</span></span></button>
+        <label class="mod-check mf-voice"><input type="checkbox" id="mfv" ${S.prefs.mfv ? "checked" : ""}><span>${TV("Lire les consignes à voix haute (voix du téléphone)")}</span></label></div>`;
+    }
+    if (ph === "info") return `${back("pleine", "Pleine conscience")}<div class="stack"><div class="screen-head"><h1>Au quotidien</h1>
+        <p>${TV("[Choisis|Choisissez] une activité de tous les jours et [fais-la|faites-la] en y prêtant toute [ton|votre] attention : les gestes, les sensations, les sons, les odeurs. Quand l'esprit part, [reviens|revenez] à l'activité.")}</p></div>
+      ${field("L'activité", chips("inf", MF_INFORMEL, false))}
+      <button class="btn wide" id="infOk">Je l'ai fait</button></div>`;
+    const x = MF_BY_ID[p.ex]; if (!x) return `${back("pleine", "Pleine conscience")}<p>Pratique introuvable.</p>`;
+    if (ph === "avant") {
+      const durs = mfDurs(x), def = durs.includes(5) ? 5 : durs[0];
+      const ancres = c.ts ? ["pieds", "mains", "sons", "regard", "souffle"] : ["souffle", "pieds", "mains", "sons", "regard"];
+      return `${back("pleine", "Pleine conscience")}<div class="stack"><div class="screen-head"><h1>${x.t}</h1><p>${x.d}.</p></div>
+        ${x.ts === "prudence" ? `<div class="notice">${TV("Cette pratique peut parfois réveiller des sensations ou des émotions fortes. [Tu peux|Vous pouvez] garder les yeux ouverts et t'arrêter à tout moment.").replace("t'arrêter", T("t'arrêter", "vous arrêter"))}</div>` : ""}
+        ${c.ts ? `<div class="notice soft">${TV("[Garde|Gardez] de préférence les yeux ouverts, le regard posé vers le sol. Si ça devient trop, [appuie|appuyez] [tes|vos] pieds au sol et [regarde|regardez] autour de [toi|vous].")}</div>` : ""}
+        ${field(TV("[Ta|Votre] tension intérieure maintenant (0 à 10)"), range("av", 0, 10, 4))}
+        <p class="hint" id="avHint"></p>
+        ${durs.length > 1 ? field("Durée", chips("dur", durs.map(d => d + " min"), false, [def + " min"])) : `<p class="small muted">Durée : ${durs[0]} min</p>`}
+        ${x.ancre ? field(TV("[Ton|Votre] ancre"), chips("anc", ancres.map(k => MF_ANCRE_LBL[k]), false, [MF_ANCRE_LBL[ancres[0]]])) : ""}
+        <button class="btn wide" id="go">Commencer</button></div>`;
+    }
+    if (ph === "run") return `<div class="mf-run">
+        <p class="small muted no-lis" id="mfT"></p>
+        <div class="mf-orb" aria-hidden="true"><span></span></div>
+        <p class="mf-cue" id="mfC" aria-live="polite">${TV("[Installe-toi|Installez-vous]…")}</p>
+        <div class="row" style="justify-content:center"><button class="btn ghost" id="mfP">Pause</button><button class="btn ghost" id="mfS">Terminer</button></div>
+        <button class="link" id="mfTrop">${TV("C'est trop pour moi en ce moment")}</button></div>`;
+    if (ph === "trop") return `<div class="stack"><div class="screen-head"><h1>${TV("On s'arrête là")}</h1>
+        <p>${TV("[Tu as|Vous avez] bien fait de [t'écouter|vous écouter]. [Ouvre|Ouvrez] grand les yeux. [Appuie|Appuyez] [tes|vos] pieds dans le sol. [Nomme|Nommez] à voix basse cinq choses que [tu vois|vous voyez] autour de [toi|vous].")}</p></div>
+        <div class="row"><button class="btn soft" data-go="respi" data-p='{"phase":"run","ex":"ancrage","t0":${Date.now()}}'>Faire le 5-4-3-2-1</button><button class="btn soft" data-go="aide">Aide</button></div>
+        <button class="btn wide" data-go="pleine" data-p='${JSON.stringify(Object.assign({}, p, { phase: "apres" }))}'>Continuer</button></div>`;
+    return `<div class="stack"><div class="screen-head"><h1>${p.fini ? "Pratique terminée" : "Pratique arrêtée"}</h1><p>${TV("[Prends|Prenez] un instant pour remarquer comment [tu te sens|vous vous sentez], sans juger.")}</p></div>
+      ${field(TV("[Ta|Votre] tension intérieure maintenant (0 à 10)"), range("ap", 0, 10, p.avant != null ? p.avant : 4))}
+      <div><span class="lbl">${TV("Pendant la pratique, [tu as|vous avez] ressenti")} <span class="small muted">(facultatif)</span></span>
+        <div class="chips emo ok" data-name="v1" data-multi="1">${MF_VECU_OK.map(o => `<button type="button" class="chip" data-v="${o}" aria-pressed="false">${o}</button>`).join("")}</div>
+        <div class="chips emo ko" data-name="v2" data-multi="1" style="margin-top:8px">${MF_VECU_KO.map(o => `<button type="button" class="chip" data-v="${o}" aria-pressed="false">${o}</button>`).join("")}</div></div>
+      <p class="hint" id="koHint" hidden>${TV("Merci de l'avoir noté. [Ta|Votre] psychologue le verra : [vous pourrez|vous pourrez] en parler et adapter la pratique.")}</p>
+      <button class="btn wide" id="fin">Enregistrer</button></div>`;
+  },
+  mount(p) {
+    const ph = p.phase || "menu";
+    if (ph === "menu") { const v = document.getElementById("mfv"); if (v) v.onchange = () => { S.prefs.mfv = v.checked; save(); if (v.checked) mfSay(TV("La voix est activée.")); }; return; }
+    if (ph === "info") { document.getElementById("infOk").onclick = () => { const a = getChips("inf")[0]; if (!a) return; addEntry("pleine", { pr: "quotidien", titre: "Au quotidien : " + a, informel: a }); saved("pleine"); }; return; }
+    const x = MF_BY_ID[p.ex];
+    if (ph === "avant") {
+      const av = document.getElementById("av"), h = document.getElementById("avHint");
+      const upd = () => { h.textContent = Number(av.value) >= 8 ? TV("La tension est haute : [commence|commencez] plutôt par une pratique courte les yeux ouverts (Ancrage : pieds et mains), ou par l'exercice Respirer et se poser.") : ""; };
+      av.addEventListener("input", upd); upd();
+      document.getElementById("go").onclick = () => {
+        const dur = parseInt((getChips("dur")[0] || "") || mfDurs(x)[0], 10) || mfDurs(x)[0];
+        const ancLbl = getChips("anc")[0], anc = Object.keys(MF_ANCRE_LBL).find(k => MF_ANCRE_LBL[k] === ancLbl) || (mfCfg().ts ? "pieds" : "souffle");
+        go("pleine", { phase: "run", ex: x.id, dur, anc: x.ancre ? anc : null, avant: Number(av.value), t0: Date.now() });
+      };
+      return;
+    }
+    if (ph === "run") { mfRun(p, x); return; }
+    if (ph === "apres") {
+      document.addEventListener("picked", () => { document.getElementById("koHint").hidden = !getChips("v2").length; });
+      document.getElementById("fin").onclick = () => {
+        addEntry("pleine", { pr: x.id, titre: x.t, dur: p.dur, duree: p.duree || 0, fini: !!p.fini, ancre: p.anc || null, avant: p.avant, apres: num("ap"), vecu: getChips("v1").concat(getChips("v2")), trop: !!p.trop });
+        saved("pleine");
+      };
+    }
+  }
+};
+function mfRun(p, x) {
+  const total = p.dur * 60000, cue = document.getElementById("mfC"), tm = document.getElementById("mfT"), orb = document.querySelector(".mf-orb");
+  const anc = p.anc ? TV(MF_ANCRES[p.anc]) : "";
+  const steps = x.steps.map(([f, t]) => [f * total, TV(t).replace("{ancre}", anc)]);
+  /* Rappels doux dans les longs silences (pratiques de 10 min et plus) */
+  if (total >= 600000) for (let i = 0; i < steps.length - 1; i++) { const gap = steps[i + 1][0] - steps[i][0]; if (gap > 150000) { const n = Math.floor(gap / 120000); for (let k = 1; k <= n; k++) steps.push([steps[i][0] + gap * k / (n + 1), TV(MF_RAPPELS[(i + k) % MF_RAPPELS.length])]); } }
+  steps.sort((a, b) => a[0] - b[0]);
+  let el = 0, last = performance.now(), paused = false, shown = -1, stopped = false, raf;
+  let ac = null; try { ac = new (window.AudioContext || window.webkitAudioContext)(); mfBell(ac, ac.currentTime + 0.05); } catch (e) {}
+  const release = wakeLock();
+  let acClosed = false; const closeAc = () => { if (ac && !acClosed) { acClosed = true; try { ac.close(); } catch (e) {} } };
+  const end = (fini, trop) => {
+    stopped = true; cancelAnimationFrame(raf); release(); try { speechSynthesis.cancel(); } catch (e) {}
+    if (ac && fini) { mfBell(ac, ac.currentTime + 0.05); setTimeout(closeAc, 4500); } else closeAc();
+    go("pleine", Object.assign({}, p, { phase: trop ? "trop" : "apres", fini, trop: !!trop, duree: Math.round(el / 1000) }));
+  };
+  function frame(now) {
+    if (stopped) return;
+    if (!paused) el += now - last; last = now;
+    let i = -1; for (let k = 0; k < steps.length; k++) if (steps[k][0] <= el) i = k;
+    if (i !== shown && i >= 0) { shown = i; cue.classList.remove("in"); void cue.offsetWidth; cue.textContent = steps[i][1]; cue.classList.add("in"); mfSay(steps[i][1]); }
+    const s = Math.max(0, Math.ceil((total - el) / 1000)); tm.textContent = `${paused ? "En pause · " : ""}Encore ${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s`;
+    if (el >= total) { end(true); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  document.getElementById("mfP").onclick = e => { paused = !paused; e.currentTarget.textContent = paused ? "Reprendre" : "Pause"; orb.classList.toggle("paused", paused); if (paused) try { speechSynthesis.cancel(); } catch (x) {} };
+  document.getElementById("mfS").onclick = () => end(false);
+  document.getElementById("mfTrop").onclick = () => end(false, true);
+  raf = requestAnimationFrame(frame);
+  cleanup = () => { if (stopped) return; stopped = true; cancelAnimationFrame(raf); release(); try { speechSynthesis.cancel(); } catch (e) {} closeAc(); };
+}
+
 /* Découper une tâche + minuteur visuel */
 SCREENS.taches = {
   html() {
@@ -2202,7 +2480,7 @@ SCREENS.reglages = {
       <div class="card stack"><h3>Mon code</h3><p><span class="code-chip no-lis">${esc(S.cfg.c)}</span></p>
         <p class="small muted">Ce code ne permet pas ${T("de te reconnaître", "de vous reconnaître")}. Les réponses envoyées depuis plus de 60 jours sont effacées automatiquement de cet appareil.</p>
         <button class="btn ghost" data-go="reglages" data-p='{"confirm":true}'>Effacer toutes mes données</button>
-        <p class="hint">Version de l'application : 2026.11.12</p></div></div>`;
+        <p class="hint">Version de l'application : 2026.11.18</p></div></div>`;
   },
   mount(p) {
     if (p.diag) { const dc = document.getElementById("diagCard"); if (dc) setTimeout(() => dc.scrollIntoView(), 0); }

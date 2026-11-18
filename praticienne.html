@@ -975,6 +975,86 @@ const QN_ITEMS = {
 };
 function qnCount(id) { const q = QN_ITEMS[id]; if (!q) return 0; return q.kind === "mdq" ? q.items.length + 2 : q.items.length; }
 /* =====================================================================
+   Pleine conscience : catalogue des pratiques (partagé patient / praticienne)
+   Textes : [forme tu|forme vous]. Les consignes sont réparties sur la durée choisie.
+   Repères issus de la recherche (voir l'onglet Exercices de l'espace praticienne) :
+   pratiques courtes et régulières, choix de l'ancre, yeux ouverts possibles,
+   droit de s'arrêter, suivi des effets indésirables.
+   ===================================================================== */
+const MF_EX = [
+  { id: "stop", t: "STOP : une minute pour soi", d: "S'arrêter, respirer, observer, repartir", durs: [1], w: 1, ts: "ok",
+    steps: [[0, "[Arrête-toi|Arrêtez-vous] un instant, là où [tu es|vous êtes]. Rien à réussir."],
+      [.2, "Une respiration un peu plus lente que d'habitude. Puis la respiration fait comme elle veut."],
+      [.45, "[Observe|Observez] : qu'est-ce qui est là, maintenant ? Une pensée, une émotion, une sensation dans le corps. [Nomme-la|Nommez-la] simplement, en un mot."],
+      [.8, "Et [reprends|reprenez] [ta|votre] journée, avec un peu plus de présence."]] },
+  { id: "pause3", t: "La pause de 3 minutes", d: "Accueillir, se rassembler, s'élargir", durs: [3], w: 1, ts: "ok",
+    steps: [[0, "[Installe-toi|Installez-vous], le dos droit, les pieds au sol. [Tu peux|Vous pouvez] garder les yeux ouverts, le regard posé vers le bas."],
+      [.05, "Première étape : qu'est-ce qui est là, en ce moment ? Quelles pensées ? Quelles émotions ? Quelles sensations dans le corps ? Sans rien changer. Juste constater."],
+      [.36, "Deuxième étape : [rassemble|rassemblez] [ton|votre] attention sur un seul point : la respiration, ou le contact des pieds avec le sol. [Suis|Suivez] ce point, moment après moment."],
+      [.53, "Si l'esprit part ailleurs, c'est normal. [Remarque-le|Remarquez-le], et [reviens|revenez] doucement."],
+      [.7, "Troisième étape : [élargis|élargissez] l'attention au corps tout entier : la posture, le visage, les mains. Comme si tout le corps respirait."],
+      [.92, "Avant de reprendre [tes|vos] activités, [remarque|remarquez] comment [tu te sens|vous vous sentez] maintenant."]] },
+  { id: "ancrage", t: "Ancrage : pieds et mains", d: "Sentir les appuis, revenir ici et maintenant", durs: [3, 5, 10], w: 1, ts: "ok",
+    steps: [[0, "[Assieds-toi|Asseyez-vous] ou [reste|restez] debout, les yeux ouverts. [Regarde|Regardez] autour de [toi|vous] quelques secondes : où [es-tu|êtes-vous] ?"],
+      [.1, "[Porte|Portez] l'attention sur [tes|vos] pieds. Le contact avec le sol, la pression, la température. [Tu peux|Vous pouvez] appuyer un peu plus fort, puis relâcher."],
+      [.35, "Maintenant [tes|vos] mains. Leur poids, sur [tes|vos] cuisses ou sur une surface. Les points de contact, la chaleur ou la fraîcheur."],
+      [.55, "Si l'attention s'en va, pas de souci. [Reviens|Revenez] aux pieds, au sol qui [te|vous] porte."],
+      [.75, "[Sens|Sentez] maintenant les pieds et les mains en même temps. Ces appuis sont là, stables, à chaque instant."],
+      [.93, "Pour terminer, [regarde|regardez] à nouveau autour de [toi|vous]. [Bouge|Bougez] doucement les doigts et les orteils."]] },
+  { id: "souffle", t: "Attention au souffle", d: "Revenir encore et encore à son ancre", durs: [3, 5, 10, 15], w: 2, ts: "ok", ancre: true,
+    steps: [[0, "[Installe-toi|Installez-vous] dans une position à la fois stable et confortable. Les yeux ouverts ou fermés : c'est [toi|vous] qui [choisis|choisissez]."],
+      [.08, "[Repère|Repérez] [ton|votre] ancre : {ancre}. [Laisse|Laissez] l'attention s'y poser."],
+      [.25, "Inutile de contrôler quoi que ce soit. [Observe|Observez] simplement, sensation après sensation."],
+      [.45, "L'esprit part, c'est sa nature. Le moment où [tu remarques|vous remarquez] qu'il est parti, c'est déjà la pleine conscience. [Reviens|Revenez] à l'ancre, avec douceur."],
+      [.7, "Chaque retour compte, même s'il faut revenir cent fois."],
+      [.92, "[Élargis|Élargissez] l'attention à tout le corps, aux sons autour, puis [prépare-toi|préparez-vous] à reprendre [ta|votre] journée."]] },
+  { id: "sons", t: "Écouter les sons", d: "Une ancre extérieure, simple et sûre", durs: [3, 5, 10], w: 3, ts: "ok",
+    steps: [[0, "[Installe-toi|Installez-vous], les yeux ouverts ou mi-clos. [Laisse|Laissez] venir les sons, sans aller les chercher."],
+      [.15, "Les sons proches, les sons lointains. Les sons qui commencent, ceux qui s'arrêtent. Et les silences entre eux."],
+      [.4, "Si [tu remarques|vous remarquez] que [tu donnes|vous donnez] un nom ou une histoire au son, ce n'est pas grave. [Reviens|Revenez] à l'écoute : volume, hauteur, durée."],
+      [.7, "Comme si les sons venaient à [toi|vous], et [tu n'avais|vous n'aviez] rien à faire."],
+      [.92, "Doucement, [reviens|revenez] à la pièce, à [ton|votre] corps, à ce qui [t'attend|vous attend]."]] },
+  { id: "marche", t: "Marcher en pleine conscience", d: "Les yeux ouverts, pas après pas", durs: [3, 5, 10], w: 3, ts: "ok",
+    steps: [[0, "[Choisis|Choisissez] un petit trajet : quelques pas aller-retour suffisent. [Marche|Marchez] un peu plus lentement que d'habitude."],
+      [.12, "[Sens|Sentez] le pied qui se soulève, avance, se pose. Le poids qui passe d'une jambe à l'autre."],
+      [.4, "Quand l'esprit part, [reviens|revenez] à la sensation des pieds sur le sol."],
+      [.65, "[Tu peux|Vous pouvez] aussi ouvrir l'attention : ce que [tu vois|vous voyez], l'air sur la peau, les sons."],
+      [.92, "[Arrête-toi|Arrêtez-vous] quelques secondes. [Sens|Sentez] [ton|votre] corps debout, immobile."]] },
+  { id: "scan", t: "Le scan du corps", d: "Parcourir le corps, des pieds à la tête", durs: [5, 10, 15], w: 4, ts: "prudence",
+    steps: [[0, "[Installe-toi|Installez-vous] assis ou allongé. Les yeux ouverts si [tu préfères|vous préférez]. [Tu restes|Vous restez] libre de sauter une zone ou de [t'arrêter|vous arrêter] à tout moment."],
+      [.06, "[Commence|Commencez] par les pieds : orteils, plante, talons. Ce qui est là, ou l'absence de sensation. Les deux vont bien."],
+      [.2, "[Remonte|Remontez] vers les chevilles, les mollets, les genoux, les cuisses."],
+      [.35, "Le bassin, le bas du dos, le ventre. Si une zone est difficile, [reste|restez] plutôt sur une zone neutre, comme les pieds ou les mains."],
+      [.5, "Le haut du dos, la poitrine, les épaules."],
+      [.62, "Les bras, les mains, chaque doigt."],
+      [.74, "La nuque, le visage : la mâchoire, les joues, les yeux, le front."],
+      [.86, "Le corps tout entier, d'un seul coup d'œil intérieur, tel qu'il est maintenant."],
+      [.95, "[Bouge|Bougez] doucement, [ouvre|ouvrez] grand les yeux, [regarde|regardez] autour de [toi|vous]."]] },
+  { id: "pensees", t: "Regarder passer ses pensées", d: "Prendre du recul : les pensées comme des nuages", durs: [3, 5, 10], w: 5, ts: "ok",
+    steps: [[0, "[Installe-toi|Installez-vous] et [pose|posez] quelques instants l'attention sur [ton|votre] ancre : le souffle, ou les pieds au sol."],
+      [.15, "[Imagine|Imaginez] [tes|vos] pensées comme des nuages qui passent dans le ciel, ou des feuilles posées sur une rivière."],
+      [.3, "Quand une pensée arrive, [pose-la|posez-la] sur une feuille et [regarde-la|regardez-la] s'éloigner. Sans la chasser, sans la retenir."],
+      [.5, "[Tu peux|Vous pouvez] la nommer : « une pensée », « un souvenir », « un plan », « un jugement »."],
+      [.7, "Si [tu te retrouves|vous vous retrouvez] emporté par une pensée, c'est normal. [Reviens|Revenez] sur la rive."],
+      [.92, "[Reviens|Revenez] à l'ancre, puis à la pièce autour de [toi|vous]."]] },
+  { id: "bienveillance", t: "Pause de bienveillance", d: "Se parler comme à un ami", durs: [3, 5], w: 6, ts: "prudence",
+    steps: [[0, "[Pense|Pensez] à une difficulté légère du moment, pas la plus lourde. [Remarque|Remarquez] où elle se loge dans le corps."],
+      [.2, "[Dis-toi|Dites-vous] intérieurement : « C'est un moment difficile. » Simplement le reconnaître."],
+      [.4, "« Je ne suis pas seul·e : tout le monde traverse des moments comme celui-ci. »"],
+      [.6, "[Tu peux|Vous pouvez] poser une main là où c'est réconfortant : sur le cœur, le bras, la joue. Ou simplement garder les mains au repos."],
+      [.75, "« Que je puisse être doux avec moi-même. » Ou d'autres mots qui [te|vous] parlent, comme ceux [que tu dirais|que vous diriez] à un ami."],
+      [.93, "[Reviens|Revenez] aux appuis des pieds, et [regarde|regardez] autour de [toi|vous]."]] }
+];
+const MF_BY_ID = Object.fromEntries(MF_EX.map(x => [x.id, x]));
+const MF_ANCRES = { souffle: "les sensations du souffle, au niveau des narines ou du ventre", pieds: "le contact des pieds avec le sol", mains: "le poids et la chaleur de [tes|vos] mains", sons: "les sons autour de [toi|vous]", regard: "un objet posé devant [toi|vous], que [tu regardes|vous regardez]" };
+const MF_ANCRE_LBL = { souffle: "Le souffle", pieds: "Les pieds au sol", mains: "Les mains", sons: "Les sons", regard: "Un objet regardé" };
+const MF_RAPPELS = ["Si l'esprit est parti, [reviens|revenez] doucement.", "Rien à réussir. Juste revenir.", "[Remarque|Remarquez] où est l'attention, maintenant.", "Encore un retour, avec gentillesse."];
+const MF_INFORMEL = ["Me brosser les dents", "Prendre ma douche", "Boire une boisson chaude", "Marcher jusqu'à un lieu", "Écouter un morceau de musique", "Faire la vaisselle", "Regarder par la fenêtre"];
+const MF_VECU_OK = ["Plus calme", "Plus présent·e", "Pareil qu'avant", "Somnolence"];
+const MF_VECU_KO = ["Pensées qui s'emballent", "Agitation, cœur qui s'accélère", "Souvenirs ou images difficiles", "Impression d'irréalité, d'être loin de moi", "Gêne ou douleur dans le corps"];
+/* Semaine suggérée : progression inspirée des programmes en 8 semaines (MBSR, MBCT) */
+const MF_SEMAINES = ["Les appuis et les pauses courtes", "L'ancre de l'attention", "Les sons et le mouvement", "Le corps", "Les pensées", "La bienveillance"];
+/* =====================================================================
    Questionnaires standardisés : noms, références, licences et cotation.
    Espace praticienne UNIQUEMENT (jamais inclus dans l'application patient).
    ===================================================================== */
@@ -1127,7 +1207,7 @@ function qnScore(e) { const d = qnDef(e.q); if (!d) return null; try { return d.
 function qnName(q) { const d = qnDef(q); return d ? d.n : "Questionnaire supprimé"; }
 /* ===== Entre-Séances — espace praticienne ===== */
 const VKEY = "es_praticienne_v1";
-const APP_VERSION = "2026.11.12";
+const APP_VERSION = "2026.11.18";
 const DEMO_PRIV = {"key_ops":["deriveKey"],"ext":true,"kty":"EC","x":"FXufJrgrxbSPIYmrbG2IrkTmdroIAHbeo0AjlEmFV-E","y":"iQbRRt_g9vrYtbJ0Jnm7yGxny1celneAbJEpW6XDQBg","crv":"P-256","d":"xW4H5AUxJv1XbmZ8CzsbV1qiQHsZUI6ERusujKccI2s"};
 const RELAIS_GS = "/* =====================================================================\n   Entre-Séances : relais de réception (Google Apps Script) — version 6.1\n   - Reçoit uniquement des messages CHIFFRÉS : Google ne peut pas les lire.\n   - Transmet aux patients leurs exercices et vos messages (chiffrés eux aussi).\n   - Envoie aux patients qui l'ont accepté une notification sans contenu.\n   - Synchronise votre espace entre vos appareils (copie chiffrée, illisible par Google).\n   - Envoie aux patients qui l'ont demandé un rappel quotidien, aux jours et à l'heure choisis.\n   - Garde les réponses 60 jours, puis les efface.\n   - Vous prévient par mail (sans aucun contenu) quand un patient envoie.\n   Ne rien modifier ci-dessous, sauf les deux réglages.\n   ===================================================================== */\nconst RETENTION_DAYS = 60;   // durée de conservation des réponses chiffrées\nconst NOTIFY = true;         // false pour ne pas recevoir de mail de notification\n\nfunction doGet() { return out_({ ok: true, app: \"entre-seances\", v: 6 }); }\n\nfunction doPost(e) {\n  let p = {};\n  try { p = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, err: \"format\" }); }\n  const lock = LockService.getScriptLock();\n  try { lock.waitLock(20000); return out_(route_(p)); }\n  catch (err) { return out_({ ok: false, err: String(err) }); }\n  finally { try { lock.releaseLock(); } catch (x) {} }\n}\n\nfunction out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }\nfunction book_() {\n  // Fonctionne que le script soit rattaché à une feuille Google ou créé seul sur script.google.com\n  let ss = null;\n  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}\n  if (!ss) {\n    const props = PropertiesService.getScriptProperties(), id = props.getProperty(\"SHEET_ID\");\n    if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) {} }\n    if (!ss) { ss = SpreadsheetApp.create(\"Entre-Séances relais (messages chiffrés)\"); props.setProperty(\"SHEET_ID\", ss.getId()); }\n  }\n  return ss;\n}\nfunction sheet_() { const ss = book_(); return ss.getSheetByName(\"Messages\") || ss.insertSheet(\"Messages\"); }\nfunction data_() { const ss = book_(); return ss.getSheetByName(\"Données\") || ss.insertSheet(\"Données\"); }\nfunction folder_() {\n  const it = DriveApp.getFoldersByName(\"Entre-Séances (messages chiffrés)\");\n  return it.hasNext() ? it.next() : DriveApp.createFolder(\"Entre-Séances (messages chiffrés)\");\n}\nfunction okCode_(c) { return typeof c === \"string\" && /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(c); }\n\n/* Petit stockage clé → valeur dans l'onglet « Données » (valeurs jusqu'à 45 000 caractères) */\nfunction find_(sh, k) { return sh.getRange(\"A:A\").createTextFinder(k).matchEntireCell(true).findNext(); }\nfunction kvGet_(k) {\n  const sh = data_(), f = find_(sh, k);\n  if (!f) return null;\n  const v = String(sh.getRange(f.getRow(), 2).getValue());\n  return v.indexOf(\"v:\") === 0 ? v.slice(2) : v;\n}\nfunction kvSet_(k, v) {\n  const sh = data_(), f = find_(sh, k);\n  if (v === null) { if (f) sh.deleteRow(f.getRow()); return; }\n  if (f) sh.getRange(f.getRow(), 2).setValue(\"v:\" + v); else sh.appendRow([k, \"v:\" + v]);\n}\nfunction cfgOf_(props, code) { return kvGet_(\"C_\" + code) || props.getProperty(\"C_\" + code); }\n\nfunction route_(p) {\n  const props = PropertiesService.getScriptProperties();\n  const token = props.getProperty(\"TOKEN\");\n  switch (p.a) {\n    case \"ping\": {\n      let sheet = true, why = \"\";\n      try { sheet_(); data_(); } catch (e) { sheet = false; why = String(e); }\n      return { ok: true, init: !!token, sheet: sheet, why: why, v: 6, trig: props.getProperty(\"TRIG\") === \"1\", vapid: !!props.getProperty(\"VAPID_D\") };\n    }\n    case \"init\":\n      if (token) return { ok: false, err: \"deja\" };\n      if (typeof p.token !== \"string\" || p.token.length < 24 || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ TOKEN: p.token, PUB: p.pub, SEQ: \"0\" });\n      return { ok: true };\n    case \"cfg\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"inconnu\" };\n      const blob = cfgOf_(props, p.code);\n      return blob ? { ok: true, pub: props.getProperty(\"PUB\"), blob: blob, msgs: kvGet_(\"M_\" + p.code), sub: !!kvGet_(\"S_\" + p.code) } : { ok: false, err: \"inconnu\" };\n    }\n    case \"send\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (typeof p.msg !== \"string\" || !/^PSY1\\.[A-Za-z0-9_-]+$/.test(p.msg) || p.msg.length > 20000000) return { ok: false, err: \"format\" };\n      const seq = Number(props.getProperty(\"SEQ\") || \"0\") + 1;\n      props.setProperty(\"SEQ\", String(seq));\n      let cell = p.msg;\n      if (p.msg.length > 45000) cell = \"DRIVE:\" + folder_().createFile(\"m\" + seq + \".txt\", p.msg, \"text/plain\").getId();\n      sheet_().appendRow([seq, new Date(), p.code, cell]);\n      try { notify_(); } catch (e) {}\n      return { ok: true, seq: seq };\n    }\n    case \"psub\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      let sub;\n      try { sub = JSON.parse(p.sub); } catch (e) { return { ok: false, err: \"format\" }; }\n      if (!sub || typeof sub.endpoint !== \"string\" || sub.endpoint.indexOf(\"https://\") !== 0 || p.sub.length > 4000) return { ok: false, err: \"format\" };\n      kvSet_(\"S_\" + p.code, JSON.stringify({ endpoint: sub.endpoint, msg: p.msg !== false }));\n      return { ok: true };\n    }\n    case \"punsub\":\n      if (okCode_(p.code) && cfgOf_(props, p.code)) { kvSet_(\"S_\" + p.code, null); kvSet_(\"R_\" + p.code, null); }\n      return { ok: true };\n    case \"prem\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (!p.on) { kvSet_(\"R_\" + p.code, null); return { ok: true }; }\n      const days = (p.days || []).filter(d => d >= 1 && d <= 7);\n      if (!days.length || !/^\\d{2}:\\d{2}$/.test(p.time || \"\") || typeof p.tz !== \"string\" || p.tz.length > 60) return { ok: false, err: \"format\" };\n      kvSet_(\"R_\" + p.code, JSON.stringify({ days: days, time: p.time, tz: p.tz, last: \"\" }));\n      return { ok: true, trig: props.getProperty(\"TRIG\") === \"1\" };\n    }\n  }\n  if (!token || p.token !== token) return { ok: false, err: \"auth\" };\n  switch (p.a) {\n    case \"check\": return { ok: true, v: 6 };\n    case \"setcfg\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"C_\" + p.code, p.blob); props.deleteProperty(\"C_\" + p.code);\n      return { ok: true };\n    case \"setmsgs\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"M_\" + p.code, p.blob);\n      return { ok: true };\n    case \"delcfg\":\n      if (okCode_(p.code)) { props.deleteProperty(\"C_\" + p.code); kvSet_(\"C_\" + p.code, null); kvSet_(\"M_\" + p.code, null); kvSet_(\"S_\" + p.code, null); }\n      return { ok: true };\n    case \"getsub\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      const o = s ? JSON.parse(s) : null;\n      return { ok: true, endpoint: o && o.msg !== false ? o.endpoint : null };\n    }\n    case \"setvapid\":\n      if (typeof p.d !== \"string\" || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ VAPID_D: p.d, VAPID_PUB: p.pub });\n      return { ok: true };\n    case \"push\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      if (!s || JSON.parse(s).msg === false) return { ok: false, err: \"nosub\" };\n      return pushTo_(p.code, JSON.parse(s).endpoint, p.jwt, p.k);\n    }\n    case \"vget\": {\n      const id = props.getProperty(\"VFILE\");\n      if (!id) return { ok: true, v: 0, blob: null };\n      try { return { ok: true, v: Number(props.getProperty(\"VVER\") || \"0\"), blob: DriveApp.getFileById(id).getBlob().getDataAsString() }; }\n      catch (e) { return { ok: true, v: Number(props.getProperty(\"VVER\") || \"0\"), blob: null }; }\n    }\n    case \"vput\": {\n      if (typeof p.blob !== \"string\" || !/^[A-Za-z0-9_-]+$/.test(p.blob)) return { ok: false, err: \"format\" };\n      const cur = Number(props.getProperty(\"VVER\") || \"0\");\n      if (Number(p.ifv || 0) !== cur) return { ok: false, err: \"conflict\", v: cur };\n      const id = props.getProperty(\"VFILE\");\n      let f = null;\n      if (id) { try { f = DriveApp.getFileById(id); f.setContent(p.blob); } catch (e) { f = null; } }\n      if (!f) { f = folder_().createFile(\"espace-praticienne.chiffre.txt\", p.blob, \"text/plain\"); props.setProperty(\"VFILE\", f.getId()); }\n      props.setProperty(\"VVER\", String(cur + 1));\n      return { ok: true, v: cur + 1 };\n    }\n    case \"inbox\": {\n      purge_();\n      const since = Number(p.since || 0), sh = sheet_(), n = sh.getLastRow();\n      if (n < 1) return { ok: true, items: [] };\n      const rows = sh.getRange(1, 1, n, 4).getValues();\n      const items = [];\n      rows.forEach(function (r) {\n        if (Number(r[0]) <= since) return;\n        let msg = String(r[3]);\n        if (msg.indexOf(\"DRIVE:\") === 0) { try { msg = DriveApp.getFileById(msg.slice(6)).getBlob().getDataAsString(); } catch (e) { return; } }\n        items.push({ seq: Number(r[0]), t: new Date(r[1]).toISOString(), code: String(r[2]), msg: msg });\n      });\n      return { ok: true, items: items };\n    }\n  }\n  return { ok: false, err: \"action\" };\n}\n\nfunction purge_() {\n  const sh = sheet_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const lim = Date.now() - RETENTION_DAYS * 864e5;\n  const rows = sh.getRange(1, 1, n, 4).getValues();\n  let k = 0;\n  while (k < rows.length && new Date(rows[k][1]).getTime() < lim) {\n    const cell = String(rows[k][3]);\n    if (cell.indexOf(\"DRIVE:\") === 0) { try { DriveApp.getFileById(cell.slice(6)).setTrashed(true); } catch (e) {} }\n    k++;\n  }\n  if (k > 0) sh.deleteRows(1, k);\n}\n\nfunction notify_() {\n  if (!NOTIFY) return;\n  const cache = CacheService.getScriptCache();\n  if (cache.get(\"notif\")) return;\n  cache.put(\"notif\", \"1\", 1800);\n  MailApp.sendEmail(Session.getEffectiveUser().getEmail(), \"Entre-Séances : nouvelles réponses\",\n    \"Un patient vient d'envoyer des réponses.\\nOuvrez votre espace praticienne pour les relever.\\n\\nCe mail ne contient aucune donnée de patient.\");\n}\n\n/* Envoi d'une notification (sans contenu). La signature est faite ici si la praticienne n'en a pas fourni. */\nfunction pushTo_(code, endpoint, jwt, k) {\n  const props = PropertiesService.getScriptProperties();\n  if (!jwt) {\n    const d = props.getProperty(\"VAPID_D\"); k = props.getProperty(\"VAPID_PUB\");\n    if (!d || !k) return { ok: false, err: \"novapid\" };\n    if (typeof BigInt === \"undefined\") return { ok: false, err: \"nobigint\" };\n    const m = /^(https:\\/\\/[^\\/]+)/.exec(endpoint);\n    jwt = vapidJwt_(m[1], d);\n  }\n  const res = UrlFetchApp.fetch(endpoint, { method: \"post\", headers: { Authorization: \"vapid t=\" + jwt + \", k=\" + k, TTL: \"86400\", Urgency: \"normal\" }, payload: \"\", muteHttpExceptions: true });\n  const st = res.getResponseCode();\n  if (st === 404 || st === 410) { kvSet_(\"S_\" + code, null); kvSet_(\"R_\" + code, null); }\n  return { ok: st >= 200 && st < 300, status: st, why: st >= 300 ? String(res.getContentText()).slice(0, 200) : \"\" };\n}\n\n/* Rappels quotidiens : lancé automatiquement toutes les 10 minutes */\nfunction rappels() {\n  const sh = data_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const rows = sh.getRange(1, 1, n, 2).getValues(), now = new Date();\n  rows.forEach(function (r) {\n    const key = String(r[0]); if (key.indexOf(\"R_\") !== 0) return;\n    const code = key.slice(2);\n    let rem; try { rem = JSON.parse(String(r[1]).replace(/^v:/, \"\")); } catch (e) { return; }\n    let day, hm, today;\n    try { day = Number(Utilities.formatDate(now, rem.tz, \"u\")); hm = Utilities.formatDate(now, rem.tz, \"HH:mm\"); today = Utilities.formatDate(now, rem.tz, \"yyyy-MM-dd\"); } catch (e) { return; }\n    if (rem.days.indexOf(day) < 0 || rem.last === today) return;\n    const toMin = t => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));\n    const diff = toMin(hm) - toMin(rem.time);\n    if (diff < 0 || diff > 60) return;\n    const s = kvGet_(\"S_\" + code); if (!s) return;\n    try { pushTo_(code, JSON.parse(s).endpoint); } catch (e) {}\n    rem.last = today; if (kvGet_(\"R_\" + code)) kvSet_(\"R_\" + code, JSON.stringify(rem));\n  });\n}\n\n/* ---- Signature ECDSA P-256 (ES256) pour les notifications, en JavaScript pur ---- */\nlet EC_CACHE_ = null;\nfunction EC_() {\n  if (EC_CACHE_) return EC_CACHE_;\n  const B0 = BigInt(0), B1 = BigInt(1), B2 = BigInt(2), B3 = BigInt(3), B4 = BigInt(4), B8 = BigInt(8);\n  const P = BigInt(\"0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff\");\n  const N = BigInt(\"0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551\");\n  const A = P - B3;\n  const G = [BigInt(\"0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296\"), BigInt(\"0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5\"), B1];\n  const mod = (a, m) => { const r = a % m; return r >= B0 ? r : r + m; };\n  const inv = (a, m) => { let [r0, r1, s0, s1] = [mod(a, m), m, B1, B0]; while (r1) { const q = r0 / r1; [r0, r1] = [r1, r0 - q * r1]; [s0, s1] = [s1, s0 - q * s1]; } return mod(s0, m); };\n  function dbl(p) {\n    const [X, Y, Z] = p; if (!Y || !Z) return [B0, B1, B0];\n    const ZZ = mod(Z * Z, P), S = mod(B4 * X * Y * Y, P), M = mod(B3 * X * X + A * ZZ * ZZ, P);\n    const X3 = mod(M * M - B2 * S, P), Y3 = mod(M * (S - X3) - B8 * Y * Y * Y * Y, P), Z3 = mod(B2 * Y * Z, P);\n    return [X3, Y3, Z3];\n  }\n  function add(p, q) {\n    if (!p[2]) return q; if (!q[2]) return p;\n    const Z1Z1 = mod(p[2] * p[2], P), Z2Z2 = mod(q[2] * q[2], P);\n    const U1 = mod(p[0] * Z2Z2, P), U2 = mod(q[0] * Z1Z1, P), S1 = mod(p[1] * q[2] * Z2Z2, P), S2 = mod(q[1] * p[2] * Z1Z1, P);\n    if (U1 === U2) return S1 === S2 ? dbl(p) : [B0, B1, B0];\n    const H = mod(U2 - U1, P), R = mod(S2 - S1, P), HH = mod(H * H, P), HHH = mod(H * HH, P), V = mod(U1 * HH, P);\n    const X3 = mod(R * R - HHH - B2 * V, P), Y3 = mod(R * (V - X3) - S1 * HHH, P), Z3 = mod(H * p[2] * q[2], P);\n    return [X3, Y3, Z3];\n  }\n  function mul(k, p) { let r = [B0, B1, B0], q = p; while (k > B0) { if (k & B1) r = add(r, q); q = dbl(q); k >>= B1; } return r; }\n  function affineX(p) { const zi = inv(p[2], P); return mod(p[0] * zi * zi, P); }\n  EC_CACHE_ = { N: N, G: G, mul: mul, affineX: affineX, inv: inv, mod: mod, B0: B0, B1: B1 };\n  return EC_CACHE_;\n}\nfunction bytesToBig_(b) { let h = \"0x\"; b.forEach(x => { h += ((x + 256) % 256).toString(16).padStart(2, \"0\"); }); return BigInt(h === \"0x\" ? \"0x0\" : h); }\nfunction bigToBytes32_(x) { const h = x.toString(16).padStart(64, \"0\"), out = []; for (let i = 0; i < 64; i += 2) { const v = parseInt(h.slice(i, i + 2), 16); out.push(v > 127 ? v - 256 : v); } return out; }\nfunction b64u_(x) { return (typeof x === \"string\" ? Utilities.base64EncodeWebSafe(x, Utilities.Charset.UTF_8) : Utilities.base64EncodeWebSafe(x)).replace(/=+$/, \"\"); }\nfunction vapidJwt_(aud, dB64) {\n  const props = PropertiesService.getScriptProperties();\n  const sub = \"mailto:\" + (props.getProperty(\"CONTACT\") || Session.getEffectiveUser().getEmail() || \"contact@example.org\");\n  const unsigned = b64u_(JSON.stringify({ typ: \"JWT\", alg: \"ES256\" })) + \".\" + b64u_(JSON.stringify({ aud: aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: sub }));\n  const d = bytesToBig_(Utilities.base64DecodeWebSafe(dB64 + \"==\".slice(0, (4 - dB64.length % 4) % 4)));\n  const z = bytesToBig_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, unsigned, Utilities.Charset.UTF_8));\n  const E = EC_();\n  let r = E.B0, s = E.B0;\n  while (!r || !s) {\n    const k = E.mod(bytesToBig_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + dB64 + unsigned + Date.now(), Utilities.Charset.UTF_8)), E.N - E.B1) + E.B1;\n    r = E.mod(E.affineX(E.mul(k, E.G)), E.N);\n    s = E.mod(E.inv(k, E.N) * (z + r * d), E.N);\n  }\n  return unsigned + \".\" + b64u_(bigToBytes32_(r).concat(bigToBytes32_(s)));\n}\n\n/* À lancer une fois depuis l'éditeur (bouton Exécuter) : autorisations + rappels automatiques. */\nfunction autoriser() {\n  sheet_(); data_(); folder_();\n  try { MailApp.getRemainingDailyQuota(); } catch (e) {}\n  try { UrlFetchApp.fetch(\"https://www.google.com\", { muteHttpExceptions: true }); } catch (e) {}\n  const has = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === \"rappels\");\n  if (!has) ScriptApp.newTrigger(\"rappels\").timeBased().everyMinutes(10).create();\n  PropertiesService.getScriptProperties().setProperty(\"TRIG\", \"1\");\n  Logger.log(\"Autorisations accordées et rappels activés. Vous pouvez déployer une nouvelle version.\");\n}\n";
 let vault = null, vkey = null, vsalt = null, demo = false;
@@ -1136,9 +1216,10 @@ let lockTimer = null, flash = "";
 const LOCK_MIN = 15;
 const inFrame = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
 const MOD_INFO = {
-  humeur: ["Humeur du jour", "Visages d'humeur + jauge d'énergie 1-10"], pensees: ["Tableau des pensées", "Colonnes de Beck guidées pas à pas"],
+  humeur: ["Humeur du jour", "Jauge colorée 0-10, émotions à cocher, jauge d'énergie"], pensees: ["Tableau des pensées", "Colonnes de Beck guidées pas à pas"],
   sud: ["Échelle de malaise (SUD)", "0 à 10, contexte facultatif"], expo: ["Échelle d'exposition", "Marches définies ci-dessous"],
   sommeil: ["Journal du sommeil", "Horaires, latence, réveils, qualité"], respi: ["Respirer et se poser", "Vague, balle, 5-4-3-2-1, stress avant/après"],
+  pleine: ["Pleine conscience", "9 pratiques guidées de 1 à 15 min, adaptation psychotrauma possible (réglages ci-dessous)"],
   angoisse: ["Crise d'angoisse", "Respiration 4-6 guidée, phrases rassurantes, pic/après"],
   fiches: ["Fiches pratiques", "Attention, sens, imprévus, émotions"],
   taches: ["Découper une tâche", "Étapes + minuteur visuel (TDAH)"], jauge: ["Ma jauge", "Surcharge sensorielle et énergie (TSA)"],
@@ -1147,12 +1228,12 @@ const MOD_INFO = {
   angst: ["Questionnaire d'Angst", "20 items Vrai/Faux, seuil > 10, envoi direct"],
   tcc: ["Exercices TCC", "Schémas, besoins, valeurs : sous-exercices à choisir ci-dessous"]
 };
-const MOD_GROUPS = [["Suivi général", ["humeur", "pensees", "sud", "expo", "sommeil", "respi", "angoisse", "fiches"]], ["Troubles du neurodéveloppement", ["taches", "jauge"]],
+const MOD_GROUPS = [["Suivi général", ["humeur", "pensees", "sud", "expo", "sommeil", "respi", "pleine", "angoisse", "fiches"]], ["Troubles du neurodéveloppement", ["taches", "jauge"]],
   ["Troubles du comportement alimentaire", ["repas", "envie"]], ["Hypomanie : questionnaires", ["elan", "angst"]], ["Thérapie des schémas, besoins et valeurs", ["tcc"]]];
 const ALL_MODS = Object.keys(MOD_INFO);
 const DEFAULT_MODS = ["humeur", "pensees", "sud", "expo", "sommeil", "respi", "angoisse", "fiches", "taches", "jauge"];
 const TYPE_LABEL = { humeur: "Humeur", pensees: "Tableau des pensées", sud: "Malaise (SUD)", expo: "Exposition", sommeil: "Sommeil", respi: "Respiration", taches: "Tâche", jauge: "Jauge",
-  repas: "Repas", envie: "Envie de crise", angoisse: "Crise d'angoisse", angst: "Angst", elan: "Élan", perso: "Exercice perso", tcc: "Exercice TCC", qn: "Questionnaire" };
+  repas: "Repas", envie: "Envie de crise", angoisse: "Crise d'angoisse", angst: "Angst", elan: "Élan", perso: "Exercice perso", tcc: "Exercice TCC", qn: "Questionnaire", pleine: "Pleine conscience" };
 const SLOTS = { pdj: "Petit-déjeuner", cm: "Collation du matin", dej: "Déjeuner", gout: "Goûter", din: "Dîner", cs: "Collation du soir", grig: "Grignotage" };
 const TCA_PROFILES = { AN: "Anorexie mentale", BN: "Boulimie", HP: "Hyperphagie boulimique", AU: "Autre TCA / non spécifié" };
 const TCA_OPTS = { photo: "Photos des repas", faim: "Faim avant / satiété après", ctrl: "Sensation de perte de contrôle", comp: "Comportements compensatoires",
@@ -1188,11 +1269,20 @@ async function persistLocal() {
   const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, vkey, await pack(vault));
   lsSet(VKEY, { v: 1, salt: B64.enc(vsalt), iv: B64.enc(iv), ct: B64.enc(ct) });
 }
+/* Retire les réponses reçues en double (même identifiant, ou même contenu à la milliseconde près) */
+function entryKey(e) { const c = Object.assign({}, e); delete c.id; delete c.photo; return JSON.stringify(c); }
+function dedupeEntries(pt) {
+  const ids = new Set(), keys = new Set(), before = (pt.entries || []).length;
+  pt.entries = (pt.entries || []).filter(e => { const k = entryKey(e); if (ids.has(e.id) || keys.has(k)) return false; ids.add(e.id); keys.add(k); return true; });
+  return before - pt.entries.length;
+}
+function dedupeVault(v) { let n = 0; for (const pt of Object.values((v && v.patients) || {})) n += dedupeEntries(pt); return n; }
 async function openVault(pw) {
   const rec = lsGet(VKEY); vsalt = B64.dec(rec.salt);
   vkey = await deriveVaultKey(pw, vsalt);
   const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: B64.dec(rec.iv) }, vkey, B64.dec(rec.ct));
   vault = await unpack(new Uint8Array(pt)); demo = false;
+  if (dedupeVault(vault)) { try { await persist(); } catch (e) {} }
 }
 async function createVault(pw) {
   vsalt = crypto.getRandomValues(new Uint8Array(16));
@@ -1232,7 +1322,7 @@ function demoVault() {
   const add = (n, type, data, h) => E.push(Object.assign({ id: "d" + (k++), t: day(n, h), type }, data));
   const moods = ["super", "content", "calme", "bof", "fatigue", "stresse", "triste", "colere", "surexcite"];
   for (let n = 34; n >= 0; n--) {
-    if (rnd() < 0.75) { const hi = n < 8; const en = Math.max(1, Math.min(10, Math.round((hi ? 7.5 : 4.5) + (rnd() - 0.5) * 3))); add(n, "humeur", { humeur: hi ? pick(["surexcite", "super", "content", "stresse"]) : pick(moods.slice(1, 8)), energie: en, note: n === 3 ? "Plein d'idées, j'ai dormi 5 h." : "" }); }
+    if (rnd() < 0.75) { const hi = n < 8; const en = Math.max(1, Math.min(10, Math.round((hi ? 7.5 : 4.5) + (rnd() - 0.5) * 3))); add(n, "humeur", n < 12 ? { score: hi ? 7 + Math.round(rnd() * 3) : 3 + Math.round(rnd() * 3), emotions: hi ? [pick(["Enthousiasme", "Joie", "Confiance"]), pick(["Agacement", "Fierté"])] : [pick(["Tristesse", "Inquiétude", "Stress", "Ennui"])], energie: en, note: n === 3 ? "Plein d'idées, j'ai dormi 5 h." : "" } : { humeur: hi ? pick(["surexcite", "super", "content", "stresse"]) : pick(moods.slice(1, 8)), energie: en, note: n === 3 ? "Plein d'idées, j'ai dormi 5 h." : "" }); }
     if (rnd() < 0.7) { const c = pick(["23:00", "23:30", "00:15", "01:00", "22:45"]); add(n, "sommeil", { nuit: day(n + 1).slice(0, 10), coucher: c, lever: pick(["06:45", "07:00", "07:15", "09:30"]), endormissement: pick(["Moins de 15 min", "15 à 30 min", "30 min à 1 h", "Plus d'1 h"]), reveils: pick(["0", "1", "1", "2"]), qualite: 1 + Math.floor(rnd() * 5), ecran: pick(["Oui", "Oui", "Non"]), sieste: pick(["Non", "Non", "Oui"]) }, 8); }
     if (rnd() < 0.3) add(n, "jauge", { niveau: 1 + Math.floor(rnd() * 5), sources: [pick(["Bruit", "Beaucoup de monde", "Fatigue", "Changement imprévu"]), pick(["Lumière", "Trop de demandes", "Bruit"])].filter((v, i, a) => a.indexOf(v) === i), aides: [pick(["Casque ou bouchons", "Pause au calme", "Musique", "Respirer"])], note: "" }, 17);
     if (rnd() < 0.2) { const a = 5 + Math.floor(rnd() * 4); add(n, "respi", { exercice: pick(["La vague", "La balle", "5-4-3-2-1"]), avant: a, apres: Math.max(0, a - 2 - Math.floor(rnd() * 3)), duree: 180 }, 21); }
@@ -1269,12 +1359,15 @@ function demoVault() {
   add(8, "tcc", { xid: "pe-schemas", titre: TCC_BY_ID["pe-schemas"].t, rep: [{ q: "Ce qui me ressemble", k: "rate", v: { "Imperfection / honte": "Beaucoup", "Exigences élevées": "Beaucoup", "Abandon / instabilité": "Un peu", "Inhibition émotionnelle": "Un peu", "Échec": "Un peu" } }] }, 20);
   add(5, "tcc", { xid: "enreg", titre: TCC_BY_ID.enreg.t, rep: [{ q: "La situation", k: "texte", v: "Remarque d'un prof sur mon devoir devant la classe." }, { q: "Mes émotions", k: "chips", v: ["Honte", "Colère"] }, { q: "Leur intensité", k: "pct", v: 80 }, { q: "Mes pensées ou images à ce moment-là", k: "texte", v: "Tout le monde pense que je suis nul." }, { q: "Le schéma qui s'est activé", k: "chips", v: ["Imperfection / honte"] }, { q: "Le besoin qui n'était pas comblé", k: "chips", v: ["Respect", "Valorisation"] }, { q: "Ma réaction (ce que j'ai fait ou dit)", k: "texte", v: "J'ai rangé mes affaires et je n'ai plus parlé." }, { q: "Ça ressemble à", k: "chips", v: TCC_LISTS.strat[1] }, { q: "Une façon plus juste de voir la situation", k: "texte", v: "Il parlait du devoir, pas de moi." }, { q: "Ce qui aurait été plus adapté", k: "texte", v: "Lui demander des explications après le cours." }, { q: "Comment je peux vraiment répondre à mon besoin", k: "texte", v: "En parler à mon ami." }] }, 21);
   add(1, "tcc", { xid: "dialogue", titre: TCC_BY_ID.dialogue.t, rep: [{ q: "Trois phrases de ma voix critique", k: "lignes", v: ["Tu rates tout", "Tu ne vaux rien", ""] }, { q: "Trois phrases de mon Adulte sain", k: "lignes", v: ["Tu apprends", "Une note n'est pas toi", ""] }, { q: "Une situation difficile en ce moment", k: "texte", v: "Les contrôles de fin de trimestre." }, { q: "La critique dit…", k: "texte", v: "Tu vas encore échouer." }, { q: "Mon Adulte sain répond…", k: "texte", v: "Tu as révisé, fais de ton mieux, c'est suffisant." }] }, 21);
+  [[20, "ancrage", 3, 6, 4, ["Plus calme"]], [18, "pause3", 3, 5, 4, ["Plus présent·e"]], [14, "souffle", 5, 7, 7, ["Pensées qui s'emballent"]], [12, "sons", 5, 6, 4, ["Plus calme"]], [9, "marche", 5, 5, 3, ["Plus présent·e", "Plus calme"]], [6, "scan", 10, 6, 6, ["Souvenirs ou images difficiles"]], [4, "ancrage", 5, 7, 4, ["Plus calme"]], [2, "pensees", 5, 5, 3, ["Plus présent·e"]], [1, "stop", 1, 6, 5, []]]
+    .forEach(([n, id, dur, av, ap, v]) => add(n, "pleine", { pr: id, titre: MF_BY_ID[id].t, dur, duree: id === "scan" ? 250 : dur * 60, fini: id !== "scan", ancre: id === "souffle" ? "pieds" : null, avant: av, apres: ap, vecu: v, trop: id === "scan" }, 21));
+  add(7, "pleine", { pr: "quotidien", titre: "Au quotidien : Boire une boisson chaude", informel: "Boire une boisson chaude" }, 8);
   add(16, "qn", { qi: "dq1", q: "q04", rep: [1, 0, 1, 1, 0] }, 18);
   add(15, "qn", { qi: "dq2", q: "q07", rep: [1, 0, 1, 1, 1, 1] }, 19);
   E.sort((a, b) => a.t < b.t ? -1 : 1);
   return { v: 2, priv: DEMO_PRIV, pub: DEMO_PUB, email: "annesophie.auray.psy@gmail.com", appUrl: "https://entre-seances.github.io", created: day(40), relay: "", token: "", cursor: 0, cx: { "demo-act": cxAct },
     patients: {
-      [DEMO_CODE]: { code: DEMO_CODE, label: "Patient fictif (ado)", tv: "tu", mods: ALL_MODS.slice(), created: day(36), lastImport: day(1), cx: ["demo-act"], tx: TCC_PRESETS.tca.slice(), qs: [{ i: "dq1", q: "q04", at: day(17), done: day(16) }, { i: "dq2", q: "q07", at: day(17), done: day(15) }, { i: "dq3", q: "q01", at: day(1) }],
+      [DEMO_CODE]: { code: DEMO_CODE, label: "Patient fictif (ado)", tv: "tu", mods: ALL_MODS.slice(), created: day(36), lastImport: day(1), cx: ["demo-act"], tx: TCC_PRESETS.tca.slice(), mf: { p: MF_EX.map(e => e.id), ts: 1, max: 10 }, qs: [{ i: "dq1", q: "q04", at: day(17), done: day(16) }, { i: "dq2", q: "q07", at: day(17), done: day(15) }, { i: "dq3", q: "q01", at: day(1) }],
         msgs: [{ id: "dm1", t: day(3, 18, 30), x: "Bravo pour tes notes de la semaine. Continue le journal du sommeil, c'est très utile pour la prochaine séance.", ex: "m:sommeil", lu: day(3, 19, 2) }, { id: "dm2", t: day(0, 9, 10), x: "J'ai vu que ta jauge d'énergie était très haute ces derniers jours. Peux-tu remplir le questionnaire « Mon élan » avant notre rendez-vous ? Et ce soir, essaie l'exercice des activités agréables.", ex: "x:demo-act" }],
         tca: { p: ["HP"], r: ["pdj", "dej", "gout", "din"], o: { photo: 1, faim: 1, ctrl: 1, comp: 0, emo: 1, pens: 0, saute: 1, grig: 1 } },
         hier: [["Demander l'heure à quelqu'un dans la rue", 3], ["Commander seul(e) au comptoir d'un café", 5], ["Poser une question en classe", 7], ["Passer un appel pour prendre un rendez-vous", 8]], entries: E },
@@ -1301,7 +1394,7 @@ function sleepHours(e) {
   const [ch, cm] = e.coucher.split(":").map(Number), [lh, lm] = e.lever.split(":").map(Number);
   let m = (lh * 60 + lm) - (ch * 60 + cm); if (m <= 0) m += 1440; return m / 60;
 }
-function cfgFor(pt) { return { v: 3, m: pt.mods, h: (pt.hier || []).filter(h => h[0].trim()), t: pt.tv, e: vault.email, a: pt.tca || null, vp: vault.vapid ? vault.vapid.pub : "", cx: (pt.cx || []).map(id => vault.cx && vault.cx[id]).filter(Boolean), tx: (pt.tx || []).filter(id => TCC_BY_ID[id]), qs: qnForCfg(pt) }; }
+function cfgFor(pt) { return { v: 3, m: pt.mods, h: (pt.hier || []).filter(h => h[0].trim()), t: pt.tv, e: vault.email, a: pt.tca || null, vp: vault.vapid ? vault.vapid.pub : "", cx: (pt.cx || []).map(id => vault.cx && vault.cx[id]).filter(Boolean), tx: (pt.tx || []).filter(id => TCC_BY_ID[id]), qs: qnForCfg(pt), mf: pt.mf || null }; }
 function activationCfg(pt) { return Object.assign(cfgFor(pt), { c: pt.code, k: vault.pub }); }
 const getChips = name => [...document.querySelectorAll(`.chips[data-name="${name}"] .chip[aria-pressed="true"]`)].map(b => b.dataset.v);
 document.addEventListener("click", e => {
@@ -1351,10 +1444,11 @@ async function publishCfg(pt) {
 async function importData(data) {
   const pt = vault.patients[data.c];
   if (!pt) return { err: "inconnu", code: data.c };
-  const known = new Set(pt.entries.map(e => e.id)); let n = 0;
+  const known = new Set(pt.entries.map(e => e.id)), keys = new Set(pt.entries.map(entryKey)); let n = 0;
   for (const e of data.e) {
     if (e.type === "msglu") { const m = (pt.msgs || []).find(x => x.id === e.mid); if (m && !m.lu) m.lu = e.t; continue; }
-    if (known.has(e.id)) continue;
+    if (known.has(e.id) || keys.has(entryKey(e))) continue;
+    known.add(e.id); keys.add(entryKey(e));
     if (e.type === "qn") { const a = (pt.qs || []).find(x => x.i === e.qi); if (a && !a.done) a.done = e.t; }
     if (e.img) { try { await storePhoto(e.id, e.img); e.photo = "ok"; } catch (x) { e.photo = "perdue"; } delete e.img; }
     pt.entries.push(e); n++;
@@ -1362,7 +1456,12 @@ async function importData(data) {
   pt.entries.sort((a, b) => a.t < b.t ? -1 : 1); pt.lastImport = new Date().toISOString();
   return { pt, n, dup: data.e.length - n };
 }
-async function fetchInbox() {
+let inboxRun = null;
+function fetchInbox() { /* une seule relève à la fois : évite d'importer deux fois les mêmes réponses */
+  if (!inboxRun) inboxRun = fetchInboxOnce().finally(() => { inboxRun = null; });
+  return inboxRun;
+}
+async function fetchInboxOnce() {
   const r = await relay(vault.relay, { a: "inbox", token: vault.token, since: vault.cursor || 0 }, 120000);
   if (!r.ok) { const e = new Error(r.err || "relais"); e.detail = r.err === "auth" ? "Ce relais appartient à un autre espace." : "Le relais a renvoyé une erreur : " + (r.err || "inconnue") + ". Mettre à jour le code du relais (Réglages → Guide)."; throw e; }
   const res = { n: 0, by: {}, bad: 0, unknown: [], seen: r.items.length };
@@ -1547,6 +1646,7 @@ function alerts(pt) {
   const lim = Date.now() - 30 * 864e5, recent = pt.entries.filter(e => new Date(e.t) > lim), out = [];
   const lastA = recent.filter(e => e.type === "angst").pop(); if (lastA && lastA.total > 10) out.push(`Angst ${lastA.total}/20`);
   const lastE = recent.filter(e => e.type === "elan").pop(); if (lastE && elanFlag(lastE)) out.push("Élan à explorer");
+  if (recent.some(e => e.type === "pleine" && (e.trop || (e.vecu || []).some(v => MF_VECU_KO.includes(v))))) out.push("Pleine conscience : vécu difficile");
   const qs = {}; recent.filter(e => e.type === "qn").forEach(e => { qs[e.q] = e; });
   Object.values(qs).forEach(e => { const sc = qnScore(e); if (sc && sc.pos) out.push(`${sc.short} : seuil atteint`); });
   const comp = pt.entries.filter(e => e.type === "repas" && e.comp && e.comp.length && new Date(e.t) > Date.now() - 7 * 864e5).length; if (comp) out.push(`Compensations ×${comp} (7 j)`);
@@ -1579,6 +1679,49 @@ MOUNTS.patients = p => {
   else { const f = document.getElementById("fetchNow"); if (f) f.onclick = async () => { f.disabled = true; f.textContent = "Relevé…"; try { flash = inboxSummary(await fetchInbox()); } catch (e) { flash = e.detail || "Le relais ne répond pas. Vérifier la connexion."; } render(); }; }
 };
 
+/* Pleine conscience */
+function mfBox(x) {
+  const on = x.mods.includes("pleine"), c = x.mf || { p: MF_EX.map(e => e.id), ts: 0, max: 15 };
+  return `<div class="card stack" id="mfBox" ${on ? "" : "hidden"}><span class="lbl">Réglages pleine conscience</span>
+    <label class="mod-check"><input type="checkbox" id="mfts" ${c.ts ? "checked" : ""}><span><b>Adaptation psychotrauma</b><br><span class="small muted">Yeux ouverts conseillés, ancres extérieures proposées en premier (pieds, mains, sons), durées limitées à 5 min. Décoche le scan du corps et la bienveillance, que vous pourrez réintroduire après en avoir parlé en séance.</span></span></label>
+    <div class="row"><label class="lbl" for="mfmax" style="margin:0">Durée maximale proposée</label><select id="mfmax">${[3, 5, 10, 15].map(m => `<option value="${m}" ${m === c.max ? "selected" : ""}>${m} min</option>`).join("")}</select></div>
+    <div><p class="grp">Pratiques proposées</p><div class="mods">${MF_EX.map(e => `<label class="mod-check"><input type="checkbox" class="mfp" value="${e.id}" ${c.p.includes(e.id) ? "checked" : ""}><span><b>${e.t}</b>${e.ts === "prudence" ? ` <span class="pill warn">prudence trauma</span>` : ""}<br><span class="small muted">${e.d} · ${e.durs.join(", ")} min</span></span></label>`).join("")}</div></div>
+    <p class="hint">Une page « Au quotidien » (pratique informelle) est toujours proposée. Repères de la recherche : onglet Exercices.</p></div>`;
+}
+function mfStats(list) {
+  const mf = list.filter(e => e.type === "pleine"), formal = mf.filter(e => e.pr !== "quotidien"), sc = formal.filter(e => e.avant != null && e.apres != null);
+  const days = new Set(mf.map(e => e.t.slice(0, 10))).size, mins = Math.round(formal.reduce((s, e) => s + (e.duree || 0), 0) / 60);
+  const ko = formal.filter(e => (e.vecu || []).some(v => MF_VECU_KO.includes(v)) || e.trop);
+  return { mf, formal, sc, days, mins, ko, inf: mf.length - formal.length };
+}
+function mfPanel(pt, list, from, to) {
+  const s = mfStats(list); if (!s.mf.length) return "";
+  const body = (s.sc.length ? timeChart({ series: [{ pts: s.sc.map(e => ({ t: e.t, v: e.avant })), color: "var(--z5)", dotsOnly: true }, { pts: s.sc.map(e => ({ t: e.t, v: e.apres })), color: "var(--z1)", dotsOnly: true }], min: 0, max: 10, ticks: [0, 5, 10], from, to, h: 150 })
+      + `<div class="legend"><span><i style="background:var(--z5)"></i>Tension avant</span><span><i style="background:var(--z1)"></i>Après</span></div>` : "")
+    + `<div class="split" style="gap:12px"><div><span class="lbl small">Pratiques</span>${freqList(s.formal.map(e => e.titre))}</div><div><span class="lbl small">Vécu signalé</span>${freqList(s.formal.flatMap(e => e.vecu || []))}${s.inf ? `<span class="lbl small">Au quotidien</span>${freqList(s.mf.filter(e => e.pr === "quotidien").map(e => e.informel))}` : ""}</div></div>`
+    + (s.ko.length ? `<div class="notice small"><b>À reprendre en séance :</b> ${s.ko.map(e => `${fmtD(e.t)} (${esc(e.titre)}${e.trop ? ", arrêtée car « trop »" : ""}${(e.vecu || []).filter(v => MF_VECU_KO.includes(v)).length ? " : " + esc((e.vecu || []).filter(v => MF_VECU_KO.includes(v)).join(", ")) : ""})`).join(" ; ")}</div>` : "");
+  return panel("Pleine conscience", `${s.formal.length} pratique${s.formal.length > 1 ? "s" : ""} · ${s.mins} min · ${s.days} jour${s.days > 1 ? "s" : ""} de pratique${s.inf ? ` · ${s.inf} au quotidien` : ""}${s.sc.length ? ` · tension ${r1(avg(s.sc.map(e => e.avant)))} → ${r1(avg(s.sc.map(e => e.apres)))}` : ""}`, body);
+}
+function mfLibrary() {
+  return `<button class="link" data-nav="exercices">← Exercices</button>
+  <div class="head-row"><div><h1>Pleine conscience : repères de la recherche</h1><p class="muted">Ce qui a guidé la conception du module, et ce que vous pouvez en dire au patient.</p></div></div>
+  <div class="stack mf-lib">
+    <div class="card stack"><span class="lbl">Durée et fréquence</span>
+      <p>Les essais qui font varier la durée des séances (de 5 à 30 min par jour) ne trouvent en général pas d'effet dose ; une comparaison 10 min / 30 min sur 2 semaines estime une différence faible (d ≈ 0,2). La méta-régression de Strohmaier (2020) ne trouve pas de lien entre la quantité de pratique à domicile et les résultats ; Parsons et al. (2017) trouvaient une corrélation faible (r = 0,26). La durée minimale pour un effet durable reste inconnue : un essai en cours compare 4, 10, 20 et 30 min par jour.</p>
+      <p><b>Dans l'application :</b> des pratiques de 1 à 15 min, 5 min par défaut ; le message au patient est « régulièrement plutôt que longtemps ». Environ 90 % des abandons d'une application de méditation ont lieu dans les 7 premiers jours : d'où des pratiques très courtes au départ (STOP, pause de 3 minutes, ancrage) et une suggestion par semaine.</p></div>
+    <div class="card stack"><span class="lbl">Efficacité attendue</span>
+      <p>Chez l'adulte en population générale (136 essais, 11 605 participants), les programmes de pleine conscience réduisent l'anxiété, la dépression et le stress par rapport à l'absence d'intervention, sans faire mieux que d'autres pratiques actives comme l'exercice physique ; avec les seuls essais de bonne qualité, seul l'effet sur le stress persiste (Galante et al., 2021). Les applications de méditation ont un effet faible sur le bien-être (DMS ≈ 0,29). La MBCT réduit le risque de rechute dépressive, surtout après 3 épisodes ou plus (méta-analyse sur données individuelles, Breedvelt et al., 2024).</p>
+      <p><b>Adolescents :</b> l'essai MYRIAD (plus de 28 000 élèves de 11 à 14 ans) n'a pas montré d'effet d'un programme scolaire universel ; environ 80 % des élèves ne faisaient pas la pratique demandée. Mieux vaut une proposition individualisée, volontaire, et accompagnée en séance.</p></div>
+    <div class="card stack"><span class="lbl">Effets indésirables et psychotrauma</span>
+      <p>Dans des programmes de pleine conscience standard (MBCT), 83 % des participants rapportent au moins un effet lié à la méditation, 58 % un effet vécu comme désagréable, 37 % un effet qui gêne le fonctionnement, et 6 à 14 % des effets négatifs durables, associés à des signes d'hyperactivation ou de dissociation (Britton et al., 2021).</p>
+      <p><b>Dans l'application :</b> tension notée avant et après ; message d'orientation si la tension de départ est à 8 ou plus ; bouton « C'est trop pour moi » qui arrête la pratique et propose le 5-4-3-2-1 ; après chaque pratique, le patient peut signaler pensées qui s'emballent, agitation, souvenirs difficiles, impression d'irréalité ou douleur. Ces signalements apparaissent dans sa fiche sous « À reprendre en séance ».</p>
+      <p><b>Adaptation psychotrauma</b> (principes de la pleine conscience sensible au trauma, Treleaven) : yeux ouverts, ancres extérieures ou périphériques (pieds, mains, sons, objet regardé) plutôt que le souffle, pratiques courtes, liberté de bouger ou d'arrêter, prudence avec le scan du corps et les pratiques d'autocompassion, que vous pouvez désactiver par patient.</p></div>
+    <div class="card stack"><span class="lbl">Les pratiques</span>
+      ${MF_EX.map(e => `<p><b>${e.t}</b> (${e.durs.join(", ")} min)${e.ts === "prudence" ? ` <span class="pill warn">prudence trauma</span>` : ""} : ${e.d}.</p>`).join("")}
+      <p class="small muted">Textes originaux, inspirés des programmes MBSR et MBCT (pause de 3 minutes, scan du corps), de l'ACT (pensées sur des feuilles) et de la pause d'autocompassion de K. Neff. Les consignes s'affichent au fil du temps ; une lecture à voix haute par la voix du téléphone est proposée en option.</p></div>
+  </div>`;
+}
+
 /* Formulaire patient */
 function patientForm(pt) {
   const x = pt || { label: "", tv: "tu", mods: DEFAULT_MODS.slice(), hier: [], tca: null };
@@ -1601,6 +1744,7 @@ function patientForm(pt) {
       <div class="card stack"><span class="lbl">Exercices personnalisés</span>
         ${Object.values(vault.cx || {}).length ? `<div class="mods">${Object.values(vault.cx).map(d => `<label class="mod-check"><input type="checkbox" class="xcx" value="${d.id}" ${(x.cx || []).includes(d.id) ? "checked" : ""}><span><b>${esc(d.t)}</b><br><span class="small muted">${esc(d.d || "")}</span></span></label>`).join("")}</div>` : `<p class="small muted">Aucun pour l'instant.</p>`}
         <button class="link" data-nav="exercices" style="align-self:flex-start">Créer ou modifier des exercices personnalisés</button></div>
+      ${mfBox(x)}
       <div class="card stack" id="tcaBox" ${tcaOn ? "" : "hidden"}><span class="lbl">Réglages TCA</span>
         <div><p class="grp">Trouble(s) suivi(s) : pré-règle les rubriques</p><div class="chips" data-name="prof" data-multi="1">${Object.entries(TCA_PROFILES).map(([k, l]) => `<button class="chip" data-v="${k}" aria-pressed="${tca.p.includes(k)}">${l}</button>`).join("")}</div></div>
         <div><p class="grp">Rubriques du carnet alimentaire</p><div class="mods">${Object.entries(TCA_OPTS).map(([k, l]) => `<label class="mod-check"><input type="checkbox" class="topt" value="${k}" ${tca.o[k] ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>
@@ -1621,9 +1765,11 @@ function mountForm(pt) {
   const box = document.getElementById("hier");
   document.getElementById("addH").onclick = () => { box.insertAdjacentHTML("beforeend", hierRow("", 5)); box.lastElementChild.querySelector("input").focus(); };
   box.addEventListener("click", e => { if (e.target.classList.contains("hrm")) e.target.closest(".hier-row").remove(); });
-  const modBoxes = [...document.querySelectorAll(".mod-check input:not(.topt):not(.tslot):not(.xcx):not(.ttx)")];
+  const modBoxes = [...document.querySelectorAll(".mod-check input:not(.topt):not(.tslot):not(.xcx):not(.ttx):not(.mfp):not(#mfts)")];
   mountTccPick(modBoxes);
-  modBoxes.forEach(i => i.onchange = () => { document.getElementById("tcaBox").hidden = !modBoxes.some(b => b.checked && (b.value === "repas" || b.value === "envie")); });
+  modBoxes.forEach(i => i.onchange = () => { document.getElementById("tcaBox").hidden = !modBoxes.some(b => b.checked && (b.value === "repas" || b.value === "envie")); document.getElementById("mfBox").hidden = !modBoxes.some(b => b.checked && b.value === "pleine"); });
+  const ts = document.getElementById("mfts");
+  ts.onchange = () => { if (ts.checked) { document.getElementById("mfmax").value = "5"; document.querySelectorAll(".mfp").forEach(i => { if (MF_BY_ID[i.value].ts === "prudence") i.checked = false; }); } };
   document.querySelectorAll('.chips[data-name="prof"] .chip').forEach(b => b.addEventListener("picked", () => {
     const on = new Set(getChips("prof").flatMap(k => TCA_PRESET[k]));
     if (getChips("prof").length) document.querySelectorAll(".topt").forEach(i => { i.checked = on.has(i.value); });
@@ -1640,8 +1786,14 @@ function mountForm(pt) {
       if (mods.includes("repas") && !r.length) { document.getElementById("ferr").textContent = "Cochez au moins un repas prévu."; return; }
       tca = { p: getChips("prof"), r, o };
     }
+    let mf = null;
+    if (mods.includes("pleine")) {
+      const pr = [...document.querySelectorAll(".mfp:checked")].map(i => i.value);
+      if (!pr.length) { document.getElementById("ferr").textContent = "Cochez au moins une pratique de pleine conscience, ou décochez le module."; return; }
+      mf = { p: pr, ts: document.getElementById("mfts").checked ? 1 : 0, max: Number(document.getElementById("mfmax").value) || 15 };
+    }
     e.currentTarget.disabled = true;
-    const data = { label: document.getElementById("lab").value.trim(), tv: getChips("tv")[0] || "tu", mods, hier, tca, cx: [...document.querySelectorAll(".xcx:checked")].map(i => i.value), tx: [...document.querySelectorAll(".ttx:checked")].map(i => i.value), updated: new Date().toISOString() };
+    const data = { mf, label: document.getElementById("lab").value.trim(), tv: getChips("tv")[0] || "tu", mods, hier, tca, cx: [...document.querySelectorAll(".xcx:checked")].map(i => i.value), tx: [...document.querySelectorAll(".ttx:checked")].map(i => i.value), updated: new Date().toISOString() };
     let code;
     if (pt) { Object.assign(pt, data); code = pt.code; }
     else { code = newCode(); vault.patients[code] = Object.assign({ code, created: new Date().toISOString(), entries: [], lastImport: null }, data); }
@@ -1722,11 +1874,12 @@ function mergeVault(L, R) {
     const lp = L.patients[code];
     if (!lp) {
       if (del && del >= stamp(rp)) continue;
-      L.patients[code] = JSON.parse(JSON.stringify(rp)); res.added.push(rp.label || code); res.entries += (rp.entries || []).length; continue;
+      L.patients[code] = JSON.parse(JSON.stringify(rp)); dedupeEntries(L.patients[code]); res.added.push(rp.label || code); res.entries += (rp.entries || []).length; continue;
     }
     if (stamp(rp) > stamp(lp)) { for (const k of ["label", "tv", "mods", "hier", "tca", "cx", "tx", "updated"]) if (k in rp) lp[k] = rp[k]; res.updated++; }
     const ids = new Set((lp.entries || []).map(e => e.id));
-    for (const e of rp.entries || []) if (!ids.has(e.id)) { lp.entries.push(e); res.entries++; }
+    for (const e of rp.entries || []) if (!ids.has(e.id)) { ids.add(e.id); lp.entries.push(e); res.entries++; }
+    res.entries -= dedupeEntries(lp);
     lp.entries.sort((a, b) => a.t < b.t ? -1 : 1);
     const mm = {}; for (const m of (lp.msgs || []).concat(rp.msgs || [])) { const x = mm[m.id]; mm[m.id] = x ? Object.assign({}, x, m, { lu: x.lu || m.lu }) : m; }
     const qq = {}; for (const a of (lp.qs || []).concat(rp.qs || [])) { const x = qq[a.i]; qq[a.i] = x ? Object.assign({}, x, a, { done: x.done || a.done }) : a; }
@@ -1959,12 +2112,14 @@ PAGES.exercices = p => {
   vault.cx = vault.cx || {};
   if (p.lib) return tccLibrary(p);
   if (p.qn) return qnLibrary(p);
+  if (p.mf) return mfLibrary();
   if (p.edit) return cxBuilder(p.edit === "new" ? (p.model ? Object.assign({ id: "" }, JSON.parse(JSON.stringify(CX_MODELS[p.model]))) : { id: "", t: "", d: "", c: "", f: [{ k: "texte", q: "" }] }) : vault.cx[p.edit]);
   const list = Object.values(vault.cx);
   const users = id => Object.values(vault.patients).filter(pt => (pt.cx || []).includes(id)).length;
   return `<div class="head-row"><div><h1>Exercices personnalisés</h1><p class="muted">Créez vos propres exercices, puis attribuez-les dans la fiche de chaque patient (Modifier les exercices).</p></div>
     <button class="btn" data-nav="exercices" data-p='{"edit":"new"}'>Nouvel exercice</button></div>
     ${list.length ? `<div class="grid-list">${list.map(d => `<button class="pcard" data-nav="exercices" data-p='${JSON.stringify({ edit: d.id })}'><span class="lab">${esc(d.t)}</span><span class="muted small">${esc(d.d || "")}</span><span class="row"><span class="pill">${d.f.length} élément${d.f.length > 1 ? "s" : ""}</span><span class="pill">${users(d.id)} patient${users(d.id) > 1 ? "s" : ""}</span></span></button>`).join("")}</div>` : `<div class="empty card"><h2>Aucun exercice personnalisé</h2><p>Partez de zéro ou d'un modèle.</p></div>`}
+    <div class="card stack" style="margin-top:16px"><span class="lbl">Pleine conscience</span><p class="small">${MF_EX.length} pratiques guidées de 1 à 15 minutes, une page « au quotidien », une adaptation psychotrauma réglable par patient et un suivi des vécus difficiles. Le module se coche dans « Modifier les exercices » du patient.</p><button class="btn soft" data-nav="exercices" data-p='{"mf":true}' style="align-self:flex-start">Repères de la recherche</button></div>
     <div class="card stack qn-entry" style="margin-top:16px"><span class="lbl">Questionnaires de repérage</span><p class="small">${QN_ORDER.length} questionnaires validés en français, rangés en ${QN_FOLDERS.length} dossiers par trouble (personnalité limite, TDAH, TSA, bipolarité, personnalité narcissique, TCA, usage d'alcool et de drogues). Le patient ne voit que « Nouveau questionnaire » ; la cotation est automatique dans sa fiche.</p><button class="btn" data-nav="exercices" data-p='{"qn":true}' style="align-self:flex-start">Ouvrir les questionnaires</button></div>
     <div class="card stack" style="margin-top:16px"><span class="lbl">Exercices TCC</span><p class="small">${TCC_EX.length} exercices de thérapie des schémas, besoins et valeurs, prêts à l'emploi et triés par indication. Ils s'attribuent dans la fiche du patient (module « Exercices TCC »).</p><button class="btn soft" data-nav="exercices" data-p='{"lib":true}' style="align-self:flex-start">Ouvrir la bibliothèque TCC</button></div>
     <div class="card stack" style="margin-top:16px"><span class="lbl">Partir d'un modèle</span><div class="row">${Object.entries(CX_MODELS).map(([k, m]) => `<button class="btn soft" data-nav="exercices" data-p='${JSON.stringify({ edit: "new", model: k })}'>${m.t}</button>`).join("")}</div></div>`;
@@ -1997,6 +2152,7 @@ function cxBuilder(d) {
 }
 MOUNTS.exercices = p => {
   if (p.qn) { mountQnLibrary(p); return; }
+  if (p.mf) return;
   if (p.lib) { document.querySelectorAll('.chips[data-name="ttag"] .chip').forEach(b => b.addEventListener("picked", () => nav("exercices", { lib: true, tag: b.dataset.v }))); return; }
   if (!p.edit) return;
   const box = document.getElementById("flds");
@@ -2272,6 +2428,7 @@ function entryText(e) {
     case "sud": return `${e.sud}/10${e.note ? " · « " + e.note + " »" : ""}`;
     case "sommeil": { const h = sleepHours(e); return `Nuit du ${fmtD(e.nuit)} : ${e.coucher} → ${e.lever} (${r1(h)} h) · endormissement ${e.endormissement || "?"} · réveils ${e.reveils || "?"} · qualité ${e.qualite || "?"}/5 · écran ${e.ecran || "?"} · sieste ${e.sieste || "?"}`; }
     case "jauge": return `Niveau ${e.niveau}/5${e.sources.length ? " · sources : " + e.sources.join(", ") : ""}${e.aides.length ? " · aides : " + e.aides.join(", ") : ""}${e.note ? " · « " + e.note + " »" : ""}`;
+    case "pleine": return e.pr === "quotidien" ? `Au quotidien : ${e.informel}` : `${e.titre} · ${Math.round((e.duree || 0) / 60)} min${e.fini ? "" : " (arrêtée)"}${e.avant != null ? ` · tension ${e.avant} → ${e.apres}` : ""}${e.ancre ? ` · ancre : ${MF_ANCRE_LBL[e.ancre]}` : ""}${(e.vecu || []).length ? ` · ${e.vecu.join(", ")}` : ""}`;
     case "respi": return `${e.exercice}${e.avant != null ? ` · stress ${e.avant} → ${e.apres}` : ""} · ${Math.round((e.duree || 0) / 60)} min`;
     case "expo": return `« ${e.label} » (prévu ${e.prevu}) · avant ${e.avant}, pic ${e.pic}, fin ${e.fin} · ${e.duree || "durée ?"} · resté : ${e.reste || "?"}${e.note ? " · « " + e.note + " »" : ""}`;
     case "taches": return `« ${e.titre || "Tâche"} » · ${e.faites}/${e.etapes} étapes · ${e.ressenti || ""} · ${e.minutes} min`;
@@ -2308,8 +2465,9 @@ function patientDetail(pt, p) {
     P.push(panel("Humeur du jour", `${pl(hum.length, "saisie")}${en.length ? ` · énergie moyenne ${r1(avg(en.map(e => e.energie)))}/10` : ""}`,
       (md.length ? `<div class="mood-strip">${md.slice(-28).map(e => `<span class="ms" title="${fmtD(e.t)} : ${MOOD_LABEL[e.humeur]}${e.energie != null ? " · énergie " + e.energie : ""}">${face(e.humeur, 26)}<small>${fmtD(e.t)}</small></span>`).join("")}</div>` : "")
       + (en.length ? `<span class="lbl small">Jauge d'énergie</span>` + timeChart({ series: [{ pts: en.map(e => ({ t: e.t, v: e.energie })), color: "var(--sun)" }], min: 1, max: 10, ticks: [1, 5, 10], from, to }) : "")
-      + (sc.length ? `<span class="lbl small">Humeur 0-10 (ancienne version)</span>` + timeChart({ series: [{ pts: sc.map(e => ({ t: e.t, v: e.score })), color: "var(--accent)" }], min: 0, max: 10, ticks: [0, 5, 10], from, to }) : "")
-      + (md.length ? `<span class="lbl small">Humeurs les plus choisies</span>${freqList(md.map(e => MOOD_LABEL[e.humeur]))}` : "")));
+      + (sc.length ? `<span class="lbl small">Humeur de 0 (très mal) à 10 (très bien) · moyenne ${r1(avg(sc.map(e => e.score)))}/10</span>` + timeChart({ series: [{ pts: sc.map(e => ({ t: e.t, v: e.score })), color: "var(--accent)" }], min: 0, max: 10, ticks: [0, 5, 10], from, to }) : "")
+      + (md.length ? `<span class="lbl small">Humeurs les plus choisies</span>${freqList(md.map(e => MOOD_LABEL[e.humeur]))}` : "")
+      + (hum.some(e => e.emotions && e.emotions.length) ? `<span class="lbl small">Émotions cochées</span>${freqList(hum.flatMap(e => e.emotions || []))}` : "")));
   }
   const el = by("elan"), ag = by("angst");
   if (el.length || ag.length) {
@@ -2361,6 +2519,7 @@ function patientDetail(pt, p) {
     + `<div class="split" style="gap:12px"><div><span class="lbl small">Sources</span>${freqList(jau.flatMap(e => e.sources))}</div><div><span class="lbl small">Ce qui aide</span>${freqList(jau.flatMap(e => e.aides))}</div></div>`));
   if (res.length) { const sc = res.filter(e => e.avant != null);
     P.push(panel("Respiration et ancrage", `${res.length} exercices${sc.length ? ` · stress ${r1(avg(sc.map(e => e.avant)))} → ${r1(avg(sc.map(e => e.apres)))}` : ""}`, freqList(res.map(e => e.exercice)))); }
+  { const mp = mfPanel(pt, list, from, to); if (mp) P.push(mp); }
   if ((pt.hier && pt.hier.length) || exp.length) {
     const rows = (pt.hier || []).map((h, i) => { const ex = exp.filter(e => e.marche === i); const last = ex[ex.length - 1];
       return `<tr><td>${esc(h[0])}</td><td class="num">${h[1]}</td><td class="num">${ex.length}</td><td class="num">${ex.map(e => e.pic).join(" → ") || "–"}</td><td class="num">${last ? last.fin : "–"}</td><td>${last ? esc(last.reste) : "–"}</td></tr>`; }).join("");
@@ -2387,9 +2546,11 @@ function report(pt, per) {
   const lines = [`Entre-Séances · ${spaced(pt.code)}${pt.label ? " (" + pt.label + ")" : ""}`, `Période du ${fmtD(from.toISOString(), { day: "numeric", month: "long", year: "numeric" })} au ${fmtD(to.toISOString(), { day: "numeric", month: "long", year: "numeric" })} · ${list.length} réponses`, ""];
   const by = t => list.filter(e => e.type === t);
   const hum = by("humeur"), en = hum.filter(e => e.energie != null), md = hum.filter(e => e.humeur);
-  if (hum.length) lines.push(`Humeur du jour : ${pl(hum.length, "saisie")}${en.length ? `, énergie moyenne ${r1(avg(en.map(e => e.energie)))}/10` : ""}${md.length ? `, humeurs : ${Object.entries(md.reduce((c, e) => (c[MOOD_LABEL[e.humeur]] = (c[MOOD_LABEL[e.humeur]] || 0) + 1, c), {})).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ×${n}`).join(", ")}` : ""}.`);
+  const scH = hum.filter(e => e.score != null), emH = hum.flatMap(e => e.emotions || []);
+  if (hum.length) lines.push(`Humeur du jour : ${pl(hum.length, "saisie")}${scH.length ? `, humeur moyenne ${r1(avg(scH.map(e => e.score)))}/10 (min ${Math.min(...scH.map(e => e.score))}, max ${Math.max(...scH.map(e => e.score))})` : ""}${emH.length ? `, émotions : ${Object.entries(emH.reduce((c, k) => (c[k] = (c[k] || 0) + 1, c), {})).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ×${n}`).join(", ")}` : ""}${en.length ? `, énergie moyenne ${r1(avg(en.map(e => e.energie)))}/10` : ""}${md.length ? `, humeurs : ${Object.entries(md.reduce((c, e) => (c[MOOD_LABEL[e.humeur]] = (c[MOOD_LABEL[e.humeur]] || 0) + 1, c), {})).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ×${n}`).join(", ")}` : ""}.`);
   const ag = by("angst"); if (ag.length) lines.push(`Questionnaire d'Angst : ${ag.map(e => `${fmtD(e.t)} ${e.total}/20`).join(", ")} (seuil > 10).`);
   const el = by("elan"); if (el.length) lines.push(`Suivi de l'élan : ${el.map(e => `${fmtD(e.t)} ${e.oui}/10${elanFlag(e) ? " à explorer" : ""}`).join(", ")}.`);
+  { const m = mfStats(list); if (m.mf.length) lines.push(`Pleine conscience : ${m.formal.length} pratique(s), ${m.mins} min au total, ${m.days} jour(s) de pratique${m.inf ? `, ${m.inf} pratique(s) au quotidien` : ""}${m.sc.length ? `, tension moyenne ${r1(avg(m.sc.map(e => e.avant)))} avant, ${r1(avg(m.sc.map(e => e.apres)))} après` : ""}${m.ko.length ? `. Vécus difficiles signalés : ${m.ko.length}` : ""}.`); }
   by("qn").forEach(e => { const sc = qnScore(e); lines.push(`${qnName(e.q)} (${fmtD(e.t)}) : ${sc ? sc.lines.join(" ") : "réponses reçues"}`); });
   const rep = by("repas"); if (rep.length) lines.push(`Repas : ${rep.filter(e => e.slot !== "grig").length} repas notés dont ${rep.filter(e => e.pris === false).length} non pris, ${rep.filter(e => e.slot === "grig").length} grignotages, perte de contrôle ×${rep.filter(e => e.ctrl === "Oui").length}, compensations ×${rep.flatMap(e => e.comp || []).length}.`);
   const env = by("envie"); if (env.length) lines.push(`Envies de crise : ${env.length} (${env.filter(e => e.issue === "J'ai fait une crise").length} avec crise).`);
