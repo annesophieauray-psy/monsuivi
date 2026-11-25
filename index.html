@@ -317,6 +317,11 @@ ol.how { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; 
 @keyframes mfIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .mf-voice { display: flex; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
 .mf-voice input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+
+.chips.col-chips { flex-direction: column; align-items: stretch; }
+.chips.col-chips .chip { text-align: left; justify-content: flex-start; }
+.chips.col-chips .chip::before { content: "☐"; margin-right: 8px; font-size: 1.15em; }
+.chips.col-chips .chip[aria-pressed="true"]::before { content: "☑"; }
 </style>
 <div class="shell" id="app"></div>
 <script>
@@ -1454,11 +1459,11 @@ SCREENS.humeur = {
       <p class="emo-g">Plutôt difficiles</p><div class="chips emo ko" data-name="emo2" data-multi="1">${EMO_KO.map(o => `<button type="button" class="chip" data-v="${o}" aria-pressed="false">${o}</button>`).join("")}</div>
       <div class="chips emo" data-name="emo3" data-multi="1" style="margin-top:8px"><button type="button" class="chip" data-v="Je ne sais pas trop" aria-pressed="false">Je ne sais pas trop</button></div>
       <input type="text" id="emoX" maxlength="40" placeholder="${T("Une autre émotion ? (un mot)", "Une autre émotion ? (un mot)")}" style="margin-top:10px"></div>
+    ${field("Le contexte (facultatif)", `<textarea id="ctx" maxlength="400" placeholder="${T("Où étais-tu, que se passait-il, avec qui… ?", "Où étiez-vous, que se passait-il, avec qui… ?")}"></textarea>`, noPerso())}
     <div><span class="lbl">${T("Ta jauge d'énergie", "Votre jauge d'énergie")}</span>
       <div class="battery" id="bat" role="group" aria-label="Jauge d'énergie de 1 à 10">${Array.from({ length: 10 }, (_, i) => `<button type="button" class="cell" data-n="${i + 1}" aria-label="${i + 1} sur 10"></button>`).join("")}<span class="nub"></span></div>
       <div class="scale-ends"><span>Vide</span><span>Pleine</span></div>
       <p class="bat-desc" id="batD" aria-live="polite">${T("Touche la jauge pour la remplir.", "Touchez la jauge pour la remplir.")}</p></div>
-    ${field("Un mot sur la journée (facultatif)", `<textarea id="note" maxlength="400"></textarea>`, noPerso())}
     <p class="hint" id="herr" role="alert"></p>
     <button class="btn wide" id="ok">Enregistrer</button></div>`,
   mount() {
@@ -1480,7 +1485,7 @@ SCREENS.humeur = {
       const x = val("emoX").trim();
       const emotions = getChips("emo").concat(getChips("emo2"), getChips("emo3"), x ? [x] : []);
       if (score == null && energie == null && !emotions.length) { document.getElementById("herr").textContent = T("Touche la jauge d'humeur, coche une émotion ou remplis ta jauge d'énergie.", "Touchez la jauge d'humeur, cochez une émotion ou remplissez votre jauge d'énergie."); return; }
-      addEntry("humeur", { score, emotions, energie, note: val("note").trim() });
+      addEntry("humeur", { score, emotions, energie, contexte: val("ctx").trim() });
       saved("humeur");
     };
   }
@@ -1950,14 +1955,24 @@ SCREENS.sommeil = {
     <div class="two">${field("Couché(e) à", `<input type="time" id="c" value="23:00">`)}${field("Levé(e) à", `<input type="time" id="l" value="07:00">`)}</div>
     ${field("Temps pour s'endormir", chips("endo", ["Moins de 15 min", "15 à 30 min", "30 min à 1 h", "Plus d'1 h"], false))}
     ${field("Réveils pendant la nuit", chips("rev", ["0", "1", "2", "3 ou plus"], false))}
+    ${field("Le réveil du matin", `<div class="chips col-chips" data-name="rmat" data-multi="0"><button type="button" class="chip" data-v="volontaire" aria-pressed="false">Volontaire : alarme, réveil programmé</button><button type="button" class="chip" data-v="involontaire" aria-pressed="false">Involontaire : ${T("réveillé(e) tout(e) seul(e) ou par un bruit", "réveillé(e) tout(e) seul(e) ou par un bruit")}</button></div>`)}
+    ${field(T("As-tu pris un médicament pour t'aider à dormir ?", "Avez-vous pris un médicament pour vous aider à dormir ?"), chips("med", ["Oui", "Non"], false))}
+    <div id="medH" hidden>${field(T("À quelle heure l'as-tu pris ?", "À quelle heure l'avez-vous pris ?"), `<input type="time" id="mh" value="22:30" style="max-width:10em">`)}</div>
     ${field("Qualité de la nuit", `<div class="chips faces" data-name="q" data-multi="0">${["Très mauvaise", "Mauvaise", "Moyenne", "Bonne", "Très bonne"].map((l, i) => `<button type="button" class="chip" data-v="${i + 1}" aria-pressed="false"><b class="no-lis">${i + 1}</b><span>${l}</span></button>`).join("")}</div>`)}
     ${field("Écran dans l'heure avant de dormir ?", chips("ecran", ["Oui", "Non"], false))}
     ${field("Sieste dans la journée ?", chips("sieste", ["Oui", "Non"], false))}
+    ${field("Ce que je veux préciser sur ma nuit (facultatif)", `<textarea id="snote" maxlength="500" placeholder="${T("Par exemple : pourquoi tu t'es réveillé(e), ce qui t'a empêché(e) de dormir, un rêve, un bruit…", "Par exemple : pourquoi vous vous êtes réveillé(e), ce qui vous a empêché(e) de dormir, un rêve, un bruit…")}"></textarea>`, noPerso())}
     <button class="btn wide" id="ok">Enregistrer</button></div>`,
   mount() {
+    const upd = () => {
+      document.getElementById("medH").hidden = getChips("med")[0] !== "Oui";
+    };
+    document.addEventListener("picked", upd);
+    const prev = cleanup; cleanup = () => { document.removeEventListener("picked", upd); if (prev) prev(); };
     document.getElementById("ok").onclick = () => {
       const d = new Date(); d.setDate(d.getDate() - (getChips("nuit")[0] === "La nuit d'avant" ? 2 : 1));
-      addEntry("sommeil", { nuit: d.toISOString().slice(0, 10), coucher: val("c"), lever: val("l"), endormissement: getChips("endo")[0] || "", reveils: getChips("rev")[0] || "", qualite: Number(getChips("q")[0] || 0), ecran: getChips("ecran")[0] || "", sieste: getChips("sieste")[0] || "" });
+      const med = getChips("med")[0] || "";
+      addEntry("sommeil", { nuit: d.toISOString().slice(0, 10), coucher: val("c"), lever: val("l"), endormissement: getChips("endo")[0] || "", reveils: getChips("rev")[0] || "", qualite: Number(getChips("q")[0] || 0), ecran: getChips("ecran")[0] || "", sieste: getChips("sieste")[0] || "", reveilMatin: getChips("rmat")[0] || "", medic: med, medicHeure: med === "Oui" ? val("mh") : "", note: val("snote").trim() });
       saved("sommeil");
     };
   }
@@ -2480,7 +2495,7 @@ SCREENS.reglages = {
       <div class="card stack"><h3>Mon code</h3><p><span class="code-chip no-lis">${esc(S.cfg.c)}</span></p>
         <p class="small muted">Ce code ne permet pas ${T("de te reconnaître", "de vous reconnaître")}. Les réponses envoyées depuis plus de 60 jours sont effacées automatiquement de cet appareil.</p>
         <button class="btn ghost" data-go="reglages" data-p='{"confirm":true}'>Effacer toutes mes données</button>
-        <p class="hint">Version de l'application : 2026.11.23</p></div></div>`;
+        <p class="hint">Version de l'application : 2026.11.25</p></div></div>`;
   },
   mount(p) {
     if (p.diag) { const dc = document.getElementById("diagCard"); if (dc) setTimeout(() => dc.scrollIntoView(), 0); }

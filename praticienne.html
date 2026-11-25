@@ -273,6 +273,19 @@ ol.guide li p { margin-top: 4px; font-size: 0.94em; }
 .qn-pend { justify-content: space-between; background: var(--surface-2); border-radius: 10px; padding: 8px 12px; }
 @media (max-width: 560px) { .qn-grid { grid-template-columns: 1fr; } .two { grid-template-columns: 1fr; } }
 .qn-res .score-box span b { font-size: 1em; font-family: inherit; line-height: inherit; }
+
+/* Alertes rouges */
+.red-alert { background: #FCE8E4; border: 2px solid #C62F1E; color: #7A1A10; border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+.red-h { display: flex; align-items: center; gap: 8px; color: #B3261E; font-size: 1.05em; }
+.red-row { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 2px; background: #fff; border-radius: 10px; padding: 8px 12px; border: 1px solid #F0B8AE; }
+.red-row:hover, .red-row:focus-visible { border-color: #C62F1E; outline: none; }
+.red-item { justify-content: space-between; gap: 10px; background: #fff; border-radius: 10px; padding: 8px 12px; }
+.btn.red-ack { background: #C62F1E; color: #fff; border-color: #C62F1E; white-space: nowrap; }
+.pcard.pcard-red { border: 2px solid #C62F1E; box-shadow: inset 6px 0 0 #C62F1E; }
+.pill.red { background: #C62F1E; color: #fff; border-color: #C62F1E; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+.pill.red svg { width: 14px; height: 14px; }
+.red-dot { display: inline-grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px; margin-left: 6px; border-radius: 10px; background: #C62F1E; color: #fff; font-size: .72em; font-weight: 700; vertical-align: 2px; }
+@media (prefers-color-scheme: dark) { .red-alert { background: #3A1713; color: #FFD9D3; } .red-row, .red-item { background: #2A1210; border-color: #7A2B22; } .red-h { color: #FF8A7A; } }
 </style>
 <div class="shell" id="app"></div>
 <script>
@@ -1207,7 +1220,7 @@ function qnScore(e) { const d = qnDef(e.q); if (!d) return null; try { return d.
 function qnName(q) { const d = qnDef(q); return d ? d.n : "Questionnaire supprimé"; }
 /* ===== Entre-Séances — espace praticienne ===== */
 const VKEY = "es_praticienne_v1";
-const APP_VERSION = "2026.11.23";
+const APP_VERSION = "2026.11.25c";
 const DEMO_PRIV = {"key_ops":["deriveKey"],"ext":true,"kty":"EC","x":"FXufJrgrxbSPIYmrbG2IrkTmdroIAHbeo0AjlEmFV-E","y":"iQbRRt_g9vrYtbJ0Jnm7yGxny1celneAbJEpW6XDQBg","crv":"P-256","d":"xW4H5AUxJv1XbmZ8CzsbV1qiQHsZUI6ERusujKccI2s"};
 const RELAIS_GS = "/* =====================================================================\n   Entre-Séances : relais de réception (Google Apps Script) — version 6.1\n   - Reçoit uniquement des messages CHIFFRÉS : Google ne peut pas les lire.\n   - Transmet aux patients leurs exercices et vos messages (chiffrés eux aussi).\n   - Envoie aux patients qui l'ont accepté une notification sans contenu.\n   - Synchronise votre espace entre vos appareils (copie chiffrée, illisible par Google).\n   - Envoie aux patients qui l'ont demandé un rappel quotidien, aux jours et à l'heure choisis.\n   - Garde les réponses 60 jours, puis les efface.\n   - Vous prévient par mail (sans aucun contenu) quand un patient envoie.\n   Ne rien modifier ci-dessous, sauf les deux réglages.\n   ===================================================================== */\nconst RETENTION_DAYS = 60;   // durée de conservation des réponses chiffrées\nconst NOTIFY = true;         // false pour ne pas recevoir de mail de notification\n\nfunction doGet() { return out_({ ok: true, app: \"entre-seances\", v: 6 }); }\n\nfunction doPost(e) {\n  let p = {};\n  try { p = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, err: \"format\" }); }\n  const lock = LockService.getScriptLock();\n  try { lock.waitLock(20000); return out_(route_(p)); }\n  catch (err) { return out_({ ok: false, err: String(err) }); }\n  finally { try { lock.releaseLock(); } catch (x) {} }\n}\n\nfunction out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }\nfunction book_() {\n  // Fonctionne que le script soit rattaché à une feuille Google ou créé seul sur script.google.com\n  let ss = null;\n  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}\n  if (!ss) {\n    const props = PropertiesService.getScriptProperties(), id = props.getProperty(\"SHEET_ID\");\n    if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) {} }\n    if (!ss) { ss = SpreadsheetApp.create(\"Entre-Séances relais (messages chiffrés)\"); props.setProperty(\"SHEET_ID\", ss.getId()); }\n  }\n  return ss;\n}\nfunction sheet_() { const ss = book_(); return ss.getSheetByName(\"Messages\") || ss.insertSheet(\"Messages\"); }\nfunction data_() { const ss = book_(); return ss.getSheetByName(\"Données\") || ss.insertSheet(\"Données\"); }\nfunction folder_() {\n  const it = DriveApp.getFoldersByName(\"Entre-Séances (messages chiffrés)\");\n  return it.hasNext() ? it.next() : DriveApp.createFolder(\"Entre-Séances (messages chiffrés)\");\n}\nfunction okCode_(c) { return typeof c === \"string\" && /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(c); }\n\n/* Petit stockage clé → valeur dans l'onglet « Données » (valeurs jusqu'à 45 000 caractères) */\nfunction find_(sh, k) { return sh.getRange(\"A:A\").createTextFinder(k).matchEntireCell(true).findNext(); }\nfunction kvGet_(k) {\n  const sh = data_(), f = find_(sh, k);\n  if (!f) return null;\n  const v = String(sh.getRange(f.getRow(), 2).getValue());\n  return v.indexOf(\"v:\") === 0 ? v.slice(2) : v;\n}\nfunction kvSet_(k, v) {\n  const sh = data_(), f = find_(sh, k);\n  if (v === null) { if (f) sh.deleteRow(f.getRow()); return; }\n  if (f) sh.getRange(f.getRow(), 2).setValue(\"v:\" + v); else sh.appendRow([k, \"v:\" + v]);\n}\nfunction cfgOf_(props, code) { return kvGet_(\"C_\" + code) || props.getProperty(\"C_\" + code); }\n\nfunction route_(p) {\n  const props = PropertiesService.getScriptProperties();\n  const token = props.getProperty(\"TOKEN\");\n  switch (p.a) {\n    case \"ping\": {\n      let sheet = true, why = \"\";\n      try { sheet_(); data_(); } catch (e) { sheet = false; why = String(e); }\n      return { ok: true, init: !!token, sheet: sheet, why: why, v: 6, trig: props.getProperty(\"TRIG\") === \"1\", vapid: !!props.getProperty(\"VAPID_D\") };\n    }\n    case \"init\":\n      if (token) return { ok: false, err: \"deja\" };\n      if (typeof p.token !== \"string\" || p.token.length < 24 || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ TOKEN: p.token, PUB: p.pub, SEQ: \"0\" });\n      return { ok: true };\n    case \"cfg\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"inconnu\" };\n      const blob = cfgOf_(props, p.code);\n      return blob ? { ok: true, pub: props.getProperty(\"PUB\"), blob: blob, msgs: kvGet_(\"M_\" + p.code), sub: !!kvGet_(\"S_\" + p.code) } : { ok: false, err: \"inconnu\" };\n    }\n    case \"send\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (typeof p.msg !== \"string\" || !/^PSY1\\.[A-Za-z0-9_-]+$/.test(p.msg) || p.msg.length > 20000000) return { ok: false, err: \"format\" };\n      const seq = Number(props.getProperty(\"SEQ\") || \"0\") + 1;\n      props.setProperty(\"SEQ\", String(seq));\n      let cell = p.msg;\n      if (p.msg.length > 45000) cell = \"DRIVE:\" + folder_().createFile(\"m\" + seq + \".txt\", p.msg, \"text/plain\").getId();\n      sheet_().appendRow([seq, new Date(), p.code, cell]);\n      try { notify_(); } catch (e) {}\n      return { ok: true, seq: seq };\n    }\n    case \"psub\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      let sub;\n      try { sub = JSON.parse(p.sub); } catch (e) { return { ok: false, err: \"format\" }; }\n      if (!sub || typeof sub.endpoint !== \"string\" || sub.endpoint.indexOf(\"https://\") !== 0 || p.sub.length > 4000) return { ok: false, err: \"format\" };\n      kvSet_(\"S_\" + p.code, JSON.stringify({ endpoint: sub.endpoint, msg: p.msg !== false }));\n      return { ok: true };\n    }\n    case \"punsub\":\n      if (okCode_(p.code) && cfgOf_(props, p.code)) { kvSet_(\"S_\" + p.code, null); kvSet_(\"R_\" + p.code, null); }\n      return { ok: true };\n    case \"prem\": {\n      if (!okCode_(p.code) || !cfgOf_(props, p.code)) return { ok: false, err: \"inconnu\" };\n      if (!p.on) { kvSet_(\"R_\" + p.code, null); return { ok: true }; }\n      const days = (p.days || []).filter(d => d >= 1 && d <= 7);\n      if (!days.length || !/^\\d{2}:\\d{2}$/.test(p.time || \"\") || typeof p.tz !== \"string\" || p.tz.length > 60) return { ok: false, err: \"format\" };\n      kvSet_(\"R_\" + p.code, JSON.stringify({ days: days, time: p.time, tz: p.tz, last: \"\" }));\n      return { ok: true, trig: props.getProperty(\"TRIG\") === \"1\" };\n    }\n  }\n  if (!token || p.token !== token) return { ok: false, err: \"auth\" };\n  switch (p.a) {\n    case \"check\": return { ok: true, v: 6 };\n    case \"setcfg\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"C_\" + p.code, p.blob); props.deleteProperty(\"C_\" + p.code);\n      return { ok: true };\n    case \"setmsgs\":\n      if (!okCode_(p.code) || typeof p.blob !== \"string\" || p.blob.length > 45000) return { ok: false, err: \"format\" };\n      kvSet_(\"M_\" + p.code, p.blob);\n      return { ok: true };\n    case \"delcfg\":\n      if (okCode_(p.code)) { props.deleteProperty(\"C_\" + p.code); kvSet_(\"C_\" + p.code, null); kvSet_(\"M_\" + p.code, null); kvSet_(\"S_\" + p.code, null); }\n      return { ok: true };\n    case \"getsub\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      const o = s ? JSON.parse(s) : null;\n      return { ok: true, endpoint: o && o.msg !== false ? o.endpoint : null };\n    }\n    case \"setvapid\":\n      if (typeof p.d !== \"string\" || typeof p.pub !== \"string\") return { ok: false, err: \"format\" };\n      props.setProperties({ VAPID_D: p.d, VAPID_PUB: p.pub });\n      return { ok: true };\n    case \"push\": {\n      if (!okCode_(p.code)) return { ok: false, err: \"format\" };\n      const s = kvGet_(\"S_\" + p.code);\n      if (!s || JSON.parse(s).msg === false) return { ok: false, err: \"nosub\" };\n      return pushTo_(p.code, JSON.parse(s).endpoint, p.jwt, p.k);\n    }\n    case \"vget\": {\n      const id = props.getProperty(\"VFILE\");\n      if (!id) return { ok: true, v: 0, blob: null };\n      try { return { ok: true, v: Number(props.getProperty(\"VVER\") || \"0\"), blob: DriveApp.getFileById(id).getBlob().getDataAsString() }; }\n      catch (e) { return { ok: true, v: Number(props.getProperty(\"VVER\") || \"0\"), blob: null }; }\n    }\n    case \"vput\": {\n      if (typeof p.blob !== \"string\" || !/^[A-Za-z0-9_-]+$/.test(p.blob)) return { ok: false, err: \"format\" };\n      const cur = Number(props.getProperty(\"VVER\") || \"0\");\n      if (Number(p.ifv || 0) !== cur) return { ok: false, err: \"conflict\", v: cur };\n      const id = props.getProperty(\"VFILE\");\n      let f = null;\n      if (id) { try { f = DriveApp.getFileById(id); f.setContent(p.blob); } catch (e) { f = null; } }\n      if (!f) { f = folder_().createFile(\"espace-praticienne.chiffre.txt\", p.blob, \"text/plain\"); props.setProperty(\"VFILE\", f.getId()); }\n      props.setProperty(\"VVER\", String(cur + 1));\n      return { ok: true, v: cur + 1 };\n    }\n    case \"inbox\": {\n      purge_();\n      const since = Number(p.since || 0), sh = sheet_(), n = sh.getLastRow();\n      if (n < 1) return { ok: true, items: [] };\n      const rows = sh.getRange(1, 1, n, 4).getValues();\n      const items = [];\n      rows.forEach(function (r) {\n        if (Number(r[0]) <= since) return;\n        let msg = String(r[3]);\n        if (msg.indexOf(\"DRIVE:\") === 0) { try { msg = DriveApp.getFileById(msg.slice(6)).getBlob().getDataAsString(); } catch (e) { return; } }\n        items.push({ seq: Number(r[0]), t: new Date(r[1]).toISOString(), code: String(r[2]), msg: msg });\n      });\n      return { ok: true, items: items };\n    }\n  }\n  return { ok: false, err: \"action\" };\n}\n\nfunction purge_() {\n  const sh = sheet_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const lim = Date.now() - RETENTION_DAYS * 864e5;\n  const rows = sh.getRange(1, 1, n, 4).getValues();\n  let k = 0;\n  while (k < rows.length && new Date(rows[k][1]).getTime() < lim) {\n    const cell = String(rows[k][3]);\n    if (cell.indexOf(\"DRIVE:\") === 0) { try { DriveApp.getFileById(cell.slice(6)).setTrashed(true); } catch (e) {} }\n    k++;\n  }\n  if (k > 0) sh.deleteRows(1, k);\n}\n\nfunction notify_() {\n  if (!NOTIFY) return;\n  const cache = CacheService.getScriptCache();\n  if (cache.get(\"notif\")) return;\n  cache.put(\"notif\", \"1\", 1800);\n  MailApp.sendEmail(Session.getEffectiveUser().getEmail(), \"Entre-Séances : nouvelles réponses\",\n    \"Un patient vient d'envoyer des réponses.\\nOuvrez votre espace praticienne pour les relever.\\n\\nCe mail ne contient aucune donnée de patient.\");\n}\n\n/* Envoi d'une notification (sans contenu). La signature est faite ici si la praticienne n'en a pas fourni. */\nfunction pushTo_(code, endpoint, jwt, k) {\n  const props = PropertiesService.getScriptProperties();\n  if (!jwt) {\n    const d = props.getProperty(\"VAPID_D\"); k = props.getProperty(\"VAPID_PUB\");\n    if (!d || !k) return { ok: false, err: \"novapid\" };\n    if (typeof BigInt === \"undefined\") return { ok: false, err: \"nobigint\" };\n    const m = /^(https:\\/\\/[^\\/]+)/.exec(endpoint);\n    jwt = vapidJwt_(m[1], d);\n  }\n  const res = UrlFetchApp.fetch(endpoint, { method: \"post\", headers: { Authorization: \"vapid t=\" + jwt + \", k=\" + k, TTL: \"86400\", Urgency: \"normal\" }, payload: \"\", muteHttpExceptions: true });\n  const st = res.getResponseCode();\n  if (st === 404 || st === 410) { kvSet_(\"S_\" + code, null); kvSet_(\"R_\" + code, null); }\n  return { ok: st >= 200 && st < 300, status: st, why: st >= 300 ? String(res.getContentText()).slice(0, 200) : \"\" };\n}\n\n/* Rappels quotidiens : lancé automatiquement toutes les 10 minutes */\nfunction rappels() {\n  const sh = data_(), n = sh.getLastRow();\n  if (n < 1) return;\n  const rows = sh.getRange(1, 1, n, 2).getValues(), now = new Date();\n  rows.forEach(function (r) {\n    const key = String(r[0]); if (key.indexOf(\"R_\") !== 0) return;\n    const code = key.slice(2);\n    let rem; try { rem = JSON.parse(String(r[1]).replace(/^v:/, \"\")); } catch (e) { return; }\n    let day, hm, today;\n    try { day = Number(Utilities.formatDate(now, rem.tz, \"u\")); hm = Utilities.formatDate(now, rem.tz, \"HH:mm\"); today = Utilities.formatDate(now, rem.tz, \"yyyy-MM-dd\"); } catch (e) { return; }\n    if (rem.days.indexOf(day) < 0 || rem.last === today) return;\n    const toMin = t => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));\n    const diff = toMin(hm) - toMin(rem.time);\n    if (diff < 0 || diff > 60) return;\n    const s = kvGet_(\"S_\" + code); if (!s) return;\n    try { pushTo_(code, JSON.parse(s).endpoint); } catch (e) {}\n    rem.last = today; if (kvGet_(\"R_\" + code)) kvSet_(\"R_\" + code, JSON.stringify(rem));\n  });\n}\n\n/* ---- Signature ECDSA P-256 (ES256) pour les notifications, en JavaScript pur ---- */\nlet EC_CACHE_ = null;\nfunction EC_() {\n  if (EC_CACHE_) return EC_CACHE_;\n  const B0 = BigInt(0), B1 = BigInt(1), B2 = BigInt(2), B3 = BigInt(3), B4 = BigInt(4), B8 = BigInt(8);\n  const P = BigInt(\"0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff\");\n  const N = BigInt(\"0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551\");\n  const A = P - B3;\n  const G = [BigInt(\"0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296\"), BigInt(\"0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5\"), B1];\n  const mod = (a, m) => { const r = a % m; return r >= B0 ? r : r + m; };\n  const inv = (a, m) => { let [r0, r1, s0, s1] = [mod(a, m), m, B1, B0]; while (r1) { const q = r0 / r1; [r0, r1] = [r1, r0 - q * r1]; [s0, s1] = [s1, s0 - q * s1]; } return mod(s0, m); };\n  function dbl(p) {\n    const [X, Y, Z] = p; if (!Y || !Z) return [B0, B1, B0];\n    const ZZ = mod(Z * Z, P), S = mod(B4 * X * Y * Y, P), M = mod(B3 * X * X + A * ZZ * ZZ, P);\n    const X3 = mod(M * M - B2 * S, P), Y3 = mod(M * (S - X3) - B8 * Y * Y * Y * Y, P), Z3 = mod(B2 * Y * Z, P);\n    return [X3, Y3, Z3];\n  }\n  function add(p, q) {\n    if (!p[2]) return q; if (!q[2]) return p;\n    const Z1Z1 = mod(p[2] * p[2], P), Z2Z2 = mod(q[2] * q[2], P);\n    const U1 = mod(p[0] * Z2Z2, P), U2 = mod(q[0] * Z1Z1, P), S1 = mod(p[1] * q[2] * Z2Z2, P), S2 = mod(q[1] * p[2] * Z1Z1, P);\n    if (U1 === U2) return S1 === S2 ? dbl(p) : [B0, B1, B0];\n    const H = mod(U2 - U1, P), R = mod(S2 - S1, P), HH = mod(H * H, P), HHH = mod(H * HH, P), V = mod(U1 * HH, P);\n    const X3 = mod(R * R - HHH - B2 * V, P), Y3 = mod(R * (V - X3) - S1 * HHH, P), Z3 = mod(H * p[2] * q[2], P);\n    return [X3, Y3, Z3];\n  }\n  function mul(k, p) { let r = [B0, B1, B0], q = p; while (k > B0) { if (k & B1) r = add(r, q); q = dbl(q); k >>= B1; } return r; }\n  function affineX(p) { const zi = inv(p[2], P); return mod(p[0] * zi * zi, P); }\n  EC_CACHE_ = { N: N, G: G, mul: mul, affineX: affineX, inv: inv, mod: mod, B0: B0, B1: B1 };\n  return EC_CACHE_;\n}\nfunction bytesToBig_(b) { let h = \"0x\"; b.forEach(x => { h += ((x + 256) % 256).toString(16).padStart(2, \"0\"); }); return BigInt(h === \"0x\" ? \"0x0\" : h); }\nfunction bigToBytes32_(x) { const h = x.toString(16).padStart(64, \"0\"), out = []; for (let i = 0; i < 64; i += 2) { const v = parseInt(h.slice(i, i + 2), 16); out.push(v > 127 ? v - 256 : v); } return out; }\nfunction b64u_(x) { return (typeof x === \"string\" ? Utilities.base64EncodeWebSafe(x, Utilities.Charset.UTF_8) : Utilities.base64EncodeWebSafe(x)).replace(/=+$/, \"\"); }\nfunction vapidJwt_(aud, dB64) {\n  const props = PropertiesService.getScriptProperties();\n  const sub = \"mailto:\" + (props.getProperty(\"CONTACT\") || Session.getEffectiveUser().getEmail() || \"contact@example.org\");\n  const unsigned = b64u_(JSON.stringify({ typ: \"JWT\", alg: \"ES256\" })) + \".\" + b64u_(JSON.stringify({ aud: aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: sub }));\n  const d = bytesToBig_(Utilities.base64DecodeWebSafe(dB64 + \"==\".slice(0, (4 - dB64.length % 4) % 4)));\n  const z = bytesToBig_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, unsigned, Utilities.Charset.UTF_8));\n  const E = EC_();\n  let r = E.B0, s = E.B0;\n  while (!r || !s) {\n    const k = E.mod(bytesToBig_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + dB64 + unsigned + Date.now(), Utilities.Charset.UTF_8)), E.N - E.B1) + E.B1;\n    r = E.mod(E.affineX(E.mul(k, E.G)), E.N);\n    s = E.mod(E.inv(k, E.N) * (z + r * d), E.N);\n  }\n  return unsigned + \".\" + b64u_(bigToBytes32_(r).concat(bigToBytes32_(s)));\n}\n\n/* À lancer une fois depuis l'éditeur (bouton Exécuter) : autorisations + rappels automatiques. */\nfunction autoriser() {\n  sheet_(); data_(); folder_();\n  try { MailApp.getRemainingDailyQuota(); } catch (e) {}\n  try { UrlFetchApp.fetch(\"https://www.google.com\", { muteHttpExceptions: true }); } catch (e) {}\n  const has = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === \"rappels\");\n  if (!has) ScriptApp.newTrigger(\"rappels\").timeBased().everyMinutes(10).create();\n  PropertiesService.getScriptProperties().setProperty(\"TRIG\", \"1\");\n  Logger.log(\"Autorisations accordées et rappels activés. Vous pouvez déployer une nouvelle version.\");\n}\n";
 let vault = null, vkey = null, vsalt = null, demo = false;
@@ -1218,7 +1231,7 @@ const inFrame = (() => { try { return window.self !== window.top; } catch (e) { 
 const MOD_INFO = {
   humeur: ["Humeur du jour", "Jauge colorée 0-10, émotions à cocher, jauge d'énergie"], pensees: ["Tableau des pensées", "Colonnes de Beck guidées pas à pas"],
   sud: ["Échelle de malaise (SUD)", "0 à 10, contexte facultatif"], expo: ["Échelle d'exposition", "Marches définies ci-dessous"],
-  sommeil: ["Journal du sommeil", "Horaires, latence, réveils, qualité"], respi: ["Respirer et se poser", "Vague, balle, 5-4-3-2-1, stress avant/après"],
+  sommeil: ["Journal du sommeil", "Horaires, latence, réveils, réveil volontaire ou non, médicament et heure de prise, qualité"], respi: ["Respirer et se poser", "Vague, balle, 5-4-3-2-1, stress avant/après"],
   pleine: ["Pleine conscience", "9 pratiques guidées de 1 à 15 min, adaptation psychotrauma possible (réglages ci-dessous)"],
   angoisse: ["Crise d'angoisse", "Respiration 4-6 guidée, phrases rassurantes, pic/après"],
   fiches: ["Fiches pratiques", "Attention, sens, imprévus, émotions"],
@@ -1322,8 +1335,8 @@ function demoVault() {
   const add = (n, type, data, h) => E.push(Object.assign({ id: "d" + (k++), t: day(n, h), type }, data));
   const moods = ["super", "content", "calme", "bof", "fatigue", "stresse", "triste", "colere", "surexcite"];
   for (let n = 34; n >= 0; n--) {
-    if (rnd() < 0.75) { const hi = n < 8; const en = Math.max(1, Math.min(10, Math.round((hi ? 7.5 : 4.5) + (rnd() - 0.5) * 3))); add(n, "humeur", n < 12 ? { score: hi ? 7 + Math.round(rnd() * 3) : 3 + Math.round(rnd() * 3), emotions: hi ? [pick(["Enthousiasme", "Joie", "Confiance"]), pick(["Agacement", "Fierté"])] : [pick(["Tristesse", "Inquiétude", "Stress", "Ennui"])], energie: en, note: n === 3 ? "Plein d'idées, j'ai dormi 5 h." : "" } : { humeur: hi ? pick(["surexcite", "super", "content", "stresse"]) : pick(moods.slice(1, 8)), energie: en, note: n === 3 ? "Plein d'idées, j'ai dormi 5 h." : "" }); }
-    if (rnd() < 0.7) { const c = pick(["23:00", "23:30", "00:15", "01:00", "22:45"]); add(n, "sommeil", { nuit: day(n + 1).slice(0, 10), coucher: c, lever: pick(["06:45", "07:00", "07:15", "09:30"]), endormissement: pick(["Moins de 15 min", "15 à 30 min", "30 min à 1 h", "Plus d'1 h"]), reveils: pick(["0", "1", "1", "2"]), qualite: 1 + Math.floor(rnd() * 5), ecran: pick(["Oui", "Oui", "Non"]), sieste: pick(["Non", "Non", "Oui"]) }, 8); }
+    if (rnd() < 0.75) { const hi = n < 8; const en = Math.max(1, Math.min(10, Math.round((hi ? 7.5 : 4.5) + (rnd() - 0.5) * 3))); add(n, "humeur", n < 12 ? { score: hi ? 7 + Math.round(rnd() * 3) : 3 + Math.round(rnd() * 3), emotions: hi ? [pick(["Enthousiasme", "Joie", "Confiance"]), pick(["Agacement", "Fierté"])] : [pick(["Tristesse", "Inquiétude", "Stress", "Ennui"])], energie: en, contexte: n === 3 ? "Plein d'idées, j'ai dormi 5 h." : n === 7 ? "Dispute avec ma sœur avant le dîner" : "" } : { humeur: hi ? pick(["surexcite", "super", "content", "stresse"]) : pick(moods.slice(1, 8)), energie: en, note: n === 3 ? "Plein d'idées, j'ai dormi 5 h." : "" }); }
+    if (rnd() < 0.7) { const c = pick(["23:00", "23:30", "00:15", "01:00", "22:45"]); add(n, "sommeil", { nuit: day(n + 1).slice(0, 10), coucher: c, lever: pick(["06:45", "07:00", "07:15", "09:30"]), endormissement: pick(["Moins de 15 min", "15 à 30 min", "30 min à 1 h", "Plus d'1 h"]), reveils: pick(["0", "1", "1", "2"]), reveilMatin: pick(["volontaire", "involontaire", "involontaire"]), medic: n % 3 === 0 ? "Oui" : "Non", medicHeure: n % 3 === 0 ? pick(["22:15", "22:45", "23:30"]) : "", note: n === 4 ? "Réveillé à 4 h par un cauchemar, pas réussi à me rendormir." : n === 9 ? "Pris le comprimé car je ruminais pour l'examen." : "", qualite: 1 + Math.floor(rnd() * 5), ecran: pick(["Oui", "Oui", "Non"]), sieste: pick(["Non", "Non", "Oui"]) }, 8); }
     if (rnd() < 0.3) add(n, "jauge", { niveau: 1 + Math.floor(rnd() * 5), sources: [pick(["Bruit", "Beaucoup de monde", "Fatigue", "Changement imprévu"]), pick(["Lumière", "Trop de demandes", "Bruit"])].filter((v, i, a) => a.indexOf(v) === i), aides: [pick(["Casque ou bouchons", "Pause au calme", "Musique", "Respirer"])], note: "" }, 17);
     if (rnd() < 0.2) { const a = 5 + Math.floor(rnd() * 4); add(n, "respi", { exercice: pick(["La vague", "La balle", "5-4-3-2-1"]), avant: a, apres: Math.max(0, a - 2 - Math.floor(rnd() * 3)), duree: 180 }, 21); }
     if (rnd() < 0.2) add(n, "sud", { sud: Math.max(0, Math.min(10, Math.round(7 - (34 - n) / 10 + (rnd() - 0.5) * 3))), note: "" }, 12);
@@ -1353,7 +1366,9 @@ function demoVault() {
   E.sort((a, b) => a.t < b.t ? -1 : 1);
   E.filter(e => e._demoImg != null).forEach(e => { const d = demoPlate(e._demoImg); if (d) memPhotos[e.id] = d; else e.photo = "perdue"; delete e._demoImg; });
   const E2 = [];
-  for (let n = 20; n >= 0; n -= 2) E2.push({ id: "e" + n, t: day(n), type: "humeur", humeur: pick(["bof", "fatigue", "calme", "content"]), energie: 3 + Math.round(rnd() * 3), note: "" });
+  for (let n = 20; n >= 6; n -= 2) E2.push({ id: "e" + n, t: day(n), type: "humeur", humeur: pick(["bof", "fatigue", "calme", "content"]), energie: 3 + Math.round(rnd() * 3), note: "" });
+  [[4, 6], [3, 4], [2, 3], [1, 4], [0, 3]].forEach(([n, sc]) => E2.push({ id: "h" + n, t: day(n), type: "humeur", score: sc, emotions: sc < 5 ? ["Tristesse", "Fatigue"].slice(0, 1 + (n % 2)) : ["Calme"], energie: 3, contexte: n === 2 ? "Conflit au travail, je n'arrive plus à dormir" : "" }));
+  [[4, 3], [3, 2], [2, 1], [1, 2], [0, 2]].forEach(([n, q]) => E2.push({ id: "s" + n, t: day(n), type: "sommeil", nuit: day(n + 1).slice(0, 10), coucher: "00:30", lever: "06:00", endormissement: "Plus d'1 h", reveils: "3 ou plus", reveilMatin: "involontaire", medic: "Non", qualite: q, ecran: "Oui", sieste: "Non" }));
   const cxAct = Object.assign({ id: "demo-act" }, JSON.parse(JSON.stringify(CX_MODELS.act)));
   [10, 6, 2].forEach((n, i) => add(n, "perso", { xid: "demo-act", titre: cxAct.t, rep: [{ q: "L'activité prévue", k: "texte", v: ["Marcher au parc", "Dessiner", "Appeler un ami"][i] }, { q: "Je l'ai faite", k: "oui", v: i === 1 ? "Non" : "Oui" }, { q: "Plaisir ressenti", k: "echelle", v: [5, 3, 8][i] }, { q: "Sentiment d'avoir réussi", k: "echelle", v: [6, 2, 8][i] }] }, 20));
   add(8, "tcc", { xid: "pe-schemas", titre: TCC_BY_ID["pe-schemas"].t, rep: [{ q: "Ce qui me ressemble", k: "rate", v: { "Imperfection / honte": "Beaucoup", "Exigences élevées": "Beaucoup", "Abandon / instabilité": "Un peu", "Inhibition émotionnelle": "Un peu", "Échec": "Un peu" } }] }, 20);
@@ -1636,7 +1651,7 @@ function render() {
   const tabs = [["patients", "Patients"], ["exercices", "Exercices"], ["recevoir", "Recevoir"], ["reglages", "Réglages"]];
   app.innerHTML = `<header class="top"><div class="top-in">
       <div class="brand">${MARK}<div><div class="brand-name">Entre-Séances</div><div class="brand-sub">Espace praticienne</div></div></div>
-      <nav class="tabs">${tabs.map(([k, l]) => `<button class="tab" data-nav="${k}" ${view.tab === k ? 'aria-current="page"' : ""}>${k === "reglages" ? COG_ICO : ""}${l}</button>`).join("")}</nav>
+      <nav class="tabs">${tabs.map(([k, l]) => `<button class="tab" data-nav="${k}" ${view.tab === k ? 'aria-current="page"' : ""}>${k === "reglages" ? COG_ICO : ""}${l}${k === "patients" && redPatients().length ? `<span class="red-dot" aria-label="${redPatients().length} alerte(s)">${redPatients().length}</span>` : ""}</button>`).join("")}</nav>
       <button class="lockbtn" id="lockBtn">${demo ? "Quitter la démo" : "Verrouiller"}</button></div></header>
     ${demo ? `<div class="demo-band"><b>Mode démonstration.</b> Patients et données fictifs, rien n'est enregistré. Les messages de l'application patient en démonstration (code ${spaced(DEMO_CODE)}) se déchiffrent dans l'onglet Recevoir.</div>` : ""}
     ${flash ? `<div class="result flash" role="status">${flash}</div>` : ""}
@@ -1648,13 +1663,15 @@ function render() {
 }
 let polling = false, pollN = 0;
 async function poll() {
-  if (polling || !relayOn() || document.visibilityState !== "visible") return;
+  if (polling || !relayOn()) return;
   polling = true;
   try {
     pollN = (pollN || 0) + 1;
     let syncNote = "";
     if (pollN % 5 === 0) { try { syncNote = syncSummary(await syncVault()); } catch (e) {} }
     let res = await fetchInbox();
+    await notifyRed();
+    if (document.visibilityState !== "visible") return;
     if (res.unknown && res.unknown.length) { try { syncNote = syncSummary(await syncVault()) || syncNote; const rr = await rereadFailed(); if (rr) res = Object.assign({}, rr, { n: res.n + rr.n }); } catch (e) {} }
     if (syncNote) flash = syncNote;
     if (res.n || (res.unknown && res.unknown.length) || res.bad || syncNote) {
@@ -1674,12 +1691,78 @@ async function afterUnlock() {
   try { await pushVapid(); } catch (e) {}
   if (relayOn()) {
     try { const res = await fetchInbox(); if (res.n || (res.unknown && res.unknown.length)) notes.push(inboxSummary(res)); } catch (e) {}
+    try { await notifyRed(); } catch (e) {}
     try { const rr = await rereadFailed(); if (rr && rr.n) notes.push("Messages récupérés : " + inboxSummary(rr)); } catch (e) {}
   }
   if (notes.length) { flash = notes.join(" "); if (view.tab === "patients" && !view.p.code && !view.p.edit && !view.p.act) render(); }
 }
 
 const PAGES = {}, MOUNTS = {};
+
+/* ---------- Alertes rouges : 3 jours d'affilée sous le seuil (calculées ici seulement, jamais envoyées au patient) ---------- */
+const RED_MIN = 3, RED_WINDOW = 14;
+const localDay = iso => { const d = new Date(iso); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const dayNum = d => Math.round(new Date(d + "T12:00:00").getTime() / 864e5);
+function lowRuns(pt) {
+  const mood = {}, sleep = {};
+  for (const e of pt.entries) {
+    if (e.type === "humeur" && e.score != null) (mood[localDay(e.t)] = mood[localDay(e.t)] || []).push(e.score);
+    if (e.type === "sommeil" && e.nuit && e.qualite) sleep[e.nuit] = e.qualite;
+  }
+  const runs = [];
+  const scan = (k, map, isLow) => {
+    const days = Object.keys(map).sort(); let cur = null;
+    for (const d of days) {
+      const v = map[d], low = isLow(v);
+      if (low && cur && dayNum(d) - dayNum(cur.to) === 1) { cur.to = d; cur.vals.push(v); }
+      else if (low) { if (cur) runs.push(cur); cur = { k, from: d, to: d, vals: [v] }; }
+      else { if (cur) runs.push(cur); cur = null; }
+    }
+    if (cur) runs.push(cur);
+  };
+  scan("humeur", Object.fromEntries(Object.entries(mood).map(([d, a]) => [d, Math.round(avg(a) * 10) / 10])), v => v < 5);
+  scan("sommeil", sleep, v => v <= 2);
+  return runs.filter(r => r.vals.length >= RED_MIN);
+}
+function redAlerts(pt) {
+  const lim = dayNum(localDay(new Date().toISOString())) - RED_WINDOW, ack = pt.ack || {}, out = {};
+  for (const r of lowRuns(pt)) if (dayNum(r.to) >= lim && !(ack[r.k] && ack[r.k] >= r.to)) out[r.k] = r; /* la plus récente par type */
+  return Object.values(out);
+}
+const dShort = d => fmtD(d + "T12:00:00", { day: "numeric", month: "short" });
+function redText(r) {
+  const n = r.vals.length;
+  return r.k === "humeur"
+    ? `Humeur sous 5/10 pendant ${n} jours d'affilée (du ${dShort(r.from)} au ${dShort(r.to)} : ${r.vals.map(v => String(v).replace(".", ",")).join(", ")})`
+    : `Sommeil de mauvaise qualité (1 ou 2 sur 5) pendant ${n} nuits d'affilée (du ${dShort(r.from)} au ${dShort(r.to)})`;
+}
+function redShort(r) { return r.k === "humeur" ? `Humeur < 5 · ${r.vals.length} j` : `Sommeil mauvais · ${r.vals.length} nuits`; }
+function redPatients() { return Object.values(vault.patients).map(pt => [pt, redAlerts(pt)]).filter(x => x[1].length); }
+async function notifyRed() {
+  if (demo || !vault.redNotif || typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  vault.notified = vault.notified || {}; let changed = false;
+  for (const [pt, al] of redPatients()) for (const r of al) {
+    const key = `${pt.code}|${r.k}|${r.to}`; if (vault.notified[key]) continue;
+    vault.notified[key] = new Date().toISOString(); changed = true;
+    const body = `Une alerte de suivi concerne le code ${spaced(pt.code)}. Ouvrez votre espace pour la voir.`;
+    try { const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+      if (reg) await reg.showNotification("Entre-Séances : alerte", { body, tag: key, data: { url: "./praticienne.html" }, requireInteraction: true });
+      else new Notification("Entre-Séances : alerte", { body, tag: key }); } catch (e) {}
+  }
+  if (changed) await persistLocal();
+}
+function redBanner() {
+  const rp = redPatients(); if (!rp.length) return "";
+  return `<div class="red-alert" role="alert"><div class="red-h">${RED_ICO}<b>${rp.length > 1 ? `${rp.length} patients à surveiller` : "1 patient à surveiller"}</b></div>
+    <div class="stack" style="gap:6px">${rp.map(([pt, al]) => `<button class="red-row" data-nav="patients" data-p='{"code":"${pt.code}"}'><span><b>${esc(pt.label || "Sans repère")}</b> <span class="code-chip">${spaced(pt.code)}</span></span><span class="small">${al.map(redText).map(esc).join(" · ")}</span></button>`).join("")}</div></div>`;
+}
+function redBox(pt) {
+  const al = redAlerts(pt); if (!al.length) return "";
+  return `<div class="red-alert" role="alert" style="grid-column:1/-1"><div class="red-h">${RED_ICO}<b>Alerte de suivi</b></div>
+    ${al.map(r => `<div class="row red-item"><span>${esc(redText(r))}</span><button class="btn red-ack" data-ack="${r.k}" data-to="${r.to}">J'ai pris connaissance</button></div>`).join("")}
+    <p class="small" style="margin:4px 0 0">Le patient ne voit pas cette alerte. Elle disparaît quand vous indiquez en avoir pris connaissance, et revient si une nouvelle série de 3 jours apparaît.</p></div>`;
+}
+const RED_ICO = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 2 20h20L12 3z" fill="currentColor"/><path d="M12 9v5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.3" fill="#fff"/></svg>';
 
 /* Liste des patients */
 function alerts(pt) {
@@ -1698,15 +1781,17 @@ PAGES.patients = p => {
   if (p.edit) return patientForm(p.edit === "new" ? null : vault.patients[p.edit]);
   if (p.act) return codeView(vault.patients[p.act], p);
   if (p.code) return patientDetail(vault.patients[p.code], p);
-  const list = Object.values(vault.patients).sort((a, b) => (b.lastImport || b.created) < (a.lastImport || a.created) ? -1 : 1);
+  const list = Object.values(vault.patients).sort((a, b) => (redAlerts(b).length - redAlerts(a).length) || ((b.lastImport || b.created) < (a.lastImport || a.created) ? -1 : 1));
   return `<div class="head-row"><div><h1>Patients</h1><p class="muted">${list.length} suivi${list.length > 1 ? "s" : ""} en cours${relayOn() ? " · réception directe active" : ""}</p></div>
     <div class="row">${relayOn() ? `<button class="btn soft" id="fetchNow">Relever les réponses</button>` : ""}${list.length ? `<button class="btn soft" data-nav="patients" data-p='{"all":true}'>Message à tous</button>` : ""}<button class="btn" data-nav="patients" data-p='{"edit":"new"}'>Nouveau patient</button></div></div>
+    ${redBanner()}
     ${unknownBanner()}
     ${!relayOn() && !demo ? `<div class="notice" style="margin-bottom:16px">La réception directe n'est pas encore configurée : les codes courts ne fonctionneront pas. <button class="link" data-nav="reglages" data-p='{"guide":true}'>Configurer (10 minutes)</button></div>` : ""}
     ${list.length ? `<div class="grid-list">${list.map(pt => {
-      const last = pt.entries.length ? pt.entries[pt.entries.length - 1].t : null, al = alerts(pt);
-      return `<button class="pcard" data-nav="patients" data-p='{"code":"${pt.code}"}'><span class="top-line"><span class="lab">${esc(pt.label || "Sans repère")}</span><span class="code-chip">${spaced(pt.code)}</span></span>
+      const last = pt.entries.length ? pt.entries[pt.entries.length - 1].t : null, al = alerts(pt), red = redAlerts(pt);
+      return `<button class="pcard${red.length ? " pcard-red" : ""}" data-nav="patients" data-p='{"code":"${pt.code}"}'><span class="top-line"><span class="lab">${esc(pt.label || "Sans repère")}</span><span class="code-chip">${spaced(pt.code)}</span></span>
         <span class="muted small">${pt.entries.length} réponse${pt.entries.length > 1 ? "s" : ""}${last ? ` · dernière le ${fmtD(last, { day: "numeric", month: "long" })}` : " · aucune réponse reçue"}</span>
+        ${red.length ? `<span class="row">${red.map(r => `<span class="pill red">${RED_ICO}${redShort(r)}</span>`).join("")}</span>` : ""}
         ${al.length ? `<span class="row">${al.map(a => `<span class="pill warn">${a}</span>`).join("")}</span>` : ""}
         <span class="row">${pt.mods.slice(0, 4).map(m => `<span class="pill">${MOD_INFO[m] ? MOD_INFO[m][0] : m}</span>`).join("")}${pt.mods.length > 4 ? `<span class="pill">+${pt.mods.length - 4}</span>` : ""}</span></button>`;
     }).join("")}</div>`
@@ -1717,10 +1802,20 @@ MOUNTS.patients = p => {
   if (p.edit) mountForm(p.edit === "new" ? null : vault.patients[p.edit]);
   else if (p.act) mountCode(vault.patients[p.act], p);
   else if (p.code) mountDetail(vault.patients[p.code], p);
-  else { mountRecover(); const f = document.getElementById("fetchNow"); if (f) f.onclick = async () => { f.disabled = true; f.textContent = "Relevé…"; try { flash = inboxSummary(await fetchInbox()); } catch (e) { flash = e.detail || "Le relais ne répond pas. Vérifier la connexion."; } render(); }; }
+  else { mountRecover(); const f = document.getElementById("fetchNow"); if (f) f.onclick = async () => { f.disabled = true; f.textContent = "Relevé…"; try { flash = inboxSummary(await fetchInbox()); await notifyRed(); } catch (e) { flash = e.detail || "Le relais ne répond pas. Vérifier la connexion."; } render(); }; }
 };
 
 /* Pleine conscience */
+/* Sommeil : réveil du matin et médicament */
+function sleepExtra(som) {
+  const out = [], rv = som.filter(e => e.reveilMatin), md = som.filter(e => e.medic);
+  if (rv.length) out.push(`Réveil involontaire : ${rv.filter(e => e.reveilMatin === "involontaire").length}/${rv.length} nuits`);
+  if (md.length) { const oui = md.filter(e => e.medic === "Oui"), hs = oui.map(e => e.medicHeure).filter(Boolean).map(h => { const [a, b] = h.split(":").map(Number); return (a < 12 ? a + 24 : a) * 60 + b; });
+    let txt = `Médicament pour dormir : ${oui.length}/${md.length} nuits`;
+    if (hs.length) { const m = Math.round(avg(hs)) % 1440, f = x => `${String(Math.floor((x % 1440) / 60)).padStart(2, "0")}:${String(x % 60).padStart(2, "0")}`; txt += `, prise vers ${f(m)} en moyenne (de ${f(Math.min(...hs))} à ${f(Math.max(...hs))})`; }
+    out.push(txt); }
+  return out;
+}
 function mfBox(x) {
   const on = x.mods.includes("pleine"), c = x.mf || { p: MF_EX.map(e => e.id), ts: 0, max: 15 };
   return `<div class="card stack" id="mfBox" ${on ? "" : "hidden"}><span class="lbl">Réglages pleine conscience</span>
@@ -1917,7 +2012,7 @@ function mergeVault(L, R) {
       if (del && del >= stamp(rp)) continue;
       L.patients[code] = JSON.parse(JSON.stringify(rp)); dedupeEntries(L.patients[code]); res.added.push(rp.label || code); res.entries += (rp.entries || []).length; continue;
     }
-    if (stamp(rp) > stamp(lp)) { for (const k of ["label", "tv", "mods", "hier", "tca", "cx", "tx", "mf", "updated"]) if (k in rp) lp[k] = rp[k]; res.updated++; }
+    if (stamp(rp) > stamp(lp)) { for (const k of ["label", "tv", "mods", "hier", "tca", "cx", "tx", "mf", "ack", "updated"]) if (k in rp) lp[k] = rp[k]; res.updated++; }
     const ids = new Set((lp.entries || []).map(e => e.id));
     for (const e of rp.entries || []) if (!ids.has(e.id)) { ids.add(e.id); lp.entries.push(e); res.entries++; }
     res.entries -= dedupeEntries(lp);
@@ -2465,9 +2560,9 @@ function inPeriod(pt, per) {
 }
 function entryText(e) {
   switch (e.type) {
-    case "humeur": return [e.humeur ? MOOD_LABEL[e.humeur] : null, e.energie != null ? `énergie ${e.energie}/10` : null, e.score != null ? `${e.score}/10` : null, e.emotions && e.emotions.length ? e.emotions.join(", ") : null, e.note ? `« ${e.note} »` : null].filter(Boolean).join(" · ");
+    case "humeur": return [e.humeur ? MOOD_LABEL[e.humeur] : null, e.energie != null ? `énergie ${e.energie}/10` : null, e.score != null ? `${e.score}/10` : null, e.emotions && e.emotions.length ? e.emotions.join(", ") : null, e.contexte ? `contexte : « ${e.contexte} »` : null, e.note ? `« ${e.note} »` : null].filter(Boolean).join(" · ");
     case "sud": return `${e.sud}/10${e.note ? " · « " + e.note + " »" : ""}`;
-    case "sommeil": { const h = sleepHours(e); return `Nuit du ${fmtD(e.nuit)} : ${e.coucher} → ${e.lever} (${r1(h)} h) · endormissement ${e.endormissement || "?"} · réveils ${e.reveils || "?"} · qualité ${e.qualite || "?"}/5 · écran ${e.ecran || "?"} · sieste ${e.sieste || "?"}`; }
+    case "sommeil": { const h = sleepHours(e); return `Nuit du ${fmtD(e.nuit)} : ${e.coucher} → ${e.lever} (${r1(h)} h) · endormissement ${e.endormissement || "?"} · réveils ${e.reveils || "?"} · qualité ${e.qualite || "?"}/5 · écran ${e.ecran || "?"} · sieste ${e.sieste || "?"}${e.reveilMatin ? ` · réveil ${e.reveilMatin}` : ""}${e.medic ? ` · médicament pour dormir : ${e.medic === "Oui" ? "oui" + (e.medicHeure ? " à " + e.medicHeure : "") : "non"}` : ""}${e.note ? ` · « ${e.note} »` : ""}`; }
     case "jauge": return `Niveau ${e.niveau}/5${e.sources.length ? " · sources : " + e.sources.join(", ") : ""}${e.aides.length ? " · aides : " + e.aides.join(", ") : ""}${e.note ? " · « " + e.note + " »" : ""}`;
     case "pleine": return e.pr === "quotidien" ? `Au quotidien : ${e.informel}` : `${e.titre} · ${Math.round((e.duree || 0) / 60)} min${e.fini ? "" : " (arrêtée)"}${e.avant != null ? ` · tension ${e.avant} → ${e.apres}` : ""}${e.ancre ? ` · ancre : ${MF_ANCRE_LBL[e.ancre]}` : ""}${(e.vecu || []).length ? ` · ${e.vecu.join(", ")}` : ""}`;
     case "respi": return `${e.exercice}${e.avant != null ? ` · stress ${e.avant} → ${e.apres}` : ""} · ${Math.round((e.duree || 0) / 60)} min`;
@@ -2555,7 +2650,8 @@ function patientDetail(pt, p) {
   if (sud.length) P.push(panel("Malaise (SUD)", `moyenne ${r1(avg(sud.map(e => e.sud)))}/10 · ${pl(sud.length, "saisie")}`, timeChart({ series: [{ pts: sud.map(e => ({ t: e.t, v: e.sud })), color: "var(--z5)" }], min: 0, max: 10, ticks: [0, 5, 10], from, to })));
   if (som.length) { const hrs = som.map(sleepHours).filter(x => x != null);
     P.push(panel("Sommeil", `durée moyenne ${r1(avg(hrs))} h · qualité ${r1(avg(som.map(e => e.qualite).filter(Boolean)))}/5`, timeChart({ series: [{ pts: som.map(e => ({ t: e.nuit + "T12:00:00", v: sleepHours(e) })), color: "var(--s0)" }], min: 0, max: 12, ticks: [0, 4, 8, 12], from, to, kind: "bar", unit: " h" })
-      + `<div class="legend"><span>Endormissement &gt; 30 min : ${som.filter(e => /30 min à 1 h|Plus d'1 h/.test(e.endormissement)).length} nuits</span><span>Écran avant le coucher : ${som.filter(e => e.ecran === "Oui").length}/${som.length}</span></div>`)); }
+      + `<div class="legend"><span>Endormissement &gt; 30 min : ${som.filter(e => /30 min à 1 h|Plus d'1 h/.test(e.endormissement)).length} nuits</span><span>Écran avant le coucher : ${som.filter(e => e.ecran === "Oui").length}/${som.length}</span>${sleepExtra(som).map(x => `<span>${x}</span>`).join("")}</div>`
+      + (som.some(e => e.note) ? `<span class="lbl small">Précisions du patient</span><ul class="small" style="margin:4px 0 0;padding-left:1.2em">${som.filter(e => e.note).slice(-6).reverse().map(e => `<li>Nuit du ${fmtD(e.nuit)} : « ${esc(e.note)} »</li>`).join("")}</ul>` : ""))); }
   if (jau.length) P.push(panel("Jauge sensorielle", `${pl(jau.length, "saisie")} · niveau 4-5 : ${jau.filter(e => e.niveau >= 4).length}`, timeChart({ series: [{ pts: jau.map(e => ({ t: e.t, v: e.niveau })), color: "var(--z4)" }], min: 1, max: 5, ticks: [1, 3, 5], from, to })
     + `<div class="split" style="gap:12px"><div><span class="lbl small">Sources</span>${freqList(jau.flatMap(e => e.sources))}</div><div><span class="lbl small">Ce qui aide</span>${freqList(jau.flatMap(e => e.aides))}</div></div>`));
   if (res.length) { const sc = res.filter(e => e.avant != null);
@@ -2572,9 +2668,9 @@ function patientDetail(pt, p) {
   if (pen.length) P.push(panel("Tableaux des pensées", `${pen.length}`, pen.slice().reverse().map(e => `<dl class="tr-card"><dt>Date</dt><dd>${fmtDT(e.t)}</dd><dt>Situation</dt><dd>${esc(e.situation)}</dd><dt>Pensée automatique</dt><dd>${esc(e.pensee)} <b>(${e.croyance} %)</b></dd><dt>Émotions</dt><dd>${esc((e.emotions || []).join(", "))} <b>(${e.intensite} %)</b></dd><dt>Pour</dt><dd>${esc(e.pour) || "–"}</dd><dt>Contre</dt><dd>${esc(e.contre) || "–"}</dd><dt>Pensée alternative</dt><dd>${esc(e.alternative) || "–"} <b>(${e.croyanceAlt} %)</b></dd><dt>Réévaluation</dt><dd>Émotion ${e.intensiteApres} % · croyance initiale ${e.croyanceApres} %</dd></dl>`).join(""), true));
   return `<button class="link" data-nav="patients">← Tous les patients</button>
     <div class="detail-head"><div class="row"><div><h1>${esc(pt.label || "Sans repère")}</h1><p class="muted"><span class="code-chip">${spaced(pt.code)}</span> · « ${pt.tv} » · suivi depuis le ${fmtD(pt.created, { day: "numeric", month: "long", year: "numeric" })}${pt.lastImport ? ` · dernière réception ${fmtDT(pt.lastImport)}` : ""}</p></div>
-      <div class="row"><button class="btn" id="cr">Copier le compte rendu</button><button class="btn soft" data-nav="patients" data-p='{"edit":"${pt.code}"}'>Modifier les exercices</button><button class="btn ghost" data-nav="patients" data-p='{"act":"${pt.code}"}'>Code et fiche à remettre</button></div></div>
+      <div class="row"><button class="btn" id="cr">Copier le compte rendu</button><button class="btn soft" id="pdf">Exporter en PDF</button><button class="btn soft" data-nav="patients" data-p='{"edit":"${pt.code}"}'>Modifier les exercices</button><button class="btn ghost" data-nav="patients" data-p='{"act":"${pt.code}"}'>Code et fiche à remettre</button></div></div>
       ${p.published === true ? `<p class="result">Modifications publiées : le patient les recevra à la prochaine ouverture de l'application.</p>` : p.published === false ? `<p class="result err">Modifications enregistrées, mais pas publiées (relais injoignable). Rouvrir « Code et fiche à remettre » pour réessayer.</p>` : ""}
-      <div class="panels" style="margin-bottom:6px">${msgPanel(pt)}${qnPanel(pt)}</div>
+      ${redBox(pt)}<div class="panels" style="margin-bottom:6px">${msgPanel(pt)}${qnPanel(pt)}</div>
       <div class="chips" data-name="per">${PERIODS.map(([k, l]) => `<button class="chip" data-v="${k}" aria-pressed="${k === per}">${l}</button>`).join("")}</div></div>
     ${list.length ? `<div class="kpis"><div class="kpi"><b>${list.length}</b><span>réponses sur la période</span></div>${Object.entries(list.reduce((c, e) => (c[e.type] = (c[e.type] || 0) + 1, c), {})).map(([k, n]) => `<div class="kpi"><b>${n}</b><span>${TYPE_LABEL[k] || k}</span></div>`).join("")}</div>
     <div class="panels">${P.join("")}
@@ -2582,6 +2678,107 @@ function patientDetail(pt, p) {
     : `<div class="empty card"><h2>Aucune réponse sur cette période</h2><p>${relayOn() ? "Les réponses arrivent automatiquement quand le patient les envoie : utilisez « Relever les réponses »." : "Les réponses apparaissent après avoir collé les messages chiffrés dans l'onglet Recevoir."}</p><button class="btn soft" data-nav="recevoir">Recevoir des réponses</button></div>`}
     <p style="margin-top:24px"><button class="link" data-nav="patients" data-p='{"code":"${pt.code}","del":true}'>Supprimer ce patient</button></p>`;
 }
+/* ---------- Export PDF de la fiche patient (espace praticienne uniquement) ---------- */
+const ELAN_ITEMS_PR = ["Je me suis senti·e beaucoup plus joyeux·se, excité·e ou « survolté·e » que d'habitude.", "Je me suis senti·e beaucoup plus irritable ou énervé·e que d'habitude.",
+  "J'ai eu beaucoup plus d'énergie que d'habitude.", "J'ai dormi beaucoup moins que d'habitude, sans me sentir fatigué·e.",
+  "Je me suis senti·e capable de tout, plus fort·e ou plus important·e que d'habitude.", "J'ai parlé beaucoup plus, ou beaucoup plus vite, que d'habitude.",
+  "Mes pensées allaient très vite, je sautais d'une idée à l'autre.", "J'étais très facilement distrait·e.",
+  "J'ai lancé beaucoup de projets ou d'activités en même temps, ou j'avais du mal à tenir en place.", "J'ai fait des choses risquées ou que j'ai regrettées ensuite (dépenses, conduite, sorties, rencontres…)."];
+const PDF_LIBS = ["https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js", "https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"];
+function loadScript(src) { return new Promise((ok, ko) => { if (document.querySelector(`script[src="${src}"]`)) return ok(); const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => ko(new Error("lib")); document.head.appendChild(s); }); }
+async function pdfLibs() { if (!(window.jspdf && window.jspdf.jsPDF && window.jspdf.jsPDF.API.autoTable)) { await loadScript(PDF_LIBS[0]); await loadScript(PDF_LIBS[1]); } return window.jspdf.jsPDF; }
+/* Les polices standard du PDF ne couvrent que l'alphabet latin courant : on remplace le reste */
+const PDF_MAP = { "≥": ">=", "≤": "<=", "→": "->", "←": "<-", "✓": "", "✔": "", "☐": "", "☑": "", "−": "-", " ": " ", " ": " ", "‑": "-" };
+const PDF_OK = new Set([..."€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ"]);
+function pdfTxt(s) { return String(s == null ? "" : s).replace(/./gsu, ch => ch in PDF_MAP ? PDF_MAP[ch] : (ch.charCodeAt(0) < 256 || PDF_OK.has(ch)) ? ch : ""); }
+const PDF_ORDER = () => [...MOD_GROUPS.flatMap(g => g[1]), "perso", "qn"].filter((v, i, a) => a.indexOf(v) === i);
+function secTitle(t) { return t === "qn" ? "Questionnaires de repérage" : t === "perso" ? "Exercices personnalisés" : (MOD_INFO[t] ? MOD_INFO[t][0] : TYPE_LABEL[t] || t); }
+async function exportPdf(pt, per) {
+  const jsPDF = await pdfLibs();
+  const doc = new jsPDF({ unit: "mm", format: "a4" }), W = 210, M = 16, CW = W - 2 * M;
+  const ACC = [31, 107, 99], INK = [31, 43, 42], MUT = [100, 115, 112], WARN = [176, 74, 40];
+  const { from, to, list } = inPeriod(pt, per);
+  let y = M;
+  const need = h => { if (y + h > 297 - 18) { doc.addPage(); y = M + 4; } };
+  const text = (s, o = {}) => { doc.setFont("helvetica", o.b ? "bold" : o.i ? "italic" : "normal"); doc.setFontSize(o.size || 10); doc.setTextColor(...(o.c || INK));
+    const lines = doc.splitTextToSize(pdfTxt(s), o.w || CW); for (const l of lines) { need(o.lh || 4.8); doc.text(l, o.x || M, y); y += o.lh || 4.8; } };
+  const h1 = s => { need(16); y += 4; doc.setFillColor(...ACC); doc.rect(M, y - 4.6, 2.2, 6.2, "F"); text(s, { b: 1, size: 13.5, x: M + 5, lh: 6.5 }); y += 1.5; };
+  const h2 = s => { need(12); y += 2.5; text(s, { b: 1, size: 11, c: ACC, lh: 5.5 }); };
+  const table = (head, body, opts = {}) => {
+    doc.autoTable(Object.assign({ startY: y, head: [head.map(pdfTxt)], body: body.map(r => r.map(pdfTxt)), margin: { left: M, right: M, top: M + 4, bottom: 18 }, theme: "grid",
+      styles: { font: "helvetica", fontSize: 8.4, cellPadding: 1.6, textColor: INK, lineColor: [210, 222, 219], lineWidth: 0.2, valign: "top", overflow: "linebreak" },
+      headStyles: { fillColor: [232, 241, 239], textColor: INK, fontStyle: "bold" }, alternateRowStyles: { fillColor: [249, 251, 251] } }, opts));
+    y = doc.lastAutoTable.finalY + 4;
+  };
+  const D = t => fmtD(t, { day: "2-digit", month: "2-digit", year: "2-digit" }), DT = t => fmtDT(t);
+  /* Page de garde */
+  doc.setFillColor(...ACC); doc.rect(0, 0, W, 34, "F");
+  doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.text("Suivi entre les séances", M, 16);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.text(pdfTxt(`${pt.label || "Patient"} · code ${spaced(pt.code)}`), M, 25);
+  y = 44;
+  text(`Période : du ${fmtD(from.toISOString(), { day: "numeric", month: "long", year: "numeric" })} au ${fmtD(to.toISOString(), { day: "numeric", month: "long", year: "numeric" })}`, { size: 10.5 });
+  text(`${pl(list.length, "réponse")} · document créé le ${fmtD(new Date().toISOString(), { day: "numeric", month: "long", year: "numeric" })} à ${new Date().toTimeString().slice(0, 5)}`, { size: 10.5 });
+  text("Document confidentiel, destiné au dossier du patient.", { i: 1, size: 9, c: MUT });
+  const types = PDF_ORDER().filter(t => list.some(e => e.type === t)).concat([...new Set(list.map(e => e.type))].filter(t => !PDF_ORDER().includes(t)));
+  if (types.length) { y += 2; text("Sommaire : " + types.map(secTitle).join(" · "), { size: 9.5, c: MUT }); }
+  /* Synthèse */
+  const syn = report(pt, per).split("\n"); const cut = syn.indexOf("Détail :");
+  const synL = syn.slice(3, cut < 0 ? syn.length : cut).filter(Boolean);
+  if (synL.length) { h1("Synthèse de la période"); synL.forEach(l => { need(6); doc.setFillColor(...ACC); doc.circle(M + 1.2, y - 1.3, 0.7, "F"); text(l, { x: M + 4, w: CW - 4, size: 9.6 }); y += 0.8; }); }
+  const al = alerts(pt); if (al.length) { y += 1; text("Points d'attention (30 derniers jours) : " + al.join(" ; "), { b: 1, size: 9.6, c: WARN }); }
+  if (!list.length) { y += 4; text("Aucune réponse sur cette période.", { i: 1 }); }
+  /* Sections par item */
+  for (const t of types) {
+    const es = list.filter(e => e.type === t);
+    h1(`${secTitle(t)} (${es.length})`);
+    if (t === "humeur") table(["Date", "Humeur", "Émotions", "Énergie", "Contexte / note"], es.map(e => [DT(e.t), e.score != null ? `${e.score}/10` : e.humeur ? MOOD_LABEL[e.humeur] : "", (e.emotions || []).join(", "), e.energie != null ? `${e.energie}/10` : "", e.contexte || e.note || ""]), { columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 18 }, 3: { cellWidth: 15 } } });
+    else if (t === "sommeil") table(["Nuit", "Horaires", "Endormis.", "Réveils", "Réveil du matin", "Médicament", "Qualité", "Écran / sieste", "Précisions"], es.map(e => { const h = sleepHours(e); return [D(e.nuit + "T12:00:00"), `${e.coucher}-${e.lever}${h != null ? ` (${r1(h)} h)` : ""}`, e.endormissement || "", e.reveils || "", e.reveilMatin || "", e.medic === "Oui" ? `Oui${e.medicHeure ? " à " + e.medicHeure : ""}` : e.medic || "", e.qualite ? e.qualite + "/5" : "", `${e.ecran || "?"} / ${e.sieste || "?"}`, e.note || ""]; }), { styles: { fontSize: 7.4, cellPadding: 1.3, font: "helvetica", textColor: INK, lineColor: [210, 222, 219], lineWidth: 0.2, valign: "top" }, columnStyles: { 0: { cellWidth: 14 }, 1: { cellWidth: 21 }, 3: { cellWidth: 12 }, 6: { cellWidth: 12 } } });
+    else if (t === "qn") for (const e of es) {
+      const s = qnScore(e), d = qnDef(e.q);
+      h2(`${qnName(e.q)} · ${fmtD(e.t, { day: "numeric", month: "long", year: "numeric" })}`);
+      if (d) text(`${d.full}${QN_TAG(e.q) ? " · dossier : " + QN_TAG(e.q) : ""}`, { size: 8.8, c: MUT, i: 1 });
+      if (s) { text(`Score : ${s.main}${s.pos === true ? "  (seuil atteint)" : s.pos === false ? "  (sous le seuil)" : ""}`, { b: 1, size: 10, c: s.pos ? WARN : INK }); s.lines.forEach(l => text(l, { size: 9.2 })); }
+      if (d && d.seuil) text("Cotation : " + d.seuil, { size: 8.4, c: MUT });
+      y += 1; table(["N°", "Item", "Réponse"], qnAnswerText(e.q, e).map(([q, a], i) => [String(i + 1), q, a]), { columnStyles: { 0: { cellWidth: 9 }, 2: { cellWidth: 48 } } });
+      if (d && d.ref) text("Référence : " + d.ref, { size: 7.6, c: MUT });
+    }
+    else if (t === "angst") for (const e of es) {
+      h2(`Questionnaire d'Angst · ${fmtD(e.t, { day: "numeric", month: "long", year: "numeric" })}`);
+      text(`Score : ${e.total}/20 « vrai »${e.total > 10 ? "  (au-dessus du seuil > 10)" : "  (seuil > 10)"}`, { b: 1, size: 10, c: e.total > 10 ? WARN : INK });
+      table(["N°", "Item", "Réponse"], QN_ITEMS.q09.items.map((q, i) => [String(i + 1), q, e.rep && e.rep[i] != null ? (e.rep[i] ? "Vrai" : "Faux") : "?"]), { columnStyles: { 0: { cellWidth: 9 }, 2: { cellWidth: 22 } } });
+    }
+    else if (t === "elan") for (const e of es) {
+      h2(`Suivi de l'élan · ${fmtD(e.t, { day: "numeric", month: "long", year: "numeric" })}`);
+      text(`${e.oui}/10 « oui »${elanFlag(e) ? "  (repère « à explorer »)" : ""}${e.oui ? ` · durée : ${e.jours} · difficultés : ${e.diff} · remarqué par l'entourage : ${e.rem}` : ""}`, { b: 1, size: 9.6, c: elanFlag(e) ? WARN : INK });
+      table(["N°", "Item", "Réponse"], ELAN_ITEMS_PR.map((q, i) => [String(i + 1), q, e.rep && e.rep[i] != null ? (e.rep[i] ? "Oui" : "Non") : "?"]), { columnStyles: { 0: { cellWidth: 9 }, 2: { cellWidth: 18 } } });
+    }
+    else if (t === "tcc" || t === "perso") for (const e of es) {
+      h2(`${e.titre || secTitle(t)} · ${DT(e.t)}`);
+      const rows = (e.rep || []).filter(r => r.k !== "rate").map(r => [r.q, t === "tcc" ? tccValText(r) : Array.isArray(r.v) ? r.v.join(", ") : String(r.v == null ? "" : r.v)]);
+      if (rows.length) table(["Question", "Réponse"], rows, { columnStyles: { 0: { cellWidth: 70 } } }); else text("Fiche lue (pas de réponse à saisir).", { size: 9, c: MUT, i: 1 });
+    }
+    else if (t === "pleine") table(["Date", "Pratique", "Durée", "Tension avant -> après", "Vécu"], es.map(e => [DT(e.t), e.pr === "quotidien" ? "Au quotidien : " + e.informel : e.titre + (e.ancre ? ` (ancre : ${MF_ANCRE_LBL[e.ancre]})` : ""), e.pr === "quotidien" ? "" : `${Math.round((e.duree || 0) / 60)} min${e.fini ? "" : e.trop ? " (arrêt : trop)" : " (arrêtée)"}`, e.avant != null ? `${e.avant} -> ${e.apres}` : "", (e.vecu || []).join(", ")]), { columnStyles: { 0: { cellWidth: 25 }, 2: { cellWidth: 22 }, 3: { cellWidth: 22 } } });
+    else table(["Date", "Réponse"], es.map(e => [DT(e.t), entryText(e)]), { columnStyles: { 0: { cellWidth: 26 } } });
+    if (t === "repas" && es.some(e => e.photo === "ok")) text("Les photos de repas restent consultables dans l'application (non incluses dans ce document).", { size: 8.2, c: MUT, i: 1 });
+  }
+  /* En-têtes et pieds de page */
+  const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++) {
+    doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(7.8); doc.setTextColor(...MUT);
+    if (i > 1) doc.text(pdfTxt(`Entre-Séances · ${pt.label || ""} ${spaced(pt.code)}`), M, 9);
+    doc.text(pdfTxt(`Confidentiel · page ${i}/${n}`), W - M, 290, { align: "right" });
+    doc.text(pdfTxt(`Créé le ${fmtD(new Date().toISOString())}`), M, 290);
+  }
+  return { blob: doc.output("blob"), name: `suivi-${pt.code}-${new Date().toISOString().slice(0, 10)}.pdf` };
+}
+async function savePdf(r) {
+  const file = typeof File !== "undefined" ? new File([r.blob], r.name, { type: "application/pdf" }) : null;
+  const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (mobile && file && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: r.name }); return "partage"; } catch (e) { if (e && e.name === "AbortError") return "annulé"; } }
+  const url = URL.createObjectURL(r.blob), a = document.createElement("a"); a.href = url; a.download = r.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000); return "téléchargé";
+}
+
 function report(pt, per) {
   const { from, to, list } = inPeriod(pt, per);
   const lines = [`Entre-Séances · ${spaced(pt.code)}${pt.label ? " (" + pt.label + ")" : ""}`, `Période du ${fmtD(from.toISOString(), { day: "numeric", month: "long", year: "numeric" })} au ${fmtD(to.toISOString(), { day: "numeric", month: "long", year: "numeric" })} · ${list.length} réponses`, ""];
@@ -2597,8 +2794,10 @@ function report(pt, per) {
   const env = by("envie"); if (env.length) lines.push(`Envies de crise : ${env.length} (${env.filter(e => e.issue === "J'ai fait une crise").length} avec crise).`);
   const ang = by("angoisse"); if (ang.length) lines.push(`Crises d'angoisse : ${ang.length}, pic moyen ${r1(avg(ang.map(e => e.pic)))}/10.`);
   const sud = by("sud"); if (sud.length) lines.push(`Malaise (SUD) : ${pl(sud.length, "saisie")}, moyenne ${r1(avg(sud.map(e => e.sud)))}/10.`);
-  const som = by("sommeil"); if (som.length) lines.push(`Sommeil : ${som.length} nuits, durée moyenne ${r1(avg(som.map(sleepHours).filter(x => x != null)))} h, qualité moyenne ${r1(avg(som.map(e => e.qualite).filter(Boolean)))}/5.`);
-  by("tcc").forEach(e => lines.push(`Exercice TCC « ${e.titre} » (${fmtD(e.t)}) : ${(e.rep || []).filter(r => r.k !== "rate").map(r => `${r.q} = ${tccValText(r)}`).join(" ; ")}.`));
+  const som = by("sommeil"); if (som.length) lines.push(`Sommeil : ${som.length} nuits, durée moyenne ${r1(avg(som.map(sleepHours).filter(x => x != null)))} h, qualité moyenne ${r1(avg(som.map(e => e.qualite).filter(Boolean)))}/5${sleepExtra(som).length ? "; " + sleepExtra(som).join("; ").toLowerCase() : ""}.`);
+  { const sn = by("sommeil").filter(e => e.note); if (sn.length) lines.push(`Précisions sur les nuits : ${sn.map(e => `nuit du ${fmtD(e.nuit)} « ${e.note} »`).join(" ; ")}.`); }
+  { const ctx = by("humeur").filter(e => e.contexte); if (ctx.length) lines.push(`Contextes notés avec l'humeur : ${ctx.map(e => `${fmtD(e.t)}${e.score != null ? " (" + e.score + "/10)" : ""} « ${e.contexte} »`).join(" ; ")}.`); }
+  by("tcc").forEach(e => { const rr = (e.rep || []).filter(r => r.k !== "rate"); lines.push(`Exercice TCC « ${e.titre} » (${fmtD(e.t)}) : ${rr.length ? rr.map(r => `${r.q} = ${tccValText(r)}`).join(" ; ") : "fiche lue"}.`); });
   by("perso").forEach(e => lines.push(`Exercice « ${e.titre} » (${fmtD(e.t)}) : ${(e.rep || []).map(r => `${r.q} = ${Array.isArray(r.v) ? r.v.join(", ") : r.v}`).join(" ; ")}.`));
   const jau = by("jauge"); if (jau.length) lines.push(`Jauge sensorielle : ${pl(jau.length, "saisie")}, ${jau.filter(e => e.niveau >= 4).length} au niveau 4 ou 5.`);
   lines.push("", "Détail :");
@@ -2610,6 +2809,17 @@ function mountDetail(pt, p) {
   if (p.del) { document.getElementById("delYes").onclick = async () => { if (relayOn()) { try { await relay(vault.relay, { a: "delcfg", token: vault.token, code: pt.code }); } catch (e) {} } vault.deleted = vault.deleted || {}; vault.deleted[pt.code] = new Date().toISOString(); delete vault.patients[pt.code]; await persist(); nav("patients"); }; return; }
   document.querySelectorAll('.chips[data-name="per"] .chip').forEach(b => b.addEventListener("picked", () => nav("patients", { code: pt.code, per: b.dataset.v })));
   mountMsgPanel(pt); mountQnPanel(pt);
+  document.querySelectorAll("[data-ack]").forEach(b => b.onclick = async () => {
+    pt.ack = Object.assign({}, pt.ack || {}, { [b.dataset.ack]: b.dataset.to }); pt.updated = new Date().toISOString();
+    await persist(); flash = "Alerte notée comme vue."; nav("patients", { code: pt.code, per: view.p.per });
+  });
+  const pb = document.getElementById("pdf");
+  pb.onclick = async () => {
+    pb.disabled = true; pb.textContent = "Création du PDF…";
+    try { const r = await exportPdf(pt, p.per || "30"); const how = await savePdf(r); pb.textContent = how === "annulé" ? "Exporter en PDF" : "PDF créé ✓"; }
+    catch (e) { console.error(e); alert(e && e.message === "lib" ? "Impossible de charger l'outil PDF : vérifiez la connexion internet, puis réessayez." : "La création du PDF a échoué. Réessayez, ou utilisez « Copier le compte rendu »."); pb.textContent = "Exporter en PDF"; }
+    pb.disabled = false;
+  };
   const cr = document.getElementById("cr");
   cr.onclick = async () => {
     const txt = report(pt, p.per || "30");
@@ -2673,6 +2883,10 @@ PAGES.reglages = p => {
     <div class="split"><ol class="guide">${GUIDE.map(([t, d]) => `<li><b>${t}</b><p>${d}</p></li>`).join("")}</ol>
     <div class="stack"><div class="card stack"><h3>Code du relais</h3><textarea id="gs" class="mono" readonly style="min-height:200px">${esc(RELAIS_GS)}</textarea><button class="btn" id="cpGs">Copier le code</button></div>${relayCard}</div></div>`;
   const cfgLine = `window.ES_RELAIS = "${vault.relay || ""}";`;
+  const redCard = `<div class="card stack"><h3>Alertes de suivi</h3>
+      <p class="small">Une alerte rouge apparaît sur la liste et sur la fiche quand un patient note son humeur <b>sous 5/10</b>, ou la qualité de sa nuit à <b>1 ou 2 sur 5</b>, <b>au moins 3 jours d'affilée</b>. Elle est calculée uniquement dans votre espace : le patient n'en sait rien.</p>
+      <p class="small">Recevoir aussi une notification sur cet appareil, quand l'espace praticienne est ouvert (même en arrière-plan sur ordinateur) :</p>
+      <div class="row"><button class="btn ${vault.redNotif && typeof Notification !== "undefined" && Notification.permission === "granted" ? "soft" : ""}" id="redN">${vault.redNotif && typeof Notification !== "undefined" && Notification.permission === "granted" ? "Notifications d'alerte activées · désactiver" : "Activer les notifications d'alerte"}</button></div><p class="hint" id="redNi"></p></div>`;
   const diagCard = relayOn() ? `<div class="card stack"><h3>Vérifier la liaison</h3>
       <p class="small">Le fichier <b>config.js</b> du site doit contenir exactement cette ligne (copiez-la et remplacez toute la ligne existante sur GitHub) :</p>
       <textarea id="cfgl" class="mono" readonly style="min-height:70px">${esc(cfgLine)}</textarea>
@@ -2687,7 +2901,7 @@ PAGES.reglages = p => {
       <p class="hint">Les photos de repas restent sur l'appareil qui les a reçues.</p></div>` : "";
   return `<div class="head-row"><h1>Réglages</h1></div>
   <div class="split">
-    ${relayCard}${syncCard}${diagCard}
+    ${redCard}${relayCard}${syncCard}${diagCard}
     <div class="card stack"><h3>Informations transmises aux patients</h3>
       <div><label class="lbl" for="url">Lien de l'application patient</label><input type="text" id="url" value="${esc(vault.appUrl || "")}" placeholder="https://…"><p class="hint">Sert au QR code et au message d'invitation.</p></div>
       <div><label class="lbl" for="em">Adresse mail (envoi manuel de secours)</label><input type="text" id="em" value="${esc(vault.email)}"></div>
@@ -2753,6 +2967,17 @@ MOUNTS.reglages = p => {
       }
     } catch (e) { h += line(false, esc(e.detail || "Relais injoignable.")); }
     out.innerHTML = h; dg.disabled = false; mountRecover();
+  };
+  const rn = document.getElementById("redN");
+  if (rn) rn.onclick = async () => {
+    const info = document.getElementById("redNi");
+    if (typeof Notification === "undefined") { info.textContent = "Cet appareil ne permet pas les notifications depuis un site. Sur iPhone, installez d'abord l'espace praticienne sur l'écran d'accueil (Partager → Sur l'écran d'accueil)."; return; }
+    if (vault.redNotif && Notification.permission === "granted") { vault.redNotif = false; await persist(); render(); return; }
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") { info.textContent = "Les notifications ont été refusées. Vous pouvez les autoriser dans les réglages du navigateur pour ce site."; return; }
+    vault.redNotif = true; vault.notified = vault.notified || {};
+    for (const [pt, al] of redPatients()) for (const r of al) vault.notified[`${pt.code}|${r.k}|${r.to}`] = new Date().toISOString(); /* pas de rafale pour les alertes déjà visibles */
+    await persist(); flash = "Notifications d'alerte activées sur cet appareil."; render();
   };
   const ss = document.getElementById("saveS");
   if (ss) ss.onclick = async () => { vault.email = document.getElementById("em").value.trim(); vault.appUrl = document.getElementById("url").value.trim().replace(/\/+$/, ""); await persist(); for (const pt of Object.values(vault.patients)) await publishCfg(pt); document.getElementById("sMsg").textContent = demo ? "Enregistré pour cette démonstration." : "Enregistré."; };
