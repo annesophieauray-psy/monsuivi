@@ -676,7 +676,8 @@ TCC_LISTS.besoins = TCC_BESOINS.flatMap(f => f[1]);
 
 const TCC_GROUPS = [
   ["comprendre", "Comprendre"], ["reperer", "Repérer mes schémas"], ["critique", "Ma voix critique"], ["enfant", "Mon enfant intérieur"],
-  ["adulte", "Mon Adulte sain"], ["changer", "Changer mes réactions"], ["besoins", "Mes besoins"], ["valeurs", "Mes valeurs"]
+  ["adulte", "Mon Adulte sain"], ["changer", "Changer mes réactions"], ["besoins", "Mes besoins"], ["valeurs", "Mes valeurs"],
+  ["elan", "Freiner l'emballement (TDAH)"]
 ];
 const TCC_TAGS = { dep: "Dépression / estime de soi", anx: "Anxiété", trauma: "Psychotraumatisme", rel: "Relations / attachement", tca: "TCA", tnd: "TDAH / TSA (format court)" };
 
@@ -826,7 +827,41 @@ const TCC_EX = [
     steps: [{ h: "Les obstacles", f: [{ k: "chips", q: "La valeur", o: "@valeurs" }, { k: "texte", q: "Un obstacle en moi (peur, croyance)", h: "Ex. : « Je n'ai pas le droit de décider sans l'accord des autres »" }, { k: "texte", q: "Un obstacle extérieur", opt: 1 }] },
       { h: "Les dépasser", f: [{ k: "texte", q: "Cette croyance est-elle justifiée ou exagérée ? Mes preuves" }, { k: "texte", q: "Une action concrète pour avancer quand même" }] }] },
   { id: "v-discours", g: "valeurs", t: "Le discours de mes proches", d: "Ce que j'aimerais qu'on dise de moi", u: 1, dur: 8, tags: ["dep", "rel"],
-    steps: [{ h: "Imaginer", f: [{ k: "info", q: "Imaginer une fête en mon honneur. Les personnes qui comptent prennent la parole pour dire sincèrement qui je suis pour elles." }, { k: "texte", q: "Ce que j'aimerais qu'elles disent" }, { k: "chips", q: "Les valeurs que ça montre", o: "@valeurs", m: 1 }] }] }
+    steps: [{ h: "Imaginer", f: [{ k: "info", q: "Imaginer une fête en mon honneur. Les personnes qui comptent prennent la parole pour dire sincèrement qui je suis pour elles." }, { k: "texte", q: "Ce que j'aimerais qu'elles disent" }, { k: "chips", q: "Les valeurs que ça montre", o: "@valeurs", m: 1 }] }] },
+
+  /* ---------- Freiner l'emballement (TDAH : impulsivité, achats, surinvestissement puis abandon) ----------
+     Inspiré des programmes TCC du TDAH adulte (Safren et al. ; Young et Bramham : « Stop, réfléchis »), des TCC des achats compulsifs
+     (Mueller et al. : surveillance des envies, délai avant achat, alternatives) et de la gestion du rythme d'activité (cycle « emballement puis effondrement »). */
+  { id: "sas48", g: "elan", t: "Le sas des 48 heures", d: "Avant un achat ou un nouveau projet : faire une pause, puis décider", u: 3, dur: 5, pin: 1, tags: ["tnd"],
+    intro: "Une envie forte (acheter, me lancer dans un nouveau projet, dire oui à tout) monte comme une vague, puis redescend. Ce sas me laisse le temps de décider avec ma tête, pas seulement avec l'élan du moment. Je le remplis dès que l'envie arrive.",
+    steps: [{ h: "L'envie", f: [{ k: "chips", q: "J'ai envie de", o: ["Acheter quelque chose", "Me lancer dans un nouveau projet ou une activité", "Dire oui à un engagement", "Autre chose"] },
+        { k: "texte", q: "Ce dont j'ai envie, en quelques mots", h: "Ex. : du matériel de peinture complet ; m'inscrire à 3 cours de sport" },
+        { k: "echelle", q: "La force de l'envie maintenant", a: "Légère", b: "Irrésistible" },
+        { k: "chips", q: "Ce qu'il y a derrière l'envie", o: ["Excitation", "Besoin de nouveauté", "Ennui", "Stress", "Tristesse", "Fatigue", "Envie de me récompenser", "Peur de rater l'occasion", "Je ne sais pas"], m: 1 }] },
+      { h: "La pause", f: [{ k: "info", q: "Je ne décide rien pendant 2 minutes. Je respire lentement, je pose le téléphone ou je m'éloigne du magasin, du site ou du projet. J'observe l'envie sans lui obéir." },
+        { k: "minuteur", q: "Ma pause", m: 2 },
+        { k: "echelle", q: "La force de l'envie après la pause", a: "Légère", b: "Irrésistible" }] },
+      { h: "Les 4 questions", f: [{ k: "oui", q: "Est-ce que j'ai déjà quelque chose de semblable, ou un projet du même genre laissé en cours ?" },
+        { k: "chips", q: "Mes projets ou activités commencés et pas terminés en ce moment", o: ["Aucun", "1", "2", "3", "4 ou plus"] },
+        { k: "chips", q: "Ce que ça me coûterait", o: ["Argent", "Temps", "Énergie", "Sommeil", "Moments avec mes proches", "Place chez moi", "Rien de tout ça"], m: 1 },
+        { k: "echelle", q: "Ma réserve d'énergie cette semaine", a: "Vide", b: "Pleine" },
+        { k: "texte", q: "Dans un mois, est-ce que je serai content·e de l'avoir fait ? Pourquoi", opt: 1 }] },
+      { h: "Ma décision", f: [{ k: "chips", q: "Je choisis", o: ["J'attends 48 heures : je le note sur ma liste d'attente", "Je fais une version mini (budget ou durée limités)", "Je termine d'abord un projet en cours", "Je laisse tomber", "Je le fais maintenant"] },
+        { k: "texte", q: "Ma limite si je le fais (budget, durée, nombre de séances)", opt: 1, h: "Ex. : 30 € maximum ; un seul cours d'essai ; 1 heure par jour" },
+        { k: "texte", q: "Mon plan « Si… alors… »", opt: 1, h: "Ex. : Si j'en ai encore envie dans 48 heures et que c'est dans mon budget, alors je l'achète." },
+        { k: "info", q: "Dans 48 heures, je relis cette fiche : elle reste disponible dans mes exercices. L'envie est souvent beaucoup plus faible. Laisser tomber n'est pas un échec : c'est garder mon énergie pour ce qui compte." }] }] },
+  { id: "energie-semaine", g: "elan", t: "Mon budget d'énergie de la semaine", d: "Un projet à la fois, à un rythme que je peux tenir", u: 3, dur: 8, pin: 1, tags: ["tnd"],
+    intro: "Avec le TDAH, on se lance souvent à fond dans une activité, on y met toute son énergie… puis on s'épuise et on abandonne tout d'un coup. Le but : garder un rythme régulier, même quand l'enthousiasme est très fort, pour aller au bout sans m'épuiser. À remplir en début de semaine.",
+    steps: [{ h: "Où j'en suis", f: [{ k: "lignes", q: "Mes projets et engagements en cours", n: 5, h: "Ex. : travail, rénovation de la chambre, cours de guitare" },
+        { k: "echelle", q: "Ma réserve d'énergie en ce début de semaine", a: "Vide", b: "Pleine" }] },
+      { h: "Mes signaux", f: [{ k: "chips", q: "Mes signaux d'emballement", o: ["Je dors moins", "J'y pense tout le temps", "J'achète du matériel avant d'avoir vraiment commencé", "Je dis oui à tout", "Je saute des repas ou des pauses", "J'oublie le reste (rendez-vous, tâches)", "Je m'agace si on m'interrompt"], m: 1 },
+        { k: "chips", q: "Mes signaux d'épuisement", o: ["Fatigue dès le réveil", "Tout me paraît lourd", "Je lâche tout d'un coup", "Je m'en veux", "Je m'isole", "Irritabilité"], m: 1 }] },
+      { h: "Ma règle de la semaine", f: [{ k: "texte", q: "Mon projet prioritaire (un seul)" },
+        { k: "chips", q: "Mes garde-fous", o: ["Un seul nouveau projet à la fois", "Pas plus d'1 heure par jour sur le projet", "Je m'arrête quand c'est encore agréable", "Aucun achat lié au projet cette semaine", "Une pause de 10 min toutes les heures", "Heure de coucher fixe", "Je garde une soirée sans projet"], m: 1 },
+        { k: "texte", q: "Ma liste d'idées pour plus tard", opt: 1, h: "Les nouvelles idées ne sont pas perdues : elles attendent la fin du projet en cours." }] },
+      { h: "Le bilan (en fin de semaine)", f: [{ k: "oui", q: "J'ai tenu mes garde-fous la plupart du temps" },
+        { k: "echelle", q: "Ma réserve d'énergie en fin de semaine", a: "Vide", b: "Pleine" },
+        { k: "texte", q: "Ce qui m'a aidé, ce que j'ajuste la semaine prochaine", opt: 1 }] }] }
 ];
 const TCC_BY_ID = Object.fromEntries(TCC_EX.map(x => [x.id, x]));
 /* Sélections recommandées par profil (ordre = utilité) */
@@ -836,7 +871,7 @@ const TCC_PRESETS = {
   trauma: ["pe-schemas", "pe-modes", "declencheurs", "enfant-apaiser", "b-secours", "compassion", "dialogue", "enreg", "memo"],
   rel: ["pe-schemas", "pe-modes", "enreg", "besoin-cache", "b-cnv", "strategies", "v-emotion", "plan", "memo"],
   tca: ["pe-schemas", "enreg", "declencheurs", "strategies", "critique-id", "dialogue", "compassion", "b-secours", "b-equilibre", "memo"],
-  tnd: ["enreg", "croyances", "b-journal", "b-cnv", "b-secours", "v-journal", "memo"]
+  tnd: ["sas48", "energie-semaine", "enreg", "croyances", "b-journal", "b-cnv", "b-secours", "v-journal", "memo"]
 };
 function tccList(name) {
   if (name === "@schemaphrases") return TCC_DOMAINES.flatMap(d => d.s.map(s => s[2]));
