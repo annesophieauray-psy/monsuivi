@@ -641,9 +641,10 @@ TCC_LISTS.besoins = TCC_BESOINS.flatMap(f => f[1]);
 const TCC_GROUPS = [
   ["comprendre", "Comprendre"], ["reperer", "Repérer mes schémas"], ["critique", "Ma voix critique"], ["enfant", "Mon enfant intérieur"],
   ["adulte", "Mon Adulte sain"], ["changer", "Changer mes réactions"], ["besoins", "Mes besoins"], ["valeurs", "Mes valeurs"],
-  ["tdah-att", "TDAH : attention et organisation"], ["elan", "TDAH : impulsivité et emballement"], ["tdah-emo", "TDAH : émotions et estime de soi"]
+  ["tdah-att", "TDAH : attention et organisation"], ["elan", "TDAH : impulsivité et emballement"], ["tdah-emo", "TDAH : émotions et estime de soi"],
+  ["toc-base", "TOC : comprendre et observer"], ["toc-expo", "TOC : m'exposer sans rituel"], ["toc-pensees", "TOC : prendre du recul sur le doute"]
 ];
-const TCC_TAGS = { dep: "Dépression / estime de soi", anx: "Anxiété", trauma: "Psychotraumatisme", rel: "Relations / attachement", tca: "TCA", tnd: "TDAH / TSA" };
+const TCC_TAGS = { dep: "Dépression / estime de soi", anx: "Anxiété", trauma: "Psychotraumatisme", rel: "Relations / attachement", tca: "TCA", tnd: "TDAH / TSA", toc: "TOC" };
 
 /* u = utilité (1 à 3), dur = minutes, seance = à introduire en séance d'abord, pin = réponses relisibles par le patient
    Types de champs : info, texte, lignes (n), chips (o, m = multiple), echelle (0-10), pct (0-100), oui, minuteur (m min), rate (o items, l niveaux), fiche (psychoéducation) */
@@ -923,7 +924,108 @@ const TCC_EX = [
     steps: [{ h: "Ma pensée dure", f: [{ k: "chips", q: "La pensée qui revient", o: ["Je suis nul·le", "Je suis paresseux·se", "Je ne finis jamais rien", "Je déçois tout le monde", "Je suis bête", "Autre"], m: 1 }, { k: "pct", q: "À quel point j'y crois" }] },
       { h: "Mes réussites", f: [{ k: "lignes", q: "3 choses que j'ai réussies ou commencées cette semaine, même petites", n: 3, h: "Ex. : j'ai envoyé le dossier ; j'ai pensé au rendez-vous" },
         { k: "texte", q: "Ce que mon TDAH explique, sans que ce soit de la paresse", opt: 1 }] },
-      { h: "Une pensée plus juste", f: [{ k: "texte", q: "Ce que je me dis maintenant", h: "Ex. : « Mon cerveau fonctionne autrement, et j'avance avec mes outils »" }, { k: "pct", q: "À quel point je crois maintenant à la pensée dure" }] }] }
+      { h: "Une pensée plus juste", f: [{ k: "texte", q: "Ce que je me dis maintenant", h: "Ex. : « Mon cerveau fonctionne autrement, et j'avance avec mes outils »" }, { k: "pct", q: "À quel point je crois maintenant à la pensée dure" }] }] },
+
+  /* ---------- TOC (d'après le document de la praticienne « TOC : exercices thérapeutiques par critère DSM-5 (vérification, lavage, comptage) »)
+     ERP intégrée à la TCC ; exposition selon l'apprentissage inhibiteur (violer l'attente, varier, retirer les signaux de sécurité, ne pas attendre la baisse de l'anxiété). ---------- */
+  { id: "toc-cercle", g: "toc-base", t: "Le cercle du TOC", d: "Comprendre pourquoi le rituel soulage… et entretient le TOC", u: 3, dur: 6, tags: ["toc"], crit: "Socle commun : psychoéducation", src: "★★★ Psychoéducation de l'ERP",
+    intro: "Le TOC tourne en cercle : une pensée intrusive fait monter l'anxiété, le rituel soulage tout de suite… et ce soulagement apprend au cerveau que le danger était réel. La prochaine fois, la pensée revient plus fort. Je dessine mon propre cercle.",
+    steps: [{ h: "Mon cercle", f: [{ k: "texte", q: "La pensée, l'image ou le doute qui arrive", h: "Ex. : « Et si je n'avais pas fermé le gaz ? » ; « Mes mains sont sales » ; « Si je ne compte pas jusqu'à 8, il va arriver malheur »" },
+        { k: "chips", q: "Ce que je ressens alors", o: ["Anxiété", "Dégoût", "Sentiment que ce n'est « pas juste »", "Culpabilité", "Peur pour un proche"], m: 1 },
+        { k: "chips", q: "Ce que je fais pour me soulager", o: ["Vérifier", "Laver, nettoyer, désinfecter", "Compter, répéter un geste", "Demander à quelqu'un de me rassurer", "Un rituel dans ma tête", "Éviter la situation", "Prendre une photo de contrôle"], m: 1 },
+        { k: "chips", q: "Juste après", o: ["Soulagement", "Un peu mieux, mais le doute revient vite", "Pas vraiment mieux"] }] },
+      { h: "Ce que le cercle m'apprend", f: [{ k: "info", q: "Plus on vérifie, plus on doute : des expériences répétées montrent que vérifier encore et encore fait baisser la confiance dans son souvenir, sans le rendre plus exact. C'est la même chose pour les lavages et les comptages : le rituel achète un soulagement de quelques minutes et renforce le TOC pour la suite. Pour casser le cercle, on s'expose à la pensée sans faire le rituel : c'est l'exposition avec prévention de la réponse." },
+        { k: "oui", q: "Je reconnais ce cercle chez moi" }, { k: "texte", q: "Ce que je retiens (facultatif)", opt: 1 }] }] },
+  { id: "toc-carnet", g: "toc-base", t: "Mon carnet du TOC", d: "Noter une situation : déclencheur, pensée, anxiété, rituel, durée", u: 3, dur: 3, tags: ["toc"], crit: "Socle commun : auto-observation (A et B)", src: "★★★ Auto-observation de l'ERP",
+    intro: "Pendant une semaine, je note chaque fois que le TOC se manifeste, même les rituels discrets (dans ma tête, demander à être rassuré·e). Cela sert à construire mon échelle d'exposition avec ma psychologue.",
+    steps: [{ h: "La situation", f: [{ k: "texte", q: "Le déclencheur", h: "Ex. : en quittant la maison ; en touchant la poignée du bus ; en montant l'escalier" },
+        { k: "texte", q: "La pensée ou le doute" },
+        { k: "echelle", q: "Mon anxiété ou mon malaise", a: "Aucun", b: "Maximal" }] },
+      { h: "Ce que j'ai fait", f: [{ k: "chips", q: "Ma réponse", o: ["Vérifier", "Laver, nettoyer", "Compter, répéter", "Rituel dans ma tête", "Demander à être rassuré·e", "Éviter", "Rien : j'ai laissé passer"], m: 1 },
+        { k: "chips", q: "Combien de temps ça m'a pris", o: ["Moins de 5 min", "5 à 15 min", "15 à 30 min", "30 min à 1 h", "Plus d'1 h"] },
+        { k: "texte", q: "Remarque (facultatif)", opt: 1 }] }] },
+  { id: "toc-cout", g: "toc-base", t: "Ce que le TOC me coûte", d: "Temps, retards, relations… et ce que je voudrais faire à la place", u: 3, dur: 8, tags: ["toc"], crit: "Critère B et insight", src: "★★ Entretien motivationnel ; ★ bilan coûts / bénéfices",
+    intro: "Je fais le point sur ce que les rituels me prennent vraiment, et sur ce que j'aimerais faire de ce temps et de cette énergie.",
+    steps: [{ h: "Le temps", f: [{ k: "chips", q: "Le temps que me prennent les rituels par jour", o: ["Moins de 30 min", "30 min à 1 h", "1 à 2 h", "2 à 4 h", "Plus de 4 h"] },
+        { k: "chips", q: "Ce que le TOC abîme", o: ["Retards", "Travail ou études", "Sommeil", "Couple, famille", "Amitiés, sorties", "Peau abîmée (lavages)", "Argent (produits, factures)", "Moral, estime de moi"], m: 1 }] },
+      { h: "Le bénéfice réel", f: [{ k: "texte", q: "Ce que le rituel m'apporte vraiment", h: "Ex. : un soulagement de quelques minutes" }, { k: "texte", q: "Ce qu'il me coûte" }] },
+      { h: "Ce que je veux", f: [{ k: "texte", q: "Ce que je ferais de ce temps et de cette énergie si le TOC prenait moins de place" }, { k: "chips", q: "Les valeurs qui comptent pour moi là-dedans", o: "@valeurs", m: 1, opt: 1 },
+        { k: "texte", q: "Mon objectif pour les prochaines semaines", h: "Ex. : passer de 90 à 30 minutes de vérification par jour ; partir à l'heure" }] }] },
+  { id: "toc-hypo", g: "toc-base", t: "Deux hypothèses", d: "Un vrai danger, ou un problème d'inquiétude face au danger ?", u: 2, dur: 8, tags: ["toc"], crit: "Insight", src: "★★ Thérapie cognitive du TOC (Salkovskis)",
+    intro: "Plutôt que de débattre du risque, je compare deux explications de ce que je vis, et je regarde laquelle colle le mieux aux faits.",
+    steps: [{ h: "Théorie A", f: [{ k: "info", q: "Théorie A : « Il y a un vrai danger, et c'est à moi de l'empêcher. » (de feu, de contamination, de malheur…)" }, { k: "texte", q: "Ce qui va dans le sens de la théorie A" }, { k: "texte", q: "Si A est vraie, ce que je dois faire" }] },
+      { h: "Théorie B", f: [{ k: "info", q: "Théorie B : « J'ai un problème d'inquiétude face au danger : mon cerveau envoie de fausses alarmes. »" }, { k: "texte", q: "Ce qui va dans le sens de la théorie B", h: "Ex. : des milliers de vérifications, jamais de drame ; les autres ne font pas ces rituels et il ne leur arrive rien" }, { k: "texte", q: "Si B est vraie, ce que je dois faire", h: "Ex. : moins vérifier, m'exposer, tolérer le doute" }] },
+      { h: "Mon bilan", f: [{ k: "pct", q: "À quel point la théorie A me semble vraie" }, { k: "pct", q: "À quel point la théorie B me semble vraie" }, { k: "texte", q: "Ce que je peux tester cette semaine pour départager", opt: 1 }] }] },
+
+  { id: "toc-expo", g: "toc-expo", t: "Mon exercice d'exposition", d: "Affronter une situation de mon échelle, sans faire le rituel", u: 3, dur: 15, seance: 1, tags: ["toc"], crit: "A, compulsions (1) et (2)", src: "★★★ Exposition avec prévention de la réponse ; apprentissage inhibiteur (Craske 2014)",
+    intro: "Je choisis une situation de mon échelle préparée avec ma psychologue. Le but n'est pas que l'anxiété disparaisse : c'est d'apprendre que je peux supporter le doute sans faire le rituel. Je peux arrêter l'exercice même si l'anxiété est encore haute.",
+    steps: [{ h: "Avant", f: [{ k: "texte", q: "La situation que je vais affronter", h: "Ex. : partir travailler sans vérifier les plaques ; toucher la poignée puis mon téléphone ; m'arrêter sur le « mauvais » nombre" },
+        { k: "texte", q: "Ce que je redoute qu'il arrive" }, { k: "pct", q: "La probabilité que ça arrive, selon moi" },
+        { k: "echelle", q: "Mon anxiété maintenant", a: "Aucune", b: "Maximale" },
+        { k: "echelle", q: "Mon dégoût ou mon sentiment de « pas juste » maintenant", a: "Aucun", b: "Maximal" },
+        { k: "chips", q: "Les protections que je laisse de côté", o: ["Lingettes, gel, gants", "Photo de contrôle", "Demander à quelqu'un de me rassurer", "Revenir en arrière", "Rituel dans ma tête", "Recompter, refaire « juste »", "Zone « propre » à protéger"], m: 1 }] },
+      { h: "Pendant", f: [{ k: "info", q: "Je reste dans la situation sans faire le rituel, ni en vrai ni dans ma tête. Si le doute arrive : « Peut-être que oui, peut-être que non. » Je peux varier : un autre lieu, un autre moment, une autre intensité que la dernière fois." },
+        { k: "minuteur", q: "Mon temps d'exposition", m: 15 }] },
+      { h: "Après", f: [{ k: "texte", q: "Ce qui s'est réellement passé" }, { k: "pct", q: "La probabilité que ça arrive, selon moi maintenant" },
+        { k: "echelle", q: "Mon anxiété à la fin", a: "Aucune", b: "Maximale" },
+        { k: "oui", q: "J'ai tenu sans faire le rituel" },
+        { k: "texte", q: "Ce que j'ai appris", h: "Ex. : « J'ai pu supporter le doute » ; « Rien de grave n'est arrivé »" }] }] },
+  { id: "toc-imagination", g: "toc-expo", t: "Mon scénario d'exposition", d: "Écrire ma peur et la relire chaque jour, sans me rassurer", u: 3, dur: 10, seance: 1, pin: 1, tags: ["toc"], crit: "A, obsessions (1)", src: "★★★ Exposition en imagination (ERP)",
+    intro: "Quand la peur porte sur quelque chose qu'aucune exposition réelle ne peut vérifier (tomber malade dans 10 ans, ne jamais savoir si la porte était fermée), j'écris un court scénario et je le relis chaque jour, sans chercher à me rassurer.",
+    steps: [{ h: "Mon scénario", f: [{ k: "info", q: "À la première personne, au présent, 1 à 2 minutes de lecture. Je décris ma peur sans la neutraliser, sans « mais de toute façon… »." },
+        { k: "texte", q: "Mon scénario", h: "Ex. : « Je suis parti·e sans vérifier la porte. Je ne saurai jamais si elle était bien fermée. Je vais devoir vivre avec ce doute toute la journée… »" }] },
+      { h: "Aujourd'hui", f: [{ k: "echelle", q: "Mon anxiété avant la lecture", a: "Aucune", b: "Maximale" }, { k: "minuteur", q: "Je le relis, lentement, pendant", m: 3 }, { k: "echelle", q: "Mon anxiété après", a: "Aucune", b: "Maximale" }, { k: "oui", q: "Je ne me suis pas rassuré·e ensuite" }] }] },
+  { id: "toc-retarder", g: "toc-expo", t: "Retarder le rituel", d: "Attendre 5, puis 15, puis 30 minutes avant de le faire", u: 2, dur: 5, tags: ["toc"], crit: "A, compulsions (2)", src: "★★ Décalage du rituel",
+    intro: "Quand arrêter complètement le rituel est encore trop difficile, je le repousse. Souvent, l'envie retombe d'elle-même. C'est une étape, pas l'objectif final.",
+    steps: [{ h: "L'envie", f: [{ k: "texte", q: "Le rituel qui me tente" }, { k: "echelle", q: "La force de l'envie", a: "Légère", b: "Irrésistible" }, { k: "chips", q: "Je le repousse de", o: ["1 min", "5 min", "15 min", "30 min"] }] },
+      { h: "J'attends", f: [{ k: "info", q: "Pendant l'attente, je reprends une activité normale. Je ne cherche pas à chasser la pensée : je la laisse là." }, { k: "minuteur", q: "Mon attente", m: 5 }] },
+      { h: "Après", f: [{ k: "echelle", q: "La force de l'envie maintenant", a: "Légère", b: "Irrésistible" }, { k: "chips", q: "Finalement", o: ["Je n'ai pas fait le rituel", "Je l'ai fait, en plus court", "Je l'ai fait comme d'habitude"] }] }] },
+  { id: "toc-gacher", g: "toc-expo", t: "Casser un rituel dans ma tête", d: "Compter faux, laisser le mauvais nombre, ne pas « annuler »", u: 2, dur: 5, tags: ["toc"], crit: "A, obsessions (2) et compulsions (1)", src: "★★ ERP des compulsions mentales (Williams, Whittal, La Torre 2022)",
+    intro: "On ne peut pas empêcher une pensée. Mais on peut repérer le rituel mental (compter, se répéter « c'est propre », penser à un bon nombre pour « annuler ») et le gâcher pour qu'il ne fonctionne plus.",
+    steps: [{ h: "Repérer", f: [{ k: "chips", q: "Mon rituel mental", o: ["Compter (pas, objets, mots)", "Penser à un « bon » nombre après un mauvais", "Me répéter une phrase pour annuler", "Imaginer que je me lave, que c'est propre", "Revoir la scène dans ma tête pour vérifier", "Prier ou réciter pour protéger"], m: 1 },
+        { k: "info", q: "Quand je le remarque, je me dis simplement : « Je suis en train de compter » (ou « d'annuler »), et je reviens à ce que je faisais. Je ne le remplace pas par un autre rituel (chanter, réciter) : ce serait un nouveau rituel." }] },
+      { h: "Gâcher", f: [{ k: "chips", q: "Ce que j'essaie", o: ["Compter faux exprès", "M'arrêter sur le « mauvais » nombre", "Recommencer au milieu", "Faire le geste le « mauvais » nombre de fois", "Laisser un objet décalé", "Interrompre une action au « mauvais » moment"], m: 1 },
+        { k: "echelle", q: "Mon malaise juste après", a: "Aucun", b: "Maximal" }, { k: "echelle", q: "Mon malaise 30 minutes plus tard", a: "Aucun", b: "Maximal" }] }] },
+  { id: "toc-deguises", g: "toc-expo", t: "Mes rituels déguisés et la réassurance", d: "Photos, questions aux proches, relectures : les repérer pour les réduire", u: 3, dur: 8, tags: ["toc"], crit: "A, compulsions (1) ; accommodation", src: "★★★ ERP ; réduction de l'accommodation familiale (Peris et al.)",
+    intro: "Certains rituels se cachent : prendre une photo de la plaque, demander « tu es sûr que c'est fermé ? », relire un message envoyé, mettre des gants. Ils entretiennent le TOC autant que les autres. Mes proches peuvent m'aider en arrêtant progressivement de me rassurer.",
+    steps: [{ h: "Les repérer", f: [{ k: "chips", q: "Mes rituels déguisés", o: ["Photos ou vidéos de contrôle", "Demander à un proche de vérifier ou de me rassurer", "Appeler quelqu'un pour vérifier", "Relire un message, un mail envoyé", "Chercher sur internet pour me rassurer", "Gants, lingettes, coude pour ouvrir", "Zones ou objets « propres » à protéger", "Faire faire les choses à ma place"], m: 1 },
+        { k: "texte", q: "Les autres (facultatif)", opt: 1 }] },
+      { h: "Mon plan", f: [{ k: "texte", q: "Celui que je réduis en premier", h: "Une seule chose à la fois, annoncée à l'avance" },
+        { k: "texte", q: "Ce que je demande à mon proche de répondre à la place", h: "Ex. : « Je vois que c'est dur pour toi, et je sais que tu peux le supporter. Je ne vais pas répondre à cette question. »" },
+        { k: "oui", q: "J'en ai parlé avec la personne concernée", opt: 1 }] }] },
+
+  { id: "toc-etiqueter", g: "toc-pensees", t: "C'est le TOC qui parle", d: "Étiqueter la pensée, accepter le doute, reprendre mon activité", u: 3, dur: 3, pin: 1, tags: ["toc"], crit: "A, obsessions (2)", src: "★★ Étiquetage et réponse d'incertitude",
+    intro: "Lutter contre une pensée la fait revenir plus souvent. À la place, je la reconnais pour ce qu'elle est, et je choisis de vivre avec le doute.",
+    steps: [{ h: "Ma phrase", f: [{ k: "info", q: "Quand le doute arrive : « C'est une pensée de TOC, pas une information. » Puis une phrase d'acceptation, sans argumenter, et je reviens à ce que je faisais." },
+        { k: "chips", q: "La phrase qui me convient", o: ["Peut-être que oui, peut-être que non. Je choisis de vivre avec ce doute.", "C'est le TOC qui parle, je ne lui réponds pas.", "Je n'ai pas besoin d'être sûr·e à 100 %.", "Cette pensée peut rester là, je continue ma journée."] },
+        { k: "texte", q: "Ma phrase à moi (facultatif)", opt: 1 }] },
+      { h: "Aujourd'hui", f: [{ k: "texte", q: "Le moment où je l'ai utilisée", opt: 1 }, { k: "oui", q: "J'ai repris mon activité sans faire le rituel", opt: 1 }] }] },
+  { id: "toc-camembert", g: "toc-pensees", t: "Mon camembert de responsabilité", d: "Ma part réelle de responsabilité si le pire arrivait", u: 2, dur: 8, tags: ["toc"], crit: "A, obsessions (1)", src: "★★ Thérapie cognitive du TOC (Salkovskis ; van Oppen et Arntz)",
+    intro: "Le TOC me fait croire que je serais seul·e responsable si un malheur arrivait. Je répartis la responsabilité entre toutes les causes possibles, et je garde ma part pour la fin.",
+    steps: [{ h: "Au départ", f: [{ k: "texte", q: "Le malheur que je redoute", h: "Ex. : la maison brûle" }, { k: "pct", q: "Ma part de responsabilité, selon moi, maintenant" }] },
+      { h: "Les autres causes", f: [{ k: "lignes", q: "Toutes les autres causes possibles, avec leur part en %", n: 6, h: "Ex. : installation électrique 25 % ; appareil défectueux 20 % ; voisin 10 % ; hasard 15 %" }] },
+      { h: "Ma part, en dernier", f: [{ k: "pct", q: "Ma part de responsabilité, une fois les autres causes placées" }, { k: "texte", q: "Ce que je remarque en comparant les deux chiffres" }] }] },
+  { id: "toc-proba", g: "toc-pensees", t: "Le calcul en chaîne", d: "Découper le scénario redouté et multiplier les probabilités", u: 2, dur: 8, tags: ["toc"], crit: "A, obsessions (1)", src: "★★ Thérapie cognitive du TOC",
+    intro: "Pour que le pire arrive, il faut que beaucoup de choses se passent l'une après l'autre. En estimant chaque étape, je vois la probabilité réelle de la chaîne entière.",
+    steps: [{ h: "Mon estimation", f: [{ k: "texte", q: "Le scénario redouté" }, { k: "pct", q: "La probabilité que ça arrive, selon moi" }] },
+      { h: "La chaîne", f: [{ k: "lignes", q: "Chaque étape et sa probabilité", n: 6, h: "Ex. : gaz resté ouvert 1/10 ; fuite 1/10 ; personne ne sent 1/10 ; étincelle 1/100…" },
+        { k: "info", q: "On multiplie les probabilités de toutes les étapes. Avec l'exemple : 1/10 × 1/10 × 1/10 × 1/100 = 1 chance sur 100 000. Ma psychologue peut faire le calcul avec moi." }] },
+      { h: "Le résultat", f: [{ k: "texte", q: "La probabilité de la chaîne entière" }, { k: "pct", q: "À quel point j'y crois encore" }] }] },
+  { id: "toc-1vs10", g: "toc-pensees", t: "Une vérification contre dix", d: "Une expérience pour voir si vérifier plus me rend plus sûr·e", u: 2, dur: 5, tags: ["toc"], crit: "A, compulsions (1) : vérification", src: "★★ Expériences de Radomsky et van den Hout",
+    intro: "Une expérience sur deux jours. Jour 1 : je vérifie 10 fois. Jour 2 : une seule fois. À chaque fois, je note à quel point je suis sûr·e de mon souvenir.",
+    steps: [{ h: "Jour 1 : 10 vérifications", f: [{ k: "texte", q: "Ce que je vérifie", h: "Ex. : la plaque de cuisson" }, { k: "pct", q: "Ma confiance dans mon souvenir après 10 vérifications" }, { k: "echelle", q: "Mon anxiété ensuite", a: "Aucune", b: "Maximale" }] },
+      { h: "Jour 2 : 1 vérification", f: [{ k: "pct", q: "Ma confiance dans mon souvenir après une seule vérification" }, { k: "echelle", q: "Mon anxiété ensuite", a: "Aucune", b: "Maximale" }] },
+      { h: "Ce que j'en tire", f: [{ k: "texte", q: "Ce que je remarque" }, { k: "info", q: "Beaucoup de personnes découvrent que vérifier davantage ne les rend pas plus sûres : au contraire, le souvenir devient plus flou." }] }] },
+  { id: "toc-lavage", g: "toc-pensees", t: "Mes règles de lavage normales", d: "Écrire les règles d'hygiène ordinaires, et repérer ce qui dépasse", u: 3, dur: 6, pin: 1, tags: ["toc"], crit: "A, compulsions (1) : lavage", src: "★★★ ERP du TOC de contamination",
+    intro: "J'écris avec ma psychologue des règles d'hygiène ordinaires, celles de la plupart des gens. Tout lavage en dehors de ces règles est un rituel.",
+    steps: [{ h: "Mes règles", f: [{ k: "chips", q: "Je me lave les mains", o: ["Avant les repas", "Après les toilettes", "En rentrant à la maison", "Après avoir touché quelque chose de vraiment sale (terre, viande crue)"], m: 1 },
+        { k: "chips", q: "Durée d'un lavage de mains", o: ["20 secondes", "30 secondes"] }, { k: "chips", q: "Douche", o: ["Une par jour, 10 minutes maximum", "Une par jour, 15 minutes maximum"] },
+        { k: "chips", q: "Produits", o: ["Savon ordinaire", "Pas de gel en plus du savon", "Ménage avec les produits habituels, sans désinfectant en plus"], m: 1 }] },
+      { h: "Aujourd'hui", f: [{ k: "chips", q: "Mes lavages en dehors des règles", o: ["Aucun", "1 ou 2", "3 à 5", "Plus de 5"] }, { k: "texte", q: "Dans quelle situation (facultatif)", opt: 1 }] }] },
+  { id: "toc-rechute", g: "toc-base", t: "Ma fiche anti-rechute", d: "Mes signaux d'alerte et quoi faire si le TOC revient", u: 3, dur: 8, pin: 1, tags: ["toc"], crit: "Socle commun : prévention de la rechute", src: "★★ Prévention de la rechute",
+    intro: "Le TOC peut revenir dans les périodes de stress. Un écart n'est pas une rechute : si un rituel revient, je reprends l'exposition le jour même.",
+    steps: [{ h: "Mes signaux d'alerte", f: [{ k: "chips", q: "Ce qui doit m'alerter", o: ["Un ancien rituel qui revient", "Un nouvel évitement", "Je redemande à être rassuré·e", "Les rituels prennent plus de temps", "Plus de stress, de fatigue"], m: 1 }, { k: "texte", q: "Mes signaux à moi", opt: 1 }] },
+      { h: "Ce que je fais", f: [{ k: "lignes", q: "Les exercices qui m'ont le plus aidé, à refaire", n: 4 }, { k: "texte", q: "Ma phrase pour ces moments-là", h: "Ex. : « Un écart n'est pas une rechute. Je reprends l'exposition aujourd'hui. »" }, { k: "oui", q: "Je sais que je peux demander une séance de rappel" }] }] }
 ];
 const TCC_BY_ID = Object.fromEntries(TCC_EX.map(x => [x.id, x]));
 /* Sélections recommandées par profil (ordre = utilité) */
@@ -933,6 +1035,7 @@ const TCC_PRESETS = {
   trauma: ["pe-schemas", "pe-modes", "declencheurs", "enfant-apaiser", "b-secours", "compassion", "dialogue", "enreg", "memo"],
   rel: ["pe-schemas", "pe-modes", "enreg", "besoin-cache", "b-cnv", "strategies", "v-emotion", "plan", "memo"],
   tca: ["pe-schemas", "enreg", "declencheurs", "strategies", "critique-id", "dialogue", "compassion", "b-secours", "b-equilibre", "memo"],
+  toc: ["toc-cercle", "toc-carnet", "toc-etiqueter", "toc-expo", "toc-deguises", "toc-retarder", "toc-gacher", "toc-imagination", "toc-cout", "toc-hypo", "toc-camembert", "toc-proba", "toc-1vs10", "toc-lavage", "toc-rechute"],
   tnd: ["t-abc", "t-procrast", "t-termine", "t-blocs", "t-distractions", "t-oublis", "t-thermo", "t-reussites", "sas48", "energie-semaine", "t-parole", "t-soupapes", "t-relecture", "t-temps", "enreg", "b-secours", "memo"]
 };
 function tccList(name) {
@@ -2502,7 +2605,7 @@ function tccLibrary(p) {
   const tag = p.tag || "";
   const list = TCC_EX.filter(e => !tag || e.tags.includes(tag)).sort((a, b) => tag ? (b.u - a.u) || (TCC_PRESETS[tag].indexOf(a.id) + 1 || 99) - (TCC_PRESETS[tag].indexOf(b.id) + 1 || 99) : 0);
   return `<button class="link" data-nav="exercices">← Exercices</button>
-    <div class="head-row"><div><h1>Bibliothèque TCC</h1><p class="muted">${TCC_EX.length} exercices adaptés de vos fiches de thérapie des schémas, de vos fiches Besoins & Valeurs et de votre document « TDAH : exercices thérapeutiques par critère DSM-5 » (critère et niveau de preuve indiqués sous chaque exercice TDAH). Reformulés, condensés et rédigés à la première personne (valables en « tu » et en « vous »).</p></div></div>
+    <div class="head-row"><div><h1>Bibliothèque TCC</h1><p class="muted">${TCC_EX.length} exercices adaptés de vos fiches de thérapie des schémas, de vos fiches Besoins & Valeurs et de vos documents « TDAH » et « TOC : exercices thérapeutiques par critère DSM-5 » (critère et niveau de preuve indiqués sous ces exercices). Reformulés, condensés et rédigés à la première personne (valables en « tu » et en « vous »).</p></div></div>
     <div class="chips" data-name="ttag" style="margin-bottom:14px"><button class="chip" data-v="" aria-pressed="${!tag}">Tous</button>${Object.entries(TCC_TAGS).map(([k, l]) => `<button class="chip" data-v="${k}" aria-pressed="${tag === k}">${l}</button>`).join("")}</div>
     ${tag ? `<p class="notice" style="margin-bottom:12px">Triés par utilité pour : <b>${TCC_TAGS[tag]}</b>. Sélection recommandée : ${TCC_PRESETS[tag].map(id => esc(TCC_BY_ID[id].t)).join(" → ")}.</p>` : ""}
     <div class="tbl-wrap"><table class="lib"><thead><tr><th>Exercice</th><th>Étape</th><th>Utilité</th><th>Durée</th><th>Indications</th><th>Contenu</th></tr></thead><tbody>
