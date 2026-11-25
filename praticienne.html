@@ -641,9 +641,9 @@ TCC_LISTS.besoins = TCC_BESOINS.flatMap(f => f[1]);
 const TCC_GROUPS = [
   ["comprendre", "Comprendre"], ["reperer", "Repérer mes schémas"], ["critique", "Ma voix critique"], ["enfant", "Mon enfant intérieur"],
   ["adulte", "Mon Adulte sain"], ["changer", "Changer mes réactions"], ["besoins", "Mes besoins"], ["valeurs", "Mes valeurs"],
-  ["elan", "Freiner l'emballement (TDAH)"]
+  ["tdah-att", "TDAH : attention et organisation"], ["elan", "TDAH : impulsivité et emballement"], ["tdah-emo", "TDAH : émotions et estime de soi"]
 ];
-const TCC_TAGS = { dep: "Dépression / estime de soi", anx: "Anxiété", trauma: "Psychotraumatisme", rel: "Relations / attachement", tca: "TCA", tnd: "TDAH / TSA (format court)" };
+const TCC_TAGS = { dep: "Dépression / estime de soi", anx: "Anxiété", trauma: "Psychotraumatisme", rel: "Relations / attachement", tca: "TCA", tnd: "TDAH / TSA" };
 
 /* u = utilité (1 à 3), dur = minutes, seance = à introduire en séance d'abord, pin = réponses relisibles par le patient
    Types de champs : info, texte, lignes (n), chips (o, m = multiple), echelle (0-10), pct (0-100), oui, minuteur (m min), rate (o items, l niveaux), fiche (psychoéducation) */
@@ -796,7 +796,7 @@ const TCC_EX = [
   /* ---------- Freiner l'emballement (TDAH : impulsivité, achats, surinvestissement puis abandon) ----------
      Inspiré des programmes TCC du TDAH adulte (Safren et al. ; Young et Bramham : « Stop, réfléchis »), des TCC des achats compulsifs
      (Mueller et al. : surveillance des envies, délai avant achat, alternatives) et de la gestion du rythme d'activité (cycle « emballement puis effondrement »). */
-  { id: "sas48", g: "elan", t: "Le sas des 48 heures", d: "Avant un achat ou un nouveau projet : faire une pause, puis décider", u: 3, dur: 5, pin: 1, tags: ["tnd"],
+  { id: "sas48", g: "elan", t: "Le sas des 48 heures", d: "Avant un achat ou un nouveau projet : faire une pause, puis décider", u: 3, dur: 5, pin: 1, tags: ["tnd"], crit: "Impulsivité (achats, projets)", src: "★★ TCC des achats compulsifs (Mueller) ; « si… alors… »",
     intro: "Une envie forte (acheter, me lancer dans un nouveau projet, dire oui à tout) monte comme une vague, puis redescend. Ce sas me laisse le temps de décider avec ma tête, pas seulement avec l'élan du moment. Je le remplis dès que l'envie arrive.",
     steps: [{ h: "L'envie", f: [{ k: "chips", q: "J'ai envie de", o: ["Acheter quelque chose", "Me lancer dans un nouveau projet ou une activité", "Dire oui à un engagement", "Autre chose"] },
         { k: "texte", q: "Ce dont j'ai envie, en quelques mots", h: "Ex. : du matériel de peinture complet ; m'inscrire à 3 cours de sport" },
@@ -814,7 +814,7 @@ const TCC_EX = [
         { k: "texte", q: "Ma limite si je le fais (budget, durée, nombre de séances)", opt: 1, h: "Ex. : 30 € maximum ; un seul cours d'essai ; 1 heure par jour" },
         { k: "texte", q: "Mon plan « Si… alors… »", opt: 1, h: "Ex. : Si j'en ai encore envie dans 48 heures et que c'est dans mon budget, alors je l'achète." },
         { k: "info", q: "Dans 48 heures, je relis cette fiche : elle reste disponible dans mes exercices. L'envie est souvent beaucoup plus faible. Laisser tomber n'est pas un échec : c'est garder mon énergie pour ce qui compte." }] }] },
-  { id: "energie-semaine", g: "elan", t: "Mon budget d'énergie de la semaine", d: "Un projet à la fois, à un rythme que je peux tenir", u: 3, dur: 8, pin: 1, tags: ["tnd"],
+  { id: "energie-semaine", g: "elan", t: "Mon budget d'énergie de la semaine", d: "Un projet à la fois, à un rythme que je peux tenir", u: 3, dur: 8, pin: 1, tags: ["tnd"], crit: "Surinvestissement puis abandon", src: "★ Gestion du rythme d'activité (consensus clinique)",
     intro: "Avec le TDAH, on se lance souvent à fond dans une activité, on y met toute son énergie… puis on s'épuise et on abandonne tout d'un coup. Le but : garder un rythme régulier, même quand l'enthousiasme est très fort, pour aller au bout sans m'épuiser. À remplir en début de semaine.",
     steps: [{ h: "Où j'en suis", f: [{ k: "lignes", q: "Mes projets et engagements en cours", n: 5, h: "Ex. : travail, rénovation de la chambre, cours de guitare" },
         { k: "echelle", q: "Ma réserve d'énergie en ce début de semaine", a: "Vide", b: "Pleine" }] },
@@ -825,7 +825,105 @@ const TCC_EX = [
         { k: "texte", q: "Ma liste d'idées pour plus tard", opt: 1, h: "Les nouvelles idées ne sont pas perdues : elles attendent la fin du projet en cours." }] },
       { h: "Le bilan (en fin de semaine)", f: [{ k: "oui", q: "J'ai tenu mes garde-fous la plupart du temps" },
         { k: "echelle", q: "Ma réserve d'énergie en fin de semaine", a: "Vide", b: "Pleine" },
-        { k: "texte", q: "Ce qui m'a aidé, ce que j'ajuste la semaine prochaine", opt: 1 }] }] }
+        { k: "texte", q: "Ce qui m'a aidé, ce que j'ajuste la semaine prochaine", opt: 1 }] }] },
+
+  /* ---------- TDAH : attention et organisation (d'après le document de la praticienne « TDAH : exercices thérapeutiques par critère DSM-5 »)
+     Principes : agir au point de performance, externaliser (temps, mémoire, motivation), fractionner, mesurer. ---------- */
+  { id: "t-relecture", g: "tdah-att", t: "Ma check-list de relecture", d: "Mes erreurs fréquentes, à vérifier avant de rendre un travail", u: 3, dur: 6, pin: 1, tags: ["tnd"], crit: "A1a", src: "★★★ Module organisation OST / HOPS",
+    intro: "Je repère mes 3 à 5 erreurs les plus fréquentes et j'en fais une petite liste à cocher avant de rendre un travail, d'envoyer un mail ou de remplir un formulaire.",
+    steps: [{ h: "Mes erreurs fréquentes", f: [{ k: "chips", q: "Ce qui m'arrive souvent", o: ["Fautes d'accord ou d'orthographe", "Chiffres inversés ou mal recopiés", "Un champ oublié dans un formulaire", "Pièce jointe oubliée", "Consigne lue trop vite", "Mauvais destinataire ou mauvaise date", "Une étape sautée"], m: 1 },
+        { k: "lignes", q: "Ma check-list personnelle (3 à 5 points)", n: 5, h: "Ex. : « J'ai relu la consigne » ; « La pièce jointe est bien là »" }] },
+      { h: "Ma méthode de relecture", f: [{ k: "info", q: "1. Je laisse passer 5 minutes entre la fin du travail et la relecture. 2. Un passage = une cible : je relis plusieurs fois, en ne cherchant qu'un type d'erreur à chaque fois (d'abord les chiffres, puis la ponctuation…). 3. Je suis la ligne avec le doigt, ou je fais lire mon texte à voix haute par le téléphone." },
+        { k: "texte", q: "Où je garde ma check-list pour l'avoir sous les yeux", h: "Ex. : en photo dans mon téléphone ; collée sur mon bureau" }] },
+      { h: "Le bilan (après l'avoir utilisée)", f: [{ k: "oui", q: "Je l'ai utilisée avant de rendre un travail cette semaine" }, { k: "texte", q: "Ce que j'ai repéré grâce à elle", opt: 1 }] }] },
+  { id: "t-blocs", g: "tdah-att", t: "Ma durée d'attention, en blocs", d: "Travailler par blocs un peu plus courts que mon attention, puis allonger", u: 3, dur: 8, tags: ["tnd"], crit: "A1b", src: "★★★ Module distractibilité, Safren",
+    intro: "Mon attention a une durée. Plutôt que de me forcer, je travaille par blocs un peu plus courts que cette durée, avec de vraies micro-pauses. Puis j'allonge les blocs peu à peu.",
+    steps: [{ h: "Mon test", f: [{ k: "info", q: "Sur une tâche un peu ennuyeuse, je lance le chronomètre du téléphone et je l'arrête dès que je décroche (je regarde ailleurs, je pense à autre chose, je prends mon téléphone)." },
+        { k: "texte", q: "La tâche testée" },
+        { k: "chips", q: "J'ai tenu environ", o: ["Moins de 5 min", "5 à 10 min", "10 à 15 min", "15 à 20 min", "20 à 30 min", "Plus de 30 min"] }] },
+      { h: "Mes blocs", f: [{ k: "chips", q: "Mon bloc de travail (un peu moins que mon test)", o: ["5 min", "8 min", "10 min", "12 min", "15 min", "20 min", "25 min"] },
+        { k: "chips", q: "Ma micro-pause", o: ["2 min", "3 min", "5 min"] },
+        { k: "chips", q: "Pendant la pause, je", o: ["Me lève et bouge", "Bois un verre d'eau", "Regarde par la fenêtre", "M'étire"], m: 1 },
+        { k: "minuteur", q: "Essayer un bloc maintenant (facultatif)", m: 10 }] },
+      { h: "Ma progression", f: [{ k: "info", q: "Chaque semaine où les blocs se passent bien, j'ajoute 2 minutes." }, { k: "echelle", q: "Comment se sont passés mes blocs cette semaine", a: "Très difficile", b: "Très bien" }, { k: "texte", q: "Ce que j'ajuste", opt: 1 }] }] },
+  { id: "t-termine", g: "tdah-att", t: "Aller au bout d'une tâche", d: "Définir « terminé », découper, se récompenser juste après", u: 3, dur: 6, tags: ["tnd"], crit: "A1d", src: "★★★ Safren (organisation), OST ; contrat « quand… alors… »",
+    intro: "Une tâche floue se termine rarement. J'écris ce que veut dire « terminé », je la découpe en petites actions de 5 à 15 minutes, et je prévois une récompense juste après.",
+    steps: [{ h: "La tâche", f: [{ k: "texte", q: "La tâche" }, { k: "texte", q: "« Terminé », pour moi, c'est quand…", h: "Ex. : le dossier est envoyé et rangé ; la cuisine est rangée et la table essuyée" }] },
+      { h: "Les étapes", f: [{ k: "lignes", q: "Mes étapes (un verbe + un objet, 5 à 15 min chacune)", n: 6, h: "Ex. : ouvrir le dossier ; remplir la page 1 ; scanner les justificatifs" },
+        { k: "info", q: "Règle des 2 minutes : ce qui prend moins de 2 minutes, je le fais tout de suite." }] },
+      { h: "Mon contrat", f: [{ k: "texte", q: "Quand c'est terminé, alors je…", h: "Ex. : je regarde un épisode ; je prends un café dehors" }, { k: "oui", q: "Je suis allé·e au bout", opt: 1 }] }] },
+  { id: "t-abc", g: "tdah-att", t: "Mon rituel A / B / C", d: "10 minutes par jour : un seul agenda et une liste triée", u: 3, dur: 10, pin: 1, tags: ["tnd"], crit: "A1e", src: "★★★ Safren ; Solanto (« si ce n'est pas dans l'agenda, ça n'existe pas »)",
+    intro: "Un seul outil (agenda papier ou application), consulté chaque jour à la même heure. Je trie mes tâches : A = urgent et important, B = important, C = le reste. Je ne passe pas aux B tant que les A ne sont pas faites.",
+    steps: [{ h: "Mon rituel", f: [{ k: "chips", q: "Mon outil unique", o: ["Agenda papier", "Agenda du téléphone", "Application de tâches", "Carnet"] }, { k: "chips", q: "Mon moment fixe", o: ["Le soir, pour le lendemain", "Le matin, avec le café", "En arrivant au travail ou en cours"] }] },
+      { h: "Ma liste du jour", f: [{ k: "lignes", q: "A : urgent et important (3 au plus)", n: 3 }, { k: "lignes", q: "B : important, pas urgent", n: 3 }, { k: "lignes", q: "C : si j'ai le temps", n: 3 }] },
+      { h: "Le soir", f: [{ k: "oui", q: "Mes tâches A sont faites", opt: 1 }, { k: "texte", q: "Ce qui passe à demain", opt: 1 }] }] },
+  { id: "t-temps", g: "tdah-att", t: "Mon coefficient de temps", d: "Estimer, chronométrer, comparer", u: 2, dur: 5, tags: ["tnd"], crit: "A1e", src: "★★ Solanto (gestion du temps)",
+    intro: "On sous-estime souvent le temps que prennent les choses. Je compare mon estimation au temps réel pour trouver mon coefficient personnel (souvent × 1,5), à appliquer dans mes plannings.",
+    steps: [{ h: "Avant", f: [{ k: "texte", q: "La tâche" }, { k: "texte", q: "Le temps que je prévois", h: "Ex. : 20 min" }] },
+      { h: "Après", f: [{ k: "texte", q: "Le temps réel (chronométré)", h: "Ex. : 35 min" }, { k: "chips", q: "J'ai mis", o: ["Moins que prévu", "À peu près le temps prévu", "Un peu plus (jusqu'à × 1,5)", "Beaucoup plus (× 2 ou plus)"] },
+        { k: "info", q: "Mon coefficient = temps réel ÷ temps prévu. Après 3 ou 4 essais, je multiplie mes prévisions par ce chiffre, et j'ajoute une marge pour les trajets et les imprévus." }] },
+      { h: "Planifier à rebours (si c'est un projet)", f: [{ k: "texte", q: "La date de rendu, puis les étapes placées à l'envers dans mon agenda, avec une marge", opt: 1, h: "Ex. : rendu le 15 → relecture le 13 → rédaction du 8 au 12 → recherches du 3 au 7" }] }] },
+  { id: "t-procrast", g: "tdah-att", t: "Comprendre ma procrastination", d: "La pensée qui me fait reporter, et un tout premier pas", u: 3, dur: 8, tags: ["tnd"], crit: "A1f", src: "★★★ Safren (pensée adaptative) ; Solanto",
+    intro: "Je ne suis pas paresseux·se : certaines pensées me donnent la « permission » de reporter. Je les repère, je leur réponds, puis je fais un tout premier pas.",
+    steps: [{ h: "Ce qui s'est passé", f: [{ k: "texte", q: "La tâche que je repousse" },
+        { k: "chips", q: "La pensée qui me fait reporter", o: ["Je le ferai mieux plus tard", "C'est trop, je ne sais pas par où commencer", "J'ai encore le temps", "Je dois d'abord faire autre chose", "Je ne suis pas d'humeur", "Ce sera nul de toute façon"], m: 1 },
+        { k: "chips", q: "L'émotion", o: "@emo", m: 1 },
+        { k: "texte", q: "Ce que je fais à la place", h: "Ex. : je range, je regarde mon téléphone" },
+        { k: "texte", q: "La conséquence", h: "Ex. : stress la veille, travail bâclé" }] },
+      { h: "Ma réponse", f: [{ k: "texte", q: "Une pensée plus juste", h: "Ex. : « Je n'ai pas besoin d'être motivé·e pour commencer 10 minutes »" }] },
+      { h: "Mon premier pas", f: [{ k: "texte", q: "Mon premier pas ridiculement petit", h: "Ex. : ouvrir le fichier et écrire le titre" },
+        { k: "info", q: "Je m'engage seulement sur 10 minutes. Continuer après est facultatif." },
+        { k: "minuteur", q: "Mes 10 minutes", m: 10 },
+        { k: "chips", q: "Pour rendre la tâche plus stimulante", o: ["Course contre le minuteur", "Travailler à côté de quelqu'un (en vrai ou en visio)", "Alterner avec une tâche que j'aime", "Musique sans paroles", "Une récompense juste après"], m: 1, opt: 1 }] }] },
+  { id: "t-distractions", g: "tdah-att", t: "Mon poste anti-distractions", d: "Retirer ce qui me distrait et noter les idées pour plus tard", u: 3, dur: 6, tags: ["tnd"], crit: "A1h", src: "★★★ Safren (distractibilité) ; aménagement de l'environnement",
+    intro: "Je retire les distractions avant de commencer. Et quand une idée parasite arrive, je la note en 3 mots sur ma feuille « plus tard » au lieu de la suivre : je la traiterai pendant la pause.",
+    steps: [{ h: "Ce qui me distrait", f: [{ k: "chips", q: "Mes distracteurs", o: ["Notifications du téléphone", "Téléphone à portée de main", "Bruit, conversations", "Fenêtre, passages", "Onglets ouverts sur l'ordinateur", "Faim ou soif", "Mes propres pensées"], m: 1 }] },
+      { h: "Mon aménagement", f: [{ k: "chips", q: "Ce que je mets en place", o: ["Téléphone dans une autre pièce", "Notifications coupées", "Bureau face au mur", "Casque ou bouchons d'oreilles", "Un seul onglet ouvert", "Eau et en-cas préparés avant", "Feuille « plus tard » à côté de moi"], m: 1 }] },
+      { h: "Ma feuille « plus tard »", f: [{ k: "lignes", q: "Les idées notées pendant le travail (3 mots chacune)", n: 5, opt: 1 }, { k: "echelle", q: "Ma concentration aujourd'hui", a: "Très dispersée", b: "Très concentrée" }] }] },
+  { id: "t-oublis", g: "tdah-att", t: "Mes rappels et ma station de départ", d: "Ne plus perdre ses affaires ni oublier ce qui compte", u: 3, dur: 8, pin: 1, tags: ["tnd"], crit: "A1g, A1i", src: "★★★ OST, HOPS (gestion du matériel) ; Barkley ; Safren",
+    intro: "Ma mémoire, je la mets dehors : une place pour chaque chose, des rappels qui disent exactement quoi faire, et des habitudes accrochées à d'autres.",
+    steps: [{ h: "Ma station de départ", f: [{ k: "chips", q: "Ce qui va toujours au même endroit, près de la porte", o: ["Clés", "Portefeuille", "Téléphone", "Chargeur", "Lunettes", "Sac de cours ou de travail", "Carte de transport"], m: 1 },
+        { k: "lignes", q: "Ma check-list de sortie", n: 5, h: "Ex. : clés · téléphone · badge · médicament" },
+        { k: "chips", q: "Aides en plus", o: ["Traceur sur les clés ou le portefeuille", "Double chargeur", "Deuxième paire de lunettes", "Photo de la check-list sur la porte"], m: 1, opt: 1 }] },
+      { h: "Mes rappels", f: [{ k: "info", q: "Une alarme dit exactement quoi faire : « 16 h 30 : appeler le médecin », pas « rappel ». Je pose la veille devant la porte ce que je dois emporter." },
+        { k: "lignes", q: "Mes alarmes nommées", n: 3, h: "Ex. : 8 h 00 : prendre mon traitement" },
+        { k: "texte", q: "Ma nouvelle habitude accrochée à une ancienne : « Après…, je… »", h: "Ex. : après le café du matin, je regarde mon agenda" }] },
+      { h: "Ma revue de la semaine", f: [{ k: "chips", q: "Mon moment de 15 minutes", o: ["Dimanche soir", "Vendredi après-midi", "Lundi matin"] },
+        { k: "chips", q: "Ce que je vérifie", o: ["L'agenda de la semaine", "Les rendez-vous", "Les factures et papiers", "Les affaires à préparer (sport, cours)", "Les messages en attente"], m: 1 }] }] },
+
+  /* ---------- TDAH : impulsivité et agitation (complète « Le sas des 48 heures » et « Mon budget d'énergie ») ---------- */
+  { id: "t-soupapes", g: "elan", t: "Mes soupapes d'agitation", d: "Canaliser le besoin de bouger plutôt que le retenir", u: 2, dur: 6, pin: 1, tags: ["tnd"], crit: "A2a à A2e", src: "★★ Sarver 2015, Hartanto 2016 ; activité physique (certitude faible, BMJ 2025)",
+    intro: "Le but n'est pas de rester immobile à tout prix : bouger m'aide souvent à me concentrer. Je choisis des façons de bouger discrètes, et des soupapes pour les moments où l'impatience monte.",
+    steps: [{ h: "Mon impatience", f: [{ k: "echelle", q: "Mon impatience ou agitation intérieure maintenant", a: "Calme", b: "Sur des ressorts" }, { k: "chips", q: "Les situations où c'est le plus difficile", o: ["Réunions, cours", "Files d'attente", "Repas longs", "Transports", "Écrans à regarder longtemps", "Le soir au coucher"], m: 1 }] },
+      { h: "Bouger discrètement", f: [{ k: "chips", q: "Mes mouvements acceptables", o: ["Objet à manipuler (balle, pâte)", "Prendre des notes, dessiner", "Croiser et décroiser les mains", "Bouger les orteils dans les chaussures", "Me lever pour boire toutes les 25 min", "Téléphoner debout", "Travailler debout"], m: 1 }] },
+      { h: "Mes soupapes", f: [{ k: "chips", q: "Quand ça monte, je peux", o: ["Marcher 5 minutes", "M'étirer", "Respiration lente : inspirer 4 s, expirer 6 s", "Monter et descendre un escalier", "Eau froide sur les mains", "Une activité physique dans la journée"], m: 1 },
+        { k: "texte", q: "Mon activité physique prévue cette semaine (idéalement avant les moments qui demandent de la concentration)", opt: 1 }] }] },
+  { id: "t-parole", g: "elan", t: "Parler, écouter, attendre mon tour", d: "Le feu tricolore, noter pour ne pas oublier, et un plan pour la prochaine fois", u: 3, dur: 8, tags: ["tnd"], crit: "A1c, A2f à A2i", src: "★★ Habiletés sociales ; restructuration cognitive ; « si… alors… »",
+    intro: "Si je coupe la parole, c'est souvent par peur d'oublier mon idée, pas par manque de respect. Quelques outils simples aident à garder l'idée et à laisser de la place à l'autre.",
+    steps: [{ h: "Mes outils", f: [{ k: "info", q: "Le feu tricolore : vert de 0 à 30 secondes, je parle ; orange de 30 à 60 secondes, je conclus ; rouge, je pose une question à l'autre. Pour ne pas oublier mon idée, je la note en 3 mots (carnet, téléphone) et j'attends mon tour. Pour bien écouter, je reformule l'essentiel ou je note 3 mots-clés." },
+        { k: "chips", q: "Ce que je vais essayer", o: ["Le feu tricolore", "Noter mon idée en 3 mots", "Reformuler ce que l'autre a dit", "Noter 3 mots-clés en réunion", "Un signal discret convenu avec un proche", "Compter jusqu'à 3 avant de répondre"], m: 1 }] },
+      { h: "Une situation récente", f: [{ k: "texte", q: "Ce que j'ai fait", h: "Ex. : j'ai coupé la parole à un collègue en réunion" },
+        { k: "texte", q: "Ce que l'autre a pu penser ou ressentir" },
+        { k: "texte", q: "Ce que je veux faire la prochaine fois" }] },
+      { h: "Mon plan « Si… alors… »", f: [{ k: "texte", q: "Si…, alors je…", h: "Ex. : Si j'ai une idée pendant que quelqu'un parle, alors je l'écris et j'attends qu'il ait fini." },
+        { k: "chips", q: "Pour une attente (file, salle d'attente), je prévois", o: ["Une tâche courte à faire", "Un livre ou un podcast", "Observer (compter, chercher des détails)", "Respiration lente"], m: 1, opt: 1 }] }] },
+
+  /* ---------- TDAH : émotions et estime de soi ---------- */
+  { id: "t-thermo", g: "tdah-emo", t: "Mon thermomètre des émotions", d: "Une stratégie pour chaque niveau, et la technique STOP", u: 3, dur: 8, pin: 1, tags: ["tnd"], crit: "Hors DSM-5 : dysrégulation émotionnelle", src: "★★ Thermomètre émotionnel ; STOP ; tolérance à la détresse (TCD)",
+    intro: "Avec le TDAH, les émotions montent souvent vite et fort. Je prépare au calme ce que je ferai à chaque niveau, pour ne pas avoir à réfléchir quand ça déborde.",
+    steps: [{ h: "Mes niveaux", f: [{ k: "texte", q: "De 0 à 3, je suis calme. Mes signes", opt: 1 },
+        { k: "texte", q: "De 4 à 6, ça monte. Mes signes, et ce que je fais", h: "Ex. : je respire lentement, je dis que j'ai besoin d'une pause" },
+        { k: "texte", q: "De 7 à 8, c'est fort. Ce que je fais", h: "Ex. : je quitte la pièce 10 minutes, je marche" },
+        { k: "texte", q: "De 9 à 10, je déborde. Ce que je fais pour ne pas aggraver les choses", h: "Ex. : je ne réponds pas aux messages, eau froide, j'appelle quelqu'un" }] },
+      { h: "STOP", f: [{ k: "info", q: "S : je m'arrête, je ne fais rien tout de suite. T : je respire lentement, une ou deux fois. O : j'observe ce qui se passe en moi et autour de moi. P : je poursuis en choisissant ce que je fais, plutôt que de réagir." },
+        { k: "texte", q: "Une phrase d'acceptation pour les moments où je ne peux rien changer", opt: 1, h: "Ex. : « C'est comme ça pour le moment, et je peux le traverser »" }] },
+      { h: "Aujourd'hui", f: [{ k: "echelle", q: "Mon niveau le plus haut aujourd'hui", a: "0", b: "10" }, { k: "oui", q: "J'ai utilisé une de mes stratégies", opt: 1 }] }] },
+  { id: "t-reussites", g: "tdah-emo", t: "Mes réussites de la semaine", d: "Répondre au « je suis nul·le, paresseux·se » avec des faits", u: 3, dur: 6, tags: ["tnd", "dep"], crit: "Hors DSM-5 : estime de soi", src: "★★★ Safren (pensée adaptative) ; Solanto",
+    intro: "Après des années de remarques, beaucoup de personnes avec un TDAH se jugent durement. Chaque semaine, je note des faits qui montrent autre chose.",
+    steps: [{ h: "Ma pensée dure", f: [{ k: "chips", q: "La pensée qui revient", o: ["Je suis nul·le", "Je suis paresseux·se", "Je ne finis jamais rien", "Je déçois tout le monde", "Je suis bête", "Autre"], m: 1 }, { k: "pct", q: "À quel point j'y crois" }] },
+      { h: "Mes réussites", f: [{ k: "lignes", q: "3 choses que j'ai réussies ou commencées cette semaine, même petites", n: 3, h: "Ex. : j'ai envoyé le dossier ; j'ai pensé au rendez-vous" },
+        { k: "texte", q: "Ce que mon TDAH explique, sans que ce soit de la paresse", opt: 1 }] },
+      { h: "Une pensée plus juste", f: [{ k: "texte", q: "Ce que je me dis maintenant", h: "Ex. : « Mon cerveau fonctionne autrement, et j'avance avec mes outils »" }, { k: "pct", q: "À quel point je crois maintenant à la pensée dure" }] }] }
 ];
 const TCC_BY_ID = Object.fromEntries(TCC_EX.map(x => [x.id, x]));
 /* Sélections recommandées par profil (ordre = utilité) */
@@ -835,7 +933,7 @@ const TCC_PRESETS = {
   trauma: ["pe-schemas", "pe-modes", "declencheurs", "enfant-apaiser", "b-secours", "compassion", "dialogue", "enreg", "memo"],
   rel: ["pe-schemas", "pe-modes", "enreg", "besoin-cache", "b-cnv", "strategies", "v-emotion", "plan", "memo"],
   tca: ["pe-schemas", "enreg", "declencheurs", "strategies", "critique-id", "dialogue", "compassion", "b-secours", "b-equilibre", "memo"],
-  tnd: ["sas48", "energie-semaine", "enreg", "croyances", "b-journal", "b-cnv", "b-secours", "v-journal", "memo"]
+  tnd: ["t-abc", "t-procrast", "t-termine", "t-blocs", "t-distractions", "t-oublis", "t-thermo", "t-reussites", "sas48", "energie-semaine", "t-parole", "t-soupapes", "t-relecture", "t-temps", "enreg", "b-secours", "memo"]
 };
 function tccList(name) {
   if (name === "@schemaphrases") return TCC_DOMAINES.flatMap(d => d.s.map(s => s[2]));
@@ -2404,11 +2502,11 @@ function tccLibrary(p) {
   const tag = p.tag || "";
   const list = TCC_EX.filter(e => !tag || e.tags.includes(tag)).sort((a, b) => tag ? (b.u - a.u) || (TCC_PRESETS[tag].indexOf(a.id) + 1 || 99) - (TCC_PRESETS[tag].indexOf(b.id) + 1 || 99) : 0);
   return `<button class="link" data-nav="exercices">← Exercices</button>
-    <div class="head-row"><div><h1>Bibliothèque TCC</h1><p class="muted">${TCC_EX.length} exercices adaptés de vos fiches de thérapie des schémas et de vos fiches Besoins & Valeurs. Reformulés, condensés et rédigés à la première personne (valables en « tu » et en « vous »).</p></div></div>
+    <div class="head-row"><div><h1>Bibliothèque TCC</h1><p class="muted">${TCC_EX.length} exercices adaptés de vos fiches de thérapie des schémas, de vos fiches Besoins & Valeurs et de votre document « TDAH : exercices thérapeutiques par critère DSM-5 » (critère et niveau de preuve indiqués sous chaque exercice TDAH). Reformulés, condensés et rédigés à la première personne (valables en « tu » et en « vous »).</p></div></div>
     <div class="chips" data-name="ttag" style="margin-bottom:14px"><button class="chip" data-v="" aria-pressed="${!tag}">Tous</button>${Object.entries(TCC_TAGS).map(([k, l]) => `<button class="chip" data-v="${k}" aria-pressed="${tag === k}">${l}</button>`).join("")}</div>
     ${tag ? `<p class="notice" style="margin-bottom:12px">Triés par utilité pour : <b>${TCC_TAGS[tag]}</b>. Sélection recommandée : ${TCC_PRESETS[tag].map(id => esc(TCC_BY_ID[id].t)).join(" → ")}.</p>` : ""}
     <div class="tbl-wrap"><table class="lib"><thead><tr><th>Exercice</th><th>Étape</th><th>Utilité</th><th>Durée</th><th>Indications</th><th>Contenu</th></tr></thead><tbody>
-    ${list.map(e => `<tr><td><b>${esc(e.t)}</b><br><span class="small muted">${esc(e.d)}</span>${e.seance ? `<br><span class="pill new">Séance d'abord</span>` : ""}${e.pin ? `<br><span class="pill">Fiche à relire</span>` : ""}</td><td>${TCC_GROUPS.find(g => g[0] === e.g)[1]}</td><td class="stars">${stars(e.u)}</td><td class="num">${e.dur} min</td><td class="small">${e.tags.map(t => TCC_TAGS[t].split(" (")[0]).join(", ")}</td><td class="small">${e.steps.map(s => esc(s.h)).join(" → ")}</td></tr>`).join("")}
+    ${list.map(e => `<tr><td><b>${esc(e.t)}</b><br><span class="small muted">${esc(e.d)}</span>${e.crit ? `<br><span class="small"><b>Critère :</b> ${esc(e.crit)}</span>` : ""}${e.src ? `<br><span class="small muted">Preuve ${esc(e.src)}</span>` : ""}${e.seance ? `<br><span class="pill new">Séance d'abord</span>` : ""}${e.pin ? `<br><span class="pill">Fiche à relire</span>` : ""}</td><td>${TCC_GROUPS.find(g => g[0] === e.g)[1]}</td><td class="stars">${stars(e.u)}</td><td class="num">${e.dur} min</td><td class="small">${e.tags.map(t => TCC_TAGS[t].split(" (")[0]).join(", ")}</td><td class="small">${e.steps.map(s => esc(s.h)).join(" → ")}</td></tr>`).join("")}
     </tbody></table></div>
     <p class="hint" style="margin-top:12px">Pour les patients avec TDAH ou TSA, préférer les exercices courts (moins de 8 minutes) et peu abstraits ; les visualisations peuvent être difficiles.</p>`;
 }
